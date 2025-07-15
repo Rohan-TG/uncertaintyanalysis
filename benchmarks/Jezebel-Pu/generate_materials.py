@@ -1,5 +1,7 @@
 import openmc
 
+openmc.config['cross_sections'] = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/ENDFBVIII/endfb-viii.0-hdf5/cross_sections.xml'
+
 mats = openmc.Materials()
 
 mat = openmc.Material(1)
