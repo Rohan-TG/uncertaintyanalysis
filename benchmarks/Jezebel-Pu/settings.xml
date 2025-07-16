@@ -11,7 +11,7 @@
   -->
 
   <run_mode>eigenvalue</run_mode>
-  <batches>1050</batches>
+  <batches>3050</batches>
   <inactive>50</inactive>
   <particles>100000</particles>
 
