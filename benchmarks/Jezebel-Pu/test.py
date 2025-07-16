@@ -9,5 +9,5 @@ with h5py.File('statepoint.3050.h5', 'r') as f:
     group = list(f.keys())[0]
 
     # Access a dataset
-    # data = f[group][:]
-    # print(data)
+    data = f['k_combined']
+    print(data)
