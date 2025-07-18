@@ -1,3 +1,11 @@
+import os
+n_cores = 20
+os.environ["OMP_NUM_THREADS"] = f"{n_cores}"
+os.environ["MKL_NUM_THREADS"] = f"{n_cores}"
+os.environ["OPENBLAS_NUM_THREADS"] = f"{n_cores}"
+os.environ["TF_NUM_INTEROP_THREADS"] = f"{n_cores}"
+os.environ["TF_NUM_INTRAOP_THREADS"] = f"{n_cores}"
+
 import openmc
 
 openmc.config['cross_sections'] = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/ENDFBVIII/endfb-viii.0-hdf5/cross_sections.xml'
