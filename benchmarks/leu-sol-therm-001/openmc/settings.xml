@@ -9,8 +9,8 @@
   -->
 
   <run_mode>eigenvalue</run_mode>
-  <batches>3000</batches>
-  <inactive>20</inactive>
+  <batches>5050</batches>
+  <inactive>50</inactive>
   <particles>10000</particles>
 
   <source>
