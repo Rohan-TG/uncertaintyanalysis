@@ -6,4 +6,4 @@ import random, sys
 import matplotlib.pyplot as plt
 
 za = 94239
-tape = sandy.get_endf6_file("ENDFB8_0", "nfpy", za * 10)
+tape = sandy.get_endf6_file("ENDFB_80", "nfpy", za * 10)
