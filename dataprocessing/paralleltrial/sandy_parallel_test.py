@@ -2,6 +2,10 @@ import sandy
 import os
 # from os.path import join
 # import matplotlib.pyplot as plt
+import datetime
+import time
+
+start = time.time()
 
 za = 94239
 filename = "n-094_Pu_239.endf"
@@ -39,3 +43,8 @@ outs = tape.apply_perturbations(
     ace_kws=dict(err=1, temperature=300, verbose=True, purr=False, heatr=False, thermr=False, gaspr=False),
     verbose=True,
 )
+
+end = time.time()
+
+elapsed = end - start
+print(f"Time elapsed: {datetime.timedelta(seconds=elapsed)}")
