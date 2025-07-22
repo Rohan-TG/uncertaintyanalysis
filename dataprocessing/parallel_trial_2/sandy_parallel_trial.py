@@ -1,5 +1,12 @@
-import sandy
 import os
+n_cores = 20
+os.environ["OMP_NUM_THREADS"] = f"{n_cores}"
+os.environ["MKL_NUM_THREADS"] = f"{n_cores}"
+os.environ["OPENBLAS_NUM_THREADS"] = f"{n_cores}"
+os.environ["TF_NUM_INTEROP_THREADS"] = f"{n_cores}"
+os.environ["TF_NUM_INTRAOP_THREADS"] = f"{n_cores}"
+
+import sandy
 # from os.path import join
 # import matplotlib.pyplot as plt
 import datetime
