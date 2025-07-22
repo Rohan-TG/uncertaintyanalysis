@@ -12,9 +12,9 @@ filename = "n-094_Pu_239.endf"
 tape = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 tape.to_file(filename)
 
-number_of_samples = 1
+number_of_samples = 2
 
-processes = 1
+processes = 20
 
 cli = f"{filename}  --processes {processes}  --samples {number_of_samples}  --mf 33  --temperatures 300  --acer  --debug"
 sandy.sampling.run(cli.split())
