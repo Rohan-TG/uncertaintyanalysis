@@ -17,7 +17,7 @@ start = time.time()
 za = 94239
 # filename = "n-094_Pu_239.endf"
 
-endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10).get_pendf(temperature = 300, purr=True, heatr=False, gaspr=False, verbose=True)
+endf6 = sandy.get_endf6_file("ENDFB_71", "xs", za * 10).get_pendf(temperature = 300, purr=True, heatr=False, gaspr=False, verbose=True)
 pendf = endf6.get_pendf(err=0.001, verbose=True)
 
 xs = sandy.Xs.from_endf6(pendf)
@@ -40,9 +40,9 @@ xspert = xs.custom_perturbation(mat, mt, perturbation)
 pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
 
 tag = "_pert"
-# outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
-# with open("94239_unperturbed_test.09c", mode="w") as f:
-#     f.write(outs["ace"])
+outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
+with open("94239_unperturbed_test.09c", mode="w") as f:
+    f.write(outs["ace"])
 
 
 
