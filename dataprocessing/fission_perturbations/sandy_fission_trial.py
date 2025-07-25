@@ -17,7 +17,7 @@ start = time.time()
 za = 94239
 # filename = "n-094_Pu_239.endf"
 
-endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10).get_pendf(temperature = 300, purr=False, heatr=False, gaspr=False, verbose=True)
+endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 pendf = endf6.get_pendf(err=0.001, verbose=True)
 
 xs = sandy.Xs.from_endf6(pendf)
@@ -29,7 +29,7 @@ domain = [lower_bound, upper_bound]
 
 mat = 9437
 mt = 18
-perturbation_coefficient = 0
+perturbation_coefficient = 0.0
 
 
 
