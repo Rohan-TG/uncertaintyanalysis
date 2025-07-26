@@ -16,5 +16,6 @@ for Element in tqdm.tqdm(elements, total=len(elements)):
 		all_elemental_ace = os.listdir(element_dir_path)
 		for isotope_ace in all_elemental_ace:
 			if suffix in isotope_ace:
-				shutil.copy(isotope_ace, endfb8_ace_dir)
+				full_ace_path = f"{Lib80x_dir}/{Element}/{isotope_ace}"
+				shutil.copy(full_ace_path, endfb8_ace_dir)
 
