@@ -1,5 +1,5 @@
 import os
-n_cores = 60
+n_cores = int(input("Enter core number: "))
 os.environ["OMP_NUM_THREADS"] = f"{n_cores}"
 os.environ["MKL_NUM_THREADS"] = f"{n_cores}"
 os.environ["OPENBLAS_NUM_THREADS"] = f"{n_cores}"
