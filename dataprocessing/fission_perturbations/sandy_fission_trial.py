@@ -29,7 +29,7 @@ domain = [lower_bound, upper_bound]
 
 mat = 9437
 mt = 18
-perturbation_coefficient = 0.0
+perturbation_coefficient = -0.2
 
 
 
@@ -40,8 +40,10 @@ xspert = xs.custom_perturbation(mat, mt, perturbation)
 pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
 
 tag = "_pert"
-outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=False, verbose=True, pendf=pendf_pert)
-with open("94239_unperturbed_test.09c", mode="w") as f:
+outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
+
+savefilename = "94239_20pctreduced_MT18_trial.09c"
+with open(f"{savefilename}", mode="w") as f:
     f.write(outs["ace"])
 
 
