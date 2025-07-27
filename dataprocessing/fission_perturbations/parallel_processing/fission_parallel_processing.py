@@ -5,6 +5,7 @@ import sandy
 import datetime
 import time
 
+perturbation_coefficient = float(input("Enter Perturbation coefficient: "))
 start = time.time()
 
 za = 94239
@@ -22,7 +23,7 @@ domain = [lower_bound, upper_bound]
 
 mat = 9437
 mt = 18
-perturbation_coefficient = float(input("Enter Perturbation coefficient: "))
+
 
 
 
