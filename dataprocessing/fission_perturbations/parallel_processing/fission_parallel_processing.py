@@ -1,15 +1,19 @@
 import sandy
+import subprocess
+import numpy as np
+# from concurrent.futures import ThreadPoolExecutor, as_completed
 # import random
 # from os.path import join
-# import matplotlib.pyplot as plt
 import datetime
 import time
+import tqdm
 
-perturbation_coefficient = float(input("Enter Perturbation coefficient: "))
 start = time.time()
 
 za = 94239
-# filename = "n-094_Pu_239.endf"
+
+
+perturbation_coefficients = np.arange(-0.500, 1.001, 0.5)
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 pendf = endf6.get_pendf(err=0.001, verbose=True)
@@ -25,75 +29,63 @@ mat = 9437
 mt = 18
 
 
+for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 
+    perturbation = sandy.Pert([1, 1 + coeff], index=domain)
 
-perturbation = sandy.Pert([1, 1 + perturbation_coefficient], index=domain)
+    xspert = xs.custom_perturbation(mat, mt, perturbation)
 
-xspert = xs.custom_perturbation(mat, mt, perturbation)
+    pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
 
-pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
+    tag = "_pert"
+    outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
 
-tag = "_pert"
-outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
-
-savefilename = f"Pu-239_coeff-{perturbation_coefficient}_MT18.09c"
-with open(f"{savefilename}", mode="w") as f:
-    f.write(outs["ace"])
-
-
-
+    savefilename = f"tmux_Pu-239_coeff_{coeff}_MT18.09c"
+    with open(f"{savefilename}", mode="w") as f:
+        f.write(outs["ace"])
 
 
 
 
-
-
-
-# perturbed_xs = []
-# for i in range(1, egrid.size):
-#     e_start = egrid[i-1]
-#     e_stop = egrid[i]
-#     index = egrid[i-1: i+1]
-#     pert = sandy.Pert([1, 1 + perturbation_coefficient], index=index)
-#     print(f"perturbed xs in energy bin #{i} [{e_start:.5e}, {e_stop:.5e}]")
-#     xspert = xs.custom_perturbation(mat, mt, pert)
-#     perturbed_xs.append(xspert)
-
-# tape.to_file(filename)
-
-# number_of_samples = 1
-#
-# processes = 1
-#
-# cli = f"{filename}  --processes {processes}  --samples {number_of_samples}  --mf 33  --temperatures 300  --acer  --debug"
-# sandy.sampling.run(cli.split())
-
-
-
-# smps = tape.get_perturbations(
-#     number_of_samples,
-#     njoy_kws=dict(
-#         err=10,   # very fast calculation, for testing
-#         chi=False,
-#         mubar=False,
-#         xs=True,
-#         nubar=False,
-#         verbose=True,
-#     ),
-# )
-#
-#
-# outs = tape.apply_perturbations(
-#     smps,
-#     processes=processes,
-#     njoy_kws=dict(err=1),   # very fast calculation, for testing
-#     to_ace=True,   # produce ACE files
-#     to_file=True,
-#     ace_kws=dict(err=1, temperature=300, verbose=True, purr=False, heatr=False, thermr=False, gaspr=False),
-#     verbose=True,
-# )
 
 end = time.time()
 
 elapsed = end - start
 print(f"Time elapsed: {datetime.timedelta(seconds=elapsed)}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# def run_tmux(coeff):
+#     session_name = f"job_{coeff}"
+#     command = f"tmux new-session -d -s {session_name} 'python3 fission_parallel_processing.py {coeff}'"
+#     try:
+#         subprocess.run(command, shell=True, check=True)
+#         return f"Launched {session_name}"
+#     except subprocess.CalledProcessError as error:
+#         return(f"Failed {session_name} with error {error}")
+#
+#
+# max_cores = 20
+# batch_size = max_cores
+#
+# for i in range(0, len(perturbation_coefficients), batch_size):
+#     batch = perturbation_coefficients[i:i+batch_size]
+#     with ThreadPoolExecutor(max_workers=max_cores) as executor:
+#         futures = [executor.submit(run_tmux, c) for c in batch]
+#         for future in as_completed(futures):
+#             print(future.result())
+#
+#     print(f"Waiting for batch {i // batch_size} to complete...")
+#
+#     time.sleep(5)
