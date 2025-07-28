@@ -26,7 +26,7 @@ za = 94239
 perturbation_coefficients = [-0.5, 0.0, 0.3]
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
-pendf = endf6.get_pendf(err=0.0001, verbose=True)
+pendf = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
 
 xs = sandy.Xs.from_endf6(pendf)
 
@@ -48,12 +48,14 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
 
     tag = "_pert"
-    outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=False, verbose=True, pendf=pendf_pert)
+    # outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=False, verbose=True, pendf=pendf_pert)
 
     savefilename = f"plotdata_Pu-239_coeff_{coeff:0.3f}_MT18.pendf"
-    with open(f"{savefilename}", mode="w") as f:
-        # f.write(outs["ace"])
-        f.write(pendf_pert)
+
+    pendf_pert.to_file(savefilename)
+    # with open(f"{savefilename}", mode="w") as f:
+    #     # f.write(outs["ace"])
+    #     f.write(pendf_pert)
 
 
 
@@ -65,38 +67,3 @@ elapsed = end - start
 print(f"Time elapsed: {datetime.timedelta(seconds=elapsed)}")
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-# def run_tmux(coeff):
-#     session_name = f"job_{coeff}"
-#     command = f"tmux new-session -d -s {session_name} 'python3 fission_parallel_processing.py {coeff}'"
-#     try:
-#         subprocess.run(command, shell=True, check=True)
-#         return f"Launched {session_name}"
-#     except subprocess.CalledProcessError as error:
-#         return(f"Failed {session_name} with error {error}")
-#
-#
-# max_cores = 20
-# batch_size = max_cores
-#
-# for i in range(0, len(perturbation_coefficients), batch_size):
-#     batch = perturbation_coefficients[i:i+batch_size]
-#     with ThreadPoolExecutor(max_workers=max_cores) as executor:
-#         futures = [executor.submit(run_tmux, c) for c in batch]
-#         for future in as_completed(futures):
-#             print(future.result())
-#
-#     print(f"Waiting for batch {i // batch_size} to complete...")
-#
-#     time.sleep(5)
