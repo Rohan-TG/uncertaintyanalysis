@@ -48,7 +48,7 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
 
     tag = "_pert"
-    outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
+    outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=False, verbose=True, pendf=pendf_pert)
 
     savefilename = f"plotdata_Pu-239_coeff_{coeff:0.3f}_MT18.pendf"
     with open(f"{savefilename}", mode="w") as f:
