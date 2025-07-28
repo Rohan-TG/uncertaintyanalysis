@@ -17,8 +17,8 @@ za = 94239
 
 # perturbation_coefficients = np.arange(-0.8, -0.6, 0.001)
 # perturbation_coefficients = np.arange(-0.599, -0.4, 0.001)
-perturbation_coefficients = np.arange(-0.4, -0.2, 0.001)
-# perturbation_coefficients = np.arange(-0.2, 0.0, 0.001)
+# perturbation_coefficients = np.arange(-0.4, -0.2, 0.001)
+perturbation_coefficients = np.arange(-0.2, 0.0, 0.001)
 # perturbation_coefficients = np.arange(0.0, 0.3, 0.001)
 # perturbation_coefficients = np.arange(0.3, 0.5, 0.001)
 # perturbation_coefficients = np.arange(0.5, 0.8, 0.001)
