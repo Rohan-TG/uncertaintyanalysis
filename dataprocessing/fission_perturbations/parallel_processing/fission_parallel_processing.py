@@ -13,10 +13,19 @@ start = time.time()
 za = 94239
 
 
-perturbation_coefficients = np.arange(0.00, 1.001, 0.2)
+# perturbation_coefficients = np.arange(-0.8, 1.001, 0.001)
+perturbation_coefficients = np.arange(-0.8, -0.6, 0.001)
+# perturbation_coefficients = np.arange(-0.599, -0.4, 0.001)
+# perturbation_coefficients = np.arange(-0.4, -0.2, 0.001)
+# perturbation_coefficients = np.arange(-0.2, 0.0, 0.001)
+# perturbation_coefficients = np.arange(0.0, 0.3, 0.001)
+# perturbation_coefficients = np.arange(0.3, 0.5, 0.001)
+# perturbation_coefficients = np.arange(0.5, 0.8, 0.001)
+# perturbation_coefficients = np.arange(0.8, 1.001, 0.001)
+
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
-pendf = endf6.get_pendf(err=0.001, verbose=True)
+pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
 xs = sandy.Xs.from_endf6(pendf)
 
@@ -40,7 +49,7 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     tag = "_pert"
     outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
 
-    savefilename = f"tmux_Pu-239_coeff_{coeff}_MT18.09c"
+    savefilename = f"tmux_Pu-239_coeff_{coeff:0.3f}_MT18.09c"
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
