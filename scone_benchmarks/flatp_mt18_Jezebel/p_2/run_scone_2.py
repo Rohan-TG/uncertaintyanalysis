@@ -11,7 +11,7 @@ ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Pu-23
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of the scone executable
 
-num_cores = 15 # number of cores to use for this specific instance of scone
+num_cores = 10 # number of cores to use for this specific instance of scone
 
 perturbation_coefficients = np.arange(0.100, 1.001, 0.001)
 
