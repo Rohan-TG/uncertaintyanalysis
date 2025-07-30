@@ -34,9 +34,9 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 	with open(libfile, 'w') as file: # write to new lib1.xsfile
 		file.writelines(lines)
 
-	subprocess.run(f'{scone_executable_path} -- omp {num_cores} Jezebel') # run scone
+	subprocess.run(f'{scone_executable_path} -- omp {num_cores} Jezebel', shell=True) # run scone
 
-	subprocess.run(f'mv output.m outputfiles/output-{coefficient}.m') # move output file to output directory for later analysis
+	subprocess.run(f'mv output.m outputfiles/output-{coefficient}.m', shell=True) # move output file to output directory for later analysis
 
 	break
 
