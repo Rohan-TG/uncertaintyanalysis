@@ -21,6 +21,7 @@ perturbation_coefficients = np.arange(-0.8, 1.001, 0.001)
 # perturbation_coefficients = [-0.800, 0,000, 0.300]
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
+	time.sleep(20)
 	libfile = 'lib1.xsfile'
 
 	input_coefficient = round(coefficient, 3) # Coefficient string prep
