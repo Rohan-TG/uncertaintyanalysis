@@ -12,13 +12,13 @@ scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of 
 
 num_cores = 20 # number of cores to use for this specific instance of scone
 
-# perturbation_coefficients = np.arange(-0.8, 1.001, 0.001)
+perturbation_coefficients = np.arange(-0.8, 1.001, 0.001)
 # perturbation_coefficients = np.arange(-0.800, 0.100, 0.001)
 # perturbation_coefficients = np.arange(0.100, 1.001, 0.001)
 
 # perturbation_coefficients = np.arange(-0.800, -0.797, 0.001)
 
-perturbation_coefficients = [-0.800, 0,000, 0.300]
+# perturbation_coefficients = [-0.800, 0,000, 0.300]
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	libfile = 'lib1.xsfile'
@@ -40,6 +40,9 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True) # run scone
 
 	subprocess.run(f'mv output.m outputfiles/output-{coefficient}.m', shell=True) # move output file to output directory for later analysis
+
+
+	time.sleep(10)
 
 
 end_time = time.time()
