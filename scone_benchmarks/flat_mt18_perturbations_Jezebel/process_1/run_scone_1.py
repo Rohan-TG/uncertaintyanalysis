@@ -1,10 +1,16 @@
-import os
 import numpy as np
 import tqdm
 import time
+import subprocess
+import datetime
 
+start_time = time.time()
 
-ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Pu-239_MT18_p_ACE'
+ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Pu-239_MT18_p_ACE' # location of the perturbed ACE files to be used for generating samples
+
+scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of the scone executable
+
+num_cores = 20 # number of cores to use for this specific instance of scone
 
 # perturbation_coefficients = np.arange(-0.8, 1.001, 0.001)
 perturbation_coefficients = np.arange(-0.800, 0.100, 0.001)
@@ -28,4 +34,12 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 	with open(libfile, 'w') as file: # write to new lib1.xsfile
 		file.writelines(lines)
 
+	subprocess.run(f'{scone_executable_path} -- omp {num_cores} Jezebel') # run scone
 
+	subprocess.run(f'mv output.m outputfiles/output-{coefficient}.m') # move output file to output directory for later analysis
+
+	break
+
+end_time = time.time()
+
+print(f"Time elapsed: {datetime.timedelta(seconds=end_time-start_time)}")
