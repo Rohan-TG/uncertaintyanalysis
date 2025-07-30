@@ -16,7 +16,9 @@ num_cores = 20 # number of cores to use for this specific instance of scone
 # perturbation_coefficients = np.arange(-0.800, 0.100, 0.001)
 # perturbation_coefficients = np.arange(0.100, 1.001, 0.001)
 
-perturbation_coefficients = np.arange(-0.800, -0.797, 0.001)
+# perturbation_coefficients = np.arange(-0.800, -0.797, 0.001)
+
+perturbation_coefficients = [-0.800, 0,000, 0.300]
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	libfile = 'lib1.xsfile'
@@ -39,7 +41,6 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 
 	subprocess.run(f'mv output.m outputfiles/output-{coefficient}.m', shell=True) # move output file to output directory for later analysis
 
-	break
 
 end_time = time.time()
 
