@@ -13,9 +13,10 @@ scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of 
 num_cores = 20 # number of cores to use for this specific instance of scone
 
 # perturbation_coefficients = np.arange(-0.8, 1.001, 0.001)
-perturbation_coefficients = np.arange(-0.800, 0.100, 0.001)
+# perturbation_coefficients = np.arange(-0.800, 0.100, 0.001)
 # perturbation_coefficients = np.arange(0.100, 1.001, 0.001)
 
+perturbation_coefficients = np.arange(-0.800, -0.797, 0.001)
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	libfile = 'lib1.xsfile'
