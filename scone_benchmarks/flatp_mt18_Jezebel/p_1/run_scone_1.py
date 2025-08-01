@@ -13,10 +13,9 @@ scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of 
 num_cores = 20 # number of cores to use for this specific instance of scone
 
 # perturbation_coefficients = np.arange(-0.8, 1.001, 0.001)
-# perturbation_coefficients = np.arange(-0.150, -0.140, 0.001)
+perturbation_coefficients = np.arange(-0.200, -0.200, 0.001)
 # perturbation_coefficients = np.arange(0.100, 1.001, 0.001)
 
-perturbation_coefficients = [-0.175, -0.150, -0.125, -0.100, 0.100, 0.125, 0.150, 0.175, 0.200]
 
 # perturbation_coefficients = [-0.800, 0,000, 0.300]
 
