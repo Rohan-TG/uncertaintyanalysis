@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import ENDF6
 import os
 import tqdm
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 # filename = 'Pu-239_coeff_0.154_MT18.pendf'
@@ -27,9 +28,16 @@ dir = '/home/rnt26/PycharmProjects/uncertaintyanalysis/dataprocessing/fission_pe
 pendf_names = os.listdir(dir)
 
 length_list = []
-for file in tqdm.tqdm(pendf_names, total=len(pendf_names)):
+def process_file(file):
 	f = open(f'{dir}/{file}')
 	lines = f.readlines()
 	section = ENDF6.find_section(lines, MF=3, MT=18)
 	erg, xs = ENDF6.read_table(section)
-	length_list.append(len(erg))
+	return(len(erg))
+	# length_list.append(len(erg))
+
+with ThreadPoolExecutor(max_workers=10) as executor:
+	futures = {executor.submit(process_file, file): file for file in pendf_names}
+	for future in as_completed(futures):
+		result = future.result()
+		length_list.append(result)
