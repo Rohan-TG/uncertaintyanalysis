@@ -38,6 +38,6 @@ def process_file(file):
 
 with ThreadPoolExecutor(max_workers=10) as executor:
 	futures = {executor.submit(process_file, file): file for file in pendf_names}
-	for future in as_completed(futures):
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		result = future.result()
 		length_list.append(result)
