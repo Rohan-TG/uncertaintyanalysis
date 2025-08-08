@@ -15,5 +15,7 @@ def plot_data(filename):
 	plt.grid()
 	plt.xlabel('Energy / eV')
 	plt.ylabel('$\sigma_{n,f}$ / b')
+	plt.xscale('log')
+	plt.yscale('log')
 	plt.title('Perturbed Pu-239 (n,f) cross sections')
 	plt.show()
