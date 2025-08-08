@@ -36,7 +36,7 @@ def process_file(file):
 	return(len(erg))
 	# length_list.append(len(erg))
 
-with ThreadPoolExecutor(max_workers=5) as executor:
+with ThreadPoolExecutor(max_workers=1) as executor:
 	futures = {executor.submit(process_file, file): file for file in pendf_names}
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		result = future.result()
