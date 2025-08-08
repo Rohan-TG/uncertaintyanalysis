@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from dataprocessing import ENDF6
+import ENDF6
 import os
 import tqdm
 
