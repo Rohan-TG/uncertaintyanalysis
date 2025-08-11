@@ -14,4 +14,5 @@ for xsfile in tqdm.tqdm(xscsv_filenames, total=len(xscsv_filenames)):
 
 	reduced_keff_df = keff_data[keff_data.p == coeff]
 	print(reduced_keff_df)
+	print(coeff)
 	break
