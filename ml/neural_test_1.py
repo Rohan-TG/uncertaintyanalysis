@@ -25,7 +25,7 @@ y_train = []
 for file in tqdm.tqdm(training_csvs, total=len(training_csvs)):
 	df = pd.read_csv(f'{data_directory}/{file}')
 
-	y_train += float(df['keff'].values[0])
+	y_train += [float(df['keff'].values[0])]
 
 
 
