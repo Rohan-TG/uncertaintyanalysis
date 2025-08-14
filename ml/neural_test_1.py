@@ -5,6 +5,7 @@ import numpy as np
 import sklearn.preprocessing
 import matplotlib.pyplot as plt
 import os
+import scipy.stats
 import random
 import tqdm
 
@@ -24,8 +25,15 @@ X_train = []
 y_train = []
 for file in tqdm.tqdm(training_csvs, total=len(training_csvs)):
 	df = pd.read_csv(f'{data_directory}/{file}')
-
 	y_train += [float(df['keff'].values[0])]
+	X_train.append(df['XS'].values)
+
+X_train = np.array(X_train)
+
+
+
+
+
 
 
 
