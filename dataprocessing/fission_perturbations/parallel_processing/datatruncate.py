@@ -16,4 +16,7 @@ for csv in tqdm.tqdm(csv_filenames, total=len(csv_filenames)):
 	current_keff = df['keff'].values[0]
 
 	if current_keff >= 0.89 and current_keff <= 1.11:
-		subprocess.run(f'cp {alldata_dir}/{csv} {pruned_ml_dir}')
+		subprocess.run(['cp',
+						f'{alldata_dir}/{csv}',
+						f'{pruned_ml_dir}',
+						])
