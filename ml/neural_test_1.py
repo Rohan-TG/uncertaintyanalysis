@@ -22,7 +22,7 @@ while len(training_csvs) < 290:
 X_train = []
 y_train = []
 for file in training_csvs:
-	df = pd.read_csv(file)
+	df = pd.read_csv(f'{data_directory}/{file}')
 	break
 
 
