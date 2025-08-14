@@ -1,11 +1,12 @@
 import pandas as pd
 # import tensorflow as tf
 import keras
-import numpy
+import numpy as np
 import sklearn.preprocessing
 import matplotlib.pyplot as plt
 import os
 import random
+import tqdm
 
 
 data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata'
@@ -21,9 +22,11 @@ while len(training_csvs) < 290:
 
 X_train = []
 y_train = []
-for file in training_csvs:
+for file in tqdm.tqdm(training_csvs, total=len(training_csvs)):
 	df = pd.read_csv(f'{data_directory}/{file}')
-	break
+
+	y_train += df['keff'].values[0]
+
 
 
 
