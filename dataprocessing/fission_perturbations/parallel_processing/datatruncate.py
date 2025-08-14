@@ -11,7 +11,7 @@ csv_filenames = os.listdir(alldata_dir)
 
 for csv in tqdm.tqdm(csv_filenames, total=len(csv_filenames)):
 
-	df = pd.read_csv(csv)
+	df = pd.read_csv(f'{alldata_dir}/{csv}')
 
 	current_keff = df['keff'].values[0]
 
