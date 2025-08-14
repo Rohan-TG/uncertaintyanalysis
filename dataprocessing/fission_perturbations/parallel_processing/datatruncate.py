@@ -5,7 +5,7 @@ import subprocess
 
 alldata_dir = '/home/rnt26/PycharmProjects/uncertaintyanalysis/dataprocessing/fission_perturbations/parallel_processing/fulldata'
 
-pruned_ml_dir = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata'
+pruned_ml_dir = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/'
 
 csv_filenames = os.listdir(alldata_dir)
 
