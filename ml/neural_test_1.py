@@ -5,7 +5,7 @@ import numpy as np
 import sklearn.preprocessing
 import matplotlib.pyplot as plt
 import os
-import scipy.stats
+from scipy.stats import zscore
 import random
 import tqdm
 
@@ -31,6 +31,14 @@ for file in tqdm.tqdm(training_csvs, total=len(training_csvs)):
 X_train = np.array(X_train)
 
 
+# NOTE: X_train[:,n] means all samples (:) and the nth energy point for each sample
+scaling_matrix_xtrain = X_train.transpose()
+
+
+scaled_columns_xtrain = []
+for column in tqdm.tqdm(scaling_matrix_xtrain, total=len(scaling_matrix_xtrain)):
+	scaled_column = zscore(column)
+	scaled_columns_xtrain.append(scaled_column)
 
 
 
