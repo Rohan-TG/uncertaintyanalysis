@@ -76,7 +76,12 @@ X_test = scaled_columns_xtest.transpose()
 
 
 
-
+callback = keras.callbacks.EarlyStopping(monitor='val_loss',
+										 # min_delta=0.005,
+										 patience=5,
+										 mode='min',
+										 start_from_epoch=3,
+										 restore_best_weights=True)
 
 
 model =keras.Sequential()
@@ -90,7 +95,7 @@ history = model.fit(X_train,
 					y_train,
 					epochs=50,
 					batch_size=16,
-					# callbacks=callback,
+					callbacks=callback,
 					validation_data=(X_test, y_test),
 					verbose=1)
 
