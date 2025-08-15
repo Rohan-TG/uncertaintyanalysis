@@ -51,14 +51,16 @@ X_train = scaled_columns_xtrain.transpose()
 
 
 XS_test = []
-y_test = []
+keff_test = []
 for file in tqdm.tqdm(test_csvs, total=len(test_csvs)):
 	dftest = pd.read_csv(f'{data_directory}/{file}')
-	y_test += [float(dftest['keff'].values[0])]
+	keff_test += [float(dftest['keff'].values[0])]
 	XS_test.append(dftest['XS'].values)
 
 XS_test = np.array(XS_test)
-y_test = zscore(y_test)
+keff_mean = np.mean(keff_test)
+keff_std = np.std(keff_test)
+y_test = zscore(keff_test)
 
 scaling_matrix_xtest = XS_test.transpose()
 
@@ -102,3 +104,8 @@ history = model.fit(X_train,
 
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
+
+rescaled_predictions = []
+for pred, mean, std in zip(predictions, keff_mean, keff_std):
+	descaled_p = pred * std + mean
+	rescaled_predictions.append(descaled_p)
