@@ -80,7 +80,7 @@ X_test = scaled_columns_xtest.transpose()
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=5,
+										 patience=20,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
@@ -105,7 +105,13 @@ history = model.fit(X_train,
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
 
+
+
 rescaled_predictions = []
-for pred, mean, std in zip(predictions, keff_mean, keff_std):
+predictions_list = predictions.tolist()
+mean_list = keff_mean.tolist()
+std_list = keff_std.tolist()
+
+for pred, mean, std in zip(predictions_list, mean_list, std_list):
 	descaled_p = pred * std + mean
 	rescaled_predictions.append(descaled_p)
