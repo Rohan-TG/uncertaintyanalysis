@@ -21,26 +21,27 @@ while len(training_csvs) < 290:
 		training_csvs.append(choice)
 
 
-X_train = []
+XS_train = []
 y_train = []
 for file in tqdm.tqdm(training_csvs, total=len(training_csvs)):
 	df = pd.read_csv(f'{data_directory}/{file}')
 	y_train += [float(df['keff'].values[0])]
-	X_train.append(df['XS'].values)
+	XS_train.append(df['XS'].values)
 
-X_train = np.array(X_train)
-
+XS_train = np.array(XS_train)
+y_train = zscore(y_train)
 
 # NOTE: X_train[:,n] means all samples (:) and the nth energy point for each sample
-scaling_matrix_xtrain = X_train.transpose()
+scaling_matrix_xtrain = XS_train.transpose()
 
 
 scaled_columns_xtrain = []
-for column in tqdm.tqdm(scaling_matrix_xtrain, total=len(scaling_matrix_xtrain)):
+for column in tqdm.tqdm(scaling_matrix_xtrain[1:], total=len(scaling_matrix_xtrain[1:])):
 	scaled_column = zscore(column)
 	scaled_columns_xtrain.append(scaled_column)
 
-
+scaled_columns_xtrain = np.array(scaled_columns_xtrain)
+X_train = scaled_columns_xtrain.transpose()
 
 
 
