@@ -81,14 +81,14 @@ X_test = scaled_columns_xtest.transpose()
 
 model =keras.Sequential()
 model.add(keras.layers.Dense(200, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(200, activation='relu'))
+# model.add(keras.layers.Dense(200, activation='relu'))
 model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
-model.compile(loss='mean_absolute_error', optimizer='adam')
+model.compile(loss='MeanSquaredError', optimizer='adam')
 
 history = model.fit(X_train,
 					y_train,
-					epochs=20,
+					epochs=50,
 					batch_size=16,
 					# callbacks=callback,
 					validation_data=(X_test, y_test),
