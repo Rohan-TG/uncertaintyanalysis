@@ -109,9 +109,10 @@ predictions = predictions.ravel()
 
 rescaled_predictions = []
 predictions_list = predictions.tolist()
-mean_list = keff_mean.tolist()
-std_list = keff_std.tolist()
 
-for pred, mean, std in zip(predictions_list, mean_list, std_list):
-	descaled_p = pred * std + mean
-	rescaled_predictions.append(descaled_p)
+for pred in predictions_list:
+	descaled_p = pred * keff_std + keff_mean
+	rescaled_predictions.append(float(descaled_p))
+
+for predicted, true in zip(rescaled_predictions, keff_test):
+	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
