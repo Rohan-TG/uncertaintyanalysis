@@ -17,7 +17,7 @@ data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata'
 
 all_csvs = os.listdir(data_directory)
 
-n_training_samples = 290
+n_training_samples = 280
 training_csvs = []
 while len(training_csvs) < n_training_samples:
 	choice = random.choice(all_csvs)
