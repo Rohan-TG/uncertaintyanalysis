@@ -17,7 +17,7 @@ data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata'
 
 all_csvs = os.listdir(data_directory)
 
-n_training_samples = 280
+n_training_samples = 285
 training_csvs = []
 while len(training_csvs) < n_training_samples:
 	choice = random.choice(all_csvs)
@@ -132,3 +132,6 @@ for predicted, true in zip(rescaled_predictions, keff_test):
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
 print(f'Average error: {np.mean(errors):0.0f} +- {np.std(errors):0.0f} pcm')
+
+absolute_errors = sorted(errors)
+print(f'Max -ve error: {absolute_errors[0]} pcm, Max +ve error: {absolute_errors[-1]} pcm')
