@@ -137,4 +137,4 @@ sorted_errors = sorted(errors)
 print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
 
 absolute_errors = [abs(x) for x in sorted_errors]
-print(f"Smallest absolute error: f{min(absolute_errors)} pcm")
+print(f"Smallest absolute error: {min(absolute_errors)} pcm")

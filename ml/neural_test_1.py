@@ -89,8 +89,7 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 model =keras.Sequential()
-model.add(keras.layers.Dense(300, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(200, activation='relu'))
+model.add(keras.layers.Dense(200, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 model.add(keras.layers.Dense(200, activation='relu'))
 model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
@@ -130,4 +129,4 @@ sorted_errors = sorted(errors)
 print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
 
 absolute_errors = [abs(x) for x in sorted_errors]
-print(f"Smallest absolute error: f{min(absolute_errors)} pcm")
+print(f"Smallest absolute error: {min(absolute_errors)} pcm")
