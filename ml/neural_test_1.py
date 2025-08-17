@@ -5,6 +5,7 @@ import numpy as np
 import sklearn.preprocessing
 import matplotlib.pyplot as plt
 import os
+import time
 from scipy.stats import zscore
 import random
 import tqdm
@@ -93,6 +94,8 @@ model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
+import datetime
+trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=50,
@@ -101,7 +104,8 @@ history = model.fit(X_train,
 					validation_data=(X_test, y_test),
 					verbose=1)
 
-
+train_end = time.time()
+print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
 

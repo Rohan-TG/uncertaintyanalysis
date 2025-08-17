@@ -10,6 +10,7 @@ import os
 from scipy.stats import zscore
 import random
 import tqdm
+import time
 
 
 data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata'
@@ -97,6 +98,10 @@ model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
+
+
+import datetime
+trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=50,
@@ -106,6 +111,8 @@ history = model.fit(X_train,
 					verbose=1)
 
 
+train_end = time.time()
+print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
 
