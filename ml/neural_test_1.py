@@ -14,7 +14,7 @@ import tqdm
 data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata'
 
 all_csvs = os.listdir(data_directory)
-n_training_samples = 285
+n_training_samples = 290
 
 training_csvs = []
 while len(training_csvs) < n_training_samples:
@@ -101,7 +101,7 @@ trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=50,
-					batch_size=16,
+					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
 					verbose=1)
