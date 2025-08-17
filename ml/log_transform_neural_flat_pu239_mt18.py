@@ -125,5 +125,9 @@ for pred in predictions_list:
 	descaled_p = pred * keff_std + keff_mean
 	rescaled_predictions.append(float(descaled_p))
 
+errors = []
 for predicted, true in zip(rescaled_predictions, keff_test):
+	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+print(f'Average error: {np.mean(errors)} +- {np.std(errors)}')
