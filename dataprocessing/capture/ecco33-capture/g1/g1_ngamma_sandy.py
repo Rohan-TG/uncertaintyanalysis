@@ -29,7 +29,7 @@ domain = [lower_bound, upper_bound]
 
 
 mat = 9437
-mt = 18
+mt = 102
 
 
 for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
@@ -44,11 +44,11 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     tag = "_pert"
     outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
 
-    savefilename = f"ECCO33-g1_Pu9_{coeff:0.3f}_MT18.09c"
+    savefilename = f"ECCO33-g1_Pu9_{coeff:0.3f}_MT102.09c"
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
-    savefilependf = f"ECCO33-g1_Pu9_{coeff:0.3f}_MT18.pendf"
+    savefilependf = f"ECCO33-g1_Pu9_{coeff:0.3f}_MT102.pendf"
     heated_pendf_pert.to_file(savefilependf)
 
 
