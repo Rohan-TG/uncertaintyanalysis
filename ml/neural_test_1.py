@@ -124,9 +124,12 @@ for predicted, true in zip(rescaled_predictions, keff_test):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
-print(f'Average error: {np.mean(errors)} +- {np.std(errors)}')
+
 sorted_errors = sorted(errors)
+absolute_errors = [abs(x) for x in sorted_errors]
+print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+
 print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
 
-absolute_errors = [abs(x) for x in sorted_errors]
+
 print(f"Smallest absolute error: {min(absolute_errors)} pcm")
