@@ -11,7 +11,7 @@ pendf_names  = os.listdir(pendf_path)
 MT = 102
 
 for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
-	f = open(f'{dir}/{filename}')
+	f = open(f'{pendf_path}/{filename}')
 	lines = f.readlines()
 	section = ENDF6.find_section(lines, MF=3, MT=MT)
 	erg, xs = ENDF6.read_table(section)
