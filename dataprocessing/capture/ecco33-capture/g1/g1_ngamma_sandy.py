@@ -13,7 +13,7 @@ start = time.time()
 za = 94239
 
 
-perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+perturbation_coefficients = np.arange(-0.083, 0.501, 0.001)
 
 # perturbation_coefficients = [-0.3, -0.1, 0.1, 0.2, 0.3, 0.4]
 
