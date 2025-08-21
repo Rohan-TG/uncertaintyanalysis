@@ -28,7 +28,7 @@ xspert_heated = xs_heated.custom_perturbation(mat, mt, perturbation)
 heated_pendf_pert = xspert_heated.to_endf6(pendfheated)
 
 tag = "_pert"
-outs = endf6.get_ace(heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=heated_pendf_pert)
+outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=heated_pendf_pert)
 savefilename = f"single-heating-ace-Pu239-no-perturb.09c"
 with open(f"{savefilename}", mode="w") as f:
 	f.write(outs["ace"])
