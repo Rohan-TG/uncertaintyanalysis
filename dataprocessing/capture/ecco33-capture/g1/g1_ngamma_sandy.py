@@ -1,5 +1,5 @@
 import sandy
-import subprocess
+# import subprocess
 import numpy as np
 # from concurrent.futures import ThreadPoolExecutor, as_completed
 # import random
@@ -22,6 +22,7 @@ pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
 pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
 xs = sandy.Xs.from_endf6(pendf)
+xs_heated = sandy.Xs.from_endf6(pendfheated)
 
 lower_bound = 1.0000000000e7  # group 1 eV
 upper_bound = 1.9640330000e7   # group 0 eV
@@ -37,12 +38,12 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     perturbation = sandy.Pert([1, 1 + coeff], index=domain)
 
     xspert = xs.custom_perturbation(mat, mt, perturbation)
+    xspert_heated = xs_heated.custom_perturbation(mat, mt, perturbation)
 
     pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
-    heated_pendf_pert = xspert.to_endf6(pendfheated)
+    heated_pendf_pert = xspert_heated.to_endf6(pendfheated)
 
-    tag = "_pert"
-    outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
+    outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=False, pendf=pendf_pert)
 
     savefilename = f"ECCO33-g1_Pu9_{coeff:0.3f}_MT102.09c"
     with open(f"{savefilename}", mode="w") as f:
@@ -59,7 +60,4 @@ end = time.time()
 
 elapsed = end - start
 print(f"Time elapsed: {datetime.timedelta(seconds=elapsed)}")
-
-
-
 
