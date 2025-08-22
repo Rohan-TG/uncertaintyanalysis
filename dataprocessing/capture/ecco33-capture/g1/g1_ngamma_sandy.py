@@ -18,11 +18,11 @@ perturbation_coefficients = np.arange(-0.083, 0.501, 0.001)
 # perturbation_coefficients = [-0.3, -0.1, 0.1, 0.2, 0.3, 0.4]
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
-pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
+# pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
 pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
 xs = sandy.Xs.from_endf6(pendf)
-xs_heated = sandy.Xs.from_endf6(pendfheated)
+# xs_heated = sandy.Xs.from_endf6(pendfheated)
 
 lower_bound = 1.0000000000e7  # group 1 eV
 upper_bound = 1.9640330000e7   # group 0 eV
@@ -38,10 +38,10 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     perturbation = sandy.Pert([1, 1 + coeff], index=domain)
 
     xspert = xs.custom_perturbation(mat, mt, perturbation)
-    xspert_heated = xs_heated.custom_perturbation(mat, mt, perturbation)
+    # xspert_heated = xs_heated.custom_perturbation(mat, mt, perturbation)
 
     pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
-    heated_pendf_pert = xspert_heated.to_endf6(pendfheated)
+    # heated_pendf_pert = xspert_heated.to_endf6(pendfheated)
 
     outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=False, pendf=pendf_pert)
 
@@ -49,8 +49,8 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
-    savefilependf = f"ECCO33-g1_Pu9_{coeff:0.3f}_MT102.pendf"
-    heated_pendf_pert.to_file(savefilependf)
+    # savefilependf = f"ECCO33-g1_Pu9_{coeff:0.3f}_MT102.pendf"
+    # heated_pendf_pert.to_file(savefilependf)
 
 
 
