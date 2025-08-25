@@ -27,12 +27,13 @@ for csv in all_csvs:
 	if csv not in training_csvs:
 		test_csvs.append(csv)
 
+maxrow = 188601
 XS_train = []
 y_train = []
 for file in tqdm.tqdm(training_csvs, total=len(training_csvs)):
 	df = pd.read_csv(f'{data_directory}/{file}')
 	y_train += [float(df['keff'].values[0])]
-	XS_train.append(df['XS'].values)
+	XS_train.append(df['XS'].values[:maxrow])
 
 XS_train = np.array(XS_train)
 y_train = zscore(y_train)
@@ -40,10 +41,10 @@ y_train = zscore(y_train)
 # NOTE: X_train[:,n] means all samples (:) and the nth energy point for each sample
 scaling_matrix_xtrain = XS_train.transpose()
 
-maxrow = 188601
+
 
 scaled_columns_xtrain = []
-for column in tqdm.tqdm(scaling_matrix_xtrain[1:maxrow], total=len(scaling_matrix_xtrain[1:maxrow])):
+for column in tqdm.tqdm(scaling_matrix_xtrain[1:], total=len(scaling_matrix_xtrain[1:])):
 	scaled_column = zscore(column)
 	scaled_columns_xtrain.append(scaled_column)
 
@@ -68,7 +69,7 @@ y_test = zscore(keff_test)
 scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
-for column in tqdm.tqdm(scaling_matrix_xtest[1:maxrow], total=len(scaling_matrix_xtest[1:maxrow])):
+for column in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest[1:])):
 	scaled_column = zscore(column)
 	scaled_columns_xtest.append(scaled_column)
 
