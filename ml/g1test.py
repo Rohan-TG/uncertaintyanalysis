@@ -14,7 +14,7 @@ import tqdm
 data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/g1fissiondata/combined'
 
 all_csvs = os.listdir(data_directory)
-n_training_samples = 1200
+n_training_samples = 1294
 
 training_csvs = []
 while len(training_csvs) < n_training_samples:
