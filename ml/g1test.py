@@ -59,7 +59,7 @@ keff_test = []
 for file in tqdm.tqdm(test_csvs, total=len(test_csvs)):
 	dftest = pd.read_csv(f'{data_directory}/{file}')
 	keff_test += [float(dftest['keff'].values[0])]
-	XS_test.append(dftest['XS'].values)
+	XS_test.append(dftest['XS'].values[:maxrow])
 
 XS_test = np.array(XS_test)
 keff_mean = np.mean(keff_test)
