@@ -32,7 +32,7 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 					   'keff_err': keff_err_list,
 					   'p': coeff_list})
 
-	break
+	df.to_csv(f'csvs/g1_Pu9_{coefficient:0.3f}_MT18.csv')
 	# df_temp = pd.DataFrame({'ERG': erg, 'XS': xs, 'P':coeff_list})
 
 
