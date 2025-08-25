@@ -40,9 +40,10 @@ y_train = zscore(y_train)
 # NOTE: X_train[:,n] means all samples (:) and the nth energy point for each sample
 scaling_matrix_xtrain = XS_train.transpose()
 
+maxrow = 188601
 
 scaled_columns_xtrain = []
-for column in tqdm.tqdm(scaling_matrix_xtrain[1:], total=len(scaling_matrix_xtrain[1:])):
+for column in tqdm.tqdm(scaling_matrix_xtrain[1:maxrow], total=len(scaling_matrix_xtrain[1:maxrow])):
 	scaled_column = zscore(column)
 	scaled_columns_xtrain.append(scaled_column)
 
@@ -67,7 +68,7 @@ y_test = zscore(keff_test)
 scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
-for column in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest[1:])):
+for column in tqdm.tqdm(scaling_matrix_xtest[1:maxrow], total=len(scaling_matrix_xtest[1:maxrow])):
 	scaled_column = zscore(column)
 	scaled_columns_xtest.append(scaled_column)
 
