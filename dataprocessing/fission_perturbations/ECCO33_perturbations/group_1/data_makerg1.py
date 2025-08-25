@@ -23,9 +23,16 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 	coeff_list = [coefficient for i in xs]
 
 	reduced_keff_df = keffs[keffs.p == coefficient]
+	keff_list = [reduced_keff_df['keff'].values[0] for i in xs]
+	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in xs]
+
+	df = pd.DataFrame({'ERG': erg,
+					   'XS': xs,
+					   'keff': keff_list,
+					   'keff_err': keff_err_list,
+					   'p': coeff_list})
 
 	break
-
 	# df_temp = pd.DataFrame({'ERG': erg, 'XS': xs, 'P':coeff_list})
 
 
