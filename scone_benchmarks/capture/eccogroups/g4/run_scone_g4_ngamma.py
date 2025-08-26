@@ -28,7 +28,7 @@ os.environ["SCONE_ACE"] = xsfile_fullpath
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	subprocess.run('echo $SCONE_ACE', shell=True)
-	time.sleep(4)
+	time.sleep(2)
 
 	input_coefficient = round(coefficient, 3) # Coefficient string prep
 
