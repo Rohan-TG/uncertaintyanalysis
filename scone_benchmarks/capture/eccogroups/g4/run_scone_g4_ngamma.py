@@ -3,6 +3,7 @@ import tqdm
 import time
 import subprocess
 import datetime
+import os
 
 start_time = time.time()
 
@@ -15,9 +16,18 @@ perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
 
 # perturbation_coefficients = [-0.499, 0.000, 0.500]
+# libfile = 'lib4.xsfile'
+search_files = os.listdir()
+for file in search_files:
+	if '.xsfile' in file:
+		libfile = file
+		break
+
+xsfile_fullpath = os.path.abspath(libfile)
+os.environ["SCONE_ACE"] = xsfile_fullpath
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
-	libfile = 'lib4.xsfile'
+
 
 	input_coefficient = round(coefficient, 3) # Coefficient string prep
 
@@ -33,6 +43,8 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 	with open(libfile, 'w') as file: # write to new lib1.xsfile
 		file.writelines(lines)
 
+	subprocess.run('echo $SCONE_ACE', shell=True)
+	time.sleep(20)
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True) # run scone
 
 	subprocess.run(f'mv output.m outputfiles/output-{input_coefficient:0.3f}.m', shell=True) # move output file to output directory for later analysis
