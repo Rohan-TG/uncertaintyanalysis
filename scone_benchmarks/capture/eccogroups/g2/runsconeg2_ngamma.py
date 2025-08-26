@@ -22,7 +22,7 @@ for file in search_files:
 # perturbation_coefficients = [-0.499, 0.000, 0.500]
 
 xsfile_fullpath = os.path.abspath(libfile)
-os.environ["SCONE_ACE"] = xsfile_fullpath
+# os.environ["SCONE_ACE"] = xsfile_fullpath
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 
