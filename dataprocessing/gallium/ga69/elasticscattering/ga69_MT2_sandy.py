@@ -10,7 +10,7 @@ import tqdm
 
 start = time.time()
 
-za = 3169
+za = 31069
 
 
 # perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
