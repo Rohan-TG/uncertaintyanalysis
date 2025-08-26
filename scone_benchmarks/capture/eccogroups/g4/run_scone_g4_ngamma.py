@@ -7,7 +7,7 @@ import os
 
 start_time = time.time()
 
-ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/ecco4Pu9/' # location of the ECCO Group 6 perturbed ACE files to be used for generating samples
+ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/ng/g4' # location of the ECCO Group 6 perturbed ACE files to be used for generating samples
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of the scone executable
 
