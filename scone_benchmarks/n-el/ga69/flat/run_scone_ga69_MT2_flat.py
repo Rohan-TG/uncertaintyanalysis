@@ -36,9 +36,16 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 	with open(libfile, 'r') as file:
 		lines = file.readlines()
 
-	Pu_239_address = 511 # Line number of the Pu-239 ACE file address
+	try:
+		for i, ACE_address in enumerate(lines):
+			if str(ZA) in ACE_address:
+				Nuclide_ACE_address = i
+				break
+	except:
+		print('Cannot find ACE address match. Terminating')
+		break
 
-	lines[Pu_239_address] = f'{ZA}.00c; 1; {ACE_filename};\n' # Rewrite line
+	lines[Nuclide_ACE_address] = f'{ZA}.00c; 1; {ACE_filename};\n' # Rewrite line
 
 	with open(libfile, 'w') as file: # write to new .xsfile
 		file.writelines(lines)
