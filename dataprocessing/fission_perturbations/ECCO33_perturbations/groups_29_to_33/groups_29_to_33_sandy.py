@@ -24,8 +24,8 @@ pendf = endf6.get_pendf(err=0.0001, verbose=True)
 xs = sandy.Xs.from_endf6(pendf)
 heated_xs = sandy.Xs.from_endf6(pendfheated)
 
-lower_bound = 8.3152870000e-5  # group 33 eV
-upper_bound = 1.9640330000e0   # group 29 eV
+lower_bound = 1.0000100000e-5  # group 33 eV
+upper_bound = 8.3152870000e0   # group 29 eV
 domain = [lower_bound, upper_bound]
 
 
