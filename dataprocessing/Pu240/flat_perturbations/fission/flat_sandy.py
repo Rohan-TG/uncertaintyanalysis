@@ -10,7 +10,7 @@ import tqdm
 
 start = time.time()
 
-za = 94239
+za = 94240
 
 
 # perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
@@ -24,12 +24,12 @@ pendf = endf6.get_pendf(err=0.0001, verbose=True)
 xs = sandy.Xs.from_endf6(pendf)
 heated_xs = sandy.Xs.from_endf6(pendfheated)
 
-lower_bound = 4.0169000000e1  # group 26 eV
-upper_bound = 1.4862540000e2   # group 23 eV
+lower_bound = 1e-5  # eV
+upper_bound = 2e7   # eV
 domain = [lower_bound, upper_bound]
 
 
-mat = 9437
+mat = 9440 # MAT number
 mt = 18
 
 
@@ -46,11 +46,11 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     tag = "_pert"
     outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
 
-    savefilename = f"ECCO33-g20-23_Pu9_{coeff:0.3f}_MT18.09c"
+    savefilename = f"Pu240_flat_{coeff:0.3f}_MT18.09c"
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
-    savefilependf = f"ECCO33-g20-23_Pu9_{coeff:0.3f}_MT18.pendf"
+    savefilependf = f"Pu240_flat_{coeff:0.3f}_MT18.pendf"
     heated_pendf_pert.to_file(savefilependf)
 
 
