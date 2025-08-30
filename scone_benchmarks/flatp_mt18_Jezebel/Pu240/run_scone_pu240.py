@@ -26,8 +26,7 @@ for file in search_files:
 xsfile_fullpath = os.path.abspath(libfile)
 os.environ["SCONE_ACE"] = xsfile_fullpath
 
-contents = os.listdir()
-if 'outputfiles' not in contents:
+if 'outputfiles' not in search_files:
 	subprocess.run('mkdir outputfiles', shell=True)
 
 ZA = 94240
