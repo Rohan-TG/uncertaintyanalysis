@@ -20,11 +20,16 @@ default_xsfile = 'endfb-viii0.xsfile'
 current_dir = os.getcwd()
 target_dir = 'scone_benchmarks'
 idx = current_dir.find(target_dir)
+default_Jezebel = 'Jezebel'
 
 target_path = current_dir[:(idx + len(target_dir))]
 libfilename = f'lib{ZA}.xsfile'
 
+
 subprocess.run(f"cp {target_path}/{default_xsfile} {libfilename}", shell=True)
+subprocess.run(f"cp {target_path}/{default_Jezebel} Jezebel", shell=True)
+
+
 
 search_files = os.listdir()
 for file in search_files:
