@@ -14,9 +14,18 @@ scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of 
 
 perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
+ZA = 94240
 
-# perturbation_coefficients = [-0.499, 0.000, 0.500]
-# libfile = 'lib4.xsfile'
+default_xsfile = 'endfb-viii0.xsfile'
+current_dir = os.getcwd()
+target_dir = 'scone_benchmarks'
+idx = current_dir.find(target_dir)
+
+target_path = current_dir[:(idx + len(target_dir))]
+libfilename = f'lib{ZA}.xsfile'
+
+subprocess.run(f"cp {target_path}/{default_xsfile} {libfilename}")
+
 search_files = os.listdir()
 for file in search_files:
 	if '.xsfile' in file:
@@ -29,7 +38,10 @@ os.environ["SCONE_ACE"] = xsfile_fullpath
 if 'outputfiles' not in search_files:
 	subprocess.run('mkdir outputfiles', shell=True)
 
-ZA = 94240
+
+
+
+
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	# subprocess.run('echo $SCONE_ACE', shell=True)
