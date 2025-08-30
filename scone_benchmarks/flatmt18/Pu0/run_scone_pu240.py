@@ -45,7 +45,7 @@ if 'outputfiles' not in search_files:
 
 
 
-
+num_cores = int(input('Core no.: '))# number of cores to use for this specific instance of scone
 
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
@@ -69,7 +69,7 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 		file.writelines(lines)
 
 
-	num_cores = int(input('Core no.: '))# number of cores to use for this specific instance of scone
+
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True) # run scone
 
 
