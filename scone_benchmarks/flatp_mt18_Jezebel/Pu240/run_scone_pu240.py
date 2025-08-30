@@ -24,7 +24,7 @@ idx = current_dir.find(target_dir)
 target_path = current_dir[:(idx + len(target_dir))]
 libfilename = f'lib{ZA}.xsfile'
 
-subprocess.run(f"cp {target_path}/{default_xsfile} {libfilename}")
+subprocess.run(f"cp {target_path}/{default_xsfile} {libfilename}", shell=True)
 
 search_files = os.listdir()
 for file in search_files:
