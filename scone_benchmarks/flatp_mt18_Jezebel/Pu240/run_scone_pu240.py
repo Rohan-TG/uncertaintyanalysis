@@ -7,11 +7,11 @@ import os
 
 start_time = time.time()
 
-ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/ng/g4' # location of the ECCO Group 6 perturbed ACE files to be used for generating samples
+ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Pu240/flat_mt18/' # location of the ECCO Group 6 perturbed ACE files to be used for generating samples
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of the scone executable
 
-num_cores = 20 # number of cores to use for this specific instance of scone
+
 perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
 
@@ -26,24 +26,34 @@ for file in search_files:
 xsfile_fullpath = os.path.abspath(libfile)
 os.environ["SCONE_ACE"] = xsfile_fullpath
 
+contents = os.listdir()
+if 'outputfiles' not in contents:
+	subprocess.run('mkdir outputfiles', shell=True)
+
+ZA = 94240
+
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	# subprocess.run('echo $SCONE_ACE', shell=True)
 
 	input_coefficient = round(coefficient, 3) # Coefficient string prep
 
-	ACE_filename = f"{ACE_file_directory}/ECCO33-g4_Pu9_{input_coefficient:0.3f}_MT102.09c" # name of ACE file for this SCONE run
+	ACE_filename = f"{ACE_file_directory}/Flat_Pu-240_{input_coefficient:0.3f}_MT18.09c" # name of ACE file for this SCONE run
 
 	with open(libfile, 'r') as file:
 		lines = file.readlines()
 
-	Pu_239_address = 511 # Line number of the Pu-239 ACE file address
+	for i, line in enumerate(lines): # Find location of the nuclide in the .xsfile
+		if str(ZA) in line:
+			nuclide_ACE_address = i
+			break
 
-	lines[Pu_239_address] = f'94239.00c; 1; {ACE_filename};\n' # Rewrite line
+	lines[nuclide_ACE_address] = f'{ZA}.00c; 1; {ACE_filename};\n' # Rewrite line
 
 	with open(libfile, 'w') as file: # write to new lib1.xsfile
 		file.writelines(lines)
 
 
+	num_cores = int(input('Core no.: '))# number of cores to use for this specific instance of scone
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True) # run scone
 
 
