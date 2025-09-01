@@ -10,12 +10,12 @@ import tqdm
 
 start = time.time()
 
-za = 94240
+za = 94241
 
 
-perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+# perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
-# perturbation_coefficients = [-0.5, 0.0, 0.5]
+perturbation_coefficients = [-0.5, 0.0, 0.5]
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
@@ -29,7 +29,7 @@ upper_bound = 2e7   # eV
 domain = [lower_bound, upper_bound]
 
 
-mat = 9440 # MAT number
+mat = 9443 # MAT number
 mt = 18
 
 
@@ -46,12 +46,12 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     tag = "_pert"
     outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
 
-    savefilename = f"Pu240_flat_{coeff:0.3f}_MT18.09c"
+    savefilename = f"Pu241_flat_{coeff:0.3f}_MT18.09c"
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
-    savefilependf = f"Pu240_flat_{coeff:0.3f}_MT18.pendf"
-    heated_pendf_pert.to_file(savefilependf)
+    # savefilependf = f"Pu241_flat_{coeff:0.3f}_MT18.pendf"
+    # heated_pendf_pert.to_file(savefilependf)
 
 
 
