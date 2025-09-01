@@ -14,7 +14,7 @@ import tqdm
 data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/g1fissiondata/combined'
 
 all_csvs = os.listdir(data_directory)
-n_training_samples = 1294
+n_training_samples = 1284
 
 training_csvs = []
 while len(training_csvs) < n_training_samples:
@@ -91,9 +91,9 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 model =keras.Sequential()
-model.add(keras.layers.Dense(200, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(2000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 # model.add(keras.layers.Dense(200, activation='relu'))
-model.add(keras.layers.Dense(100, activation='relu'))
+model.add(keras.layers.Dense(1000, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
@@ -101,7 +101,7 @@ import datetime
 trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
-					epochs=50,
+					epochs=100,
 					batch_size=16,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
