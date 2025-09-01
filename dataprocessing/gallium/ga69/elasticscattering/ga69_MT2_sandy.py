@@ -13,9 +13,9 @@ start = time.time()
 za = 31069
 
 
-perturbation_coefficients = np.arange(-0.800, 0.801, 0.001)
+# perturbation_coefficients = np.arange(-0.800, 0.801, 0.001)
 
-# perturbation_coefficients = [-0.9, -0.5, 0.0, 0.5, 0.9]
+perturbation_coefficients = [-0.8, 0.8]
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 # pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
