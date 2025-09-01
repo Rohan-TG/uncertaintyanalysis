@@ -13,9 +13,9 @@ start = time.time()
 za = 94241
 
 
-# perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
-perturbation_coefficients = [-0.5, 0.0, 0.5]
+# perturbation_coefficients = [-0.5, 0.0, 0.5]
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
@@ -50,8 +50,8 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
-    # savefilependf = f"Pu241_flat_{coeff:0.3f}_MT18.pendf"
-    # heated_pendf_pert.to_file(savefilependf)
+    savefilependf = f"Pu241_flat_{coeff:0.3f}_MT18.pendf"
+    heated_pendf_pert.to_file(savefilependf)
 
 
 
