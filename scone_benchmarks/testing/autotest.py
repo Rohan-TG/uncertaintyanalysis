@@ -3,6 +3,7 @@ import tqdm
 import time
 import datetime
 import subprocess
+import numpy as np
 
 start_time = time.time()
 
@@ -26,7 +27,7 @@ default_Jezebel = 'Jezebel'
 
 target_path = current_dir[:(idx + len(target_dir))]
 
-# subprocess.run(f"cp {target_path}/{default_Jezebel} Jezebel", shell=True)
+subprocess.run(f"cp {target_path}/{default_Jezebel} Jezebel", shell=True)
 
 ACE_files = []
 for f in files:
@@ -82,7 +83,11 @@ for j, ACE in tqdm.tqdm(enumerate(ACE_files), total=len(ACE_files)):
 		keff_err_list[j].append(keff_err)
 
 
+for i, result in enumerate(keff_list):
+	mean = np.mean(result)
+	std = np.std(result)
 
+	print(f"For {ACE_files[i]}, k_eff: {mean:0.5f} +- {std:0.5f}")
 
 end_time = time.time()
 
