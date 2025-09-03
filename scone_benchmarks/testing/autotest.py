@@ -14,7 +14,8 @@ num_cores = int(input('Core no.: '))# number of cores to use for this specific i
 
 files = os.listdir()
 
-ZA = 94239 # variable
+# ZA = 94239 # variable
+ZA = 31069
 MT = 2
 
 num_runs_per_nuclide = 5
