@@ -24,8 +24,8 @@ pendf = endf6.get_pendf(err=0.0001, verbose=True)
 xs = sandy.Xs.from_endf6(pendf)
 heated_xs = sandy.Xs.from_endf6(pendfheated)
 
-lower_bound = 1.0000000000e7  # group 1 eV
-upper_bound = 1.9640330000e7   # group 0 eV
+lower_bound = 6.0653070000e6  # group 2 eV
+upper_bound = 1.0000000000e7   # group 1 eV
 domain = [lower_bound, upper_bound]
 
 
@@ -46,11 +46,11 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     tag = "_pert"
     outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
 
-    savefilename = f"Pu239_g1_{coeff:0.3f}_MT16.09c"
+    savefilename = f"Pu239_g2_{coeff:0.3f}_MT16.09c"
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
-    savefilependf = f"Pu9_g1_{coeff:0.3f}_MT16.pendf"
+    savefilependf = f"Pu9_g2_{coeff:0.3f}_MT16.pendf"
     heated_pendf_pert.to_file(savefilependf)
 
 
@@ -61,6 +61,7 @@ end = time.time()
 
 elapsed = end - start
 print(f"Time elapsed: {datetime.timedelta(seconds=elapsed)}")
+
 
 
 
