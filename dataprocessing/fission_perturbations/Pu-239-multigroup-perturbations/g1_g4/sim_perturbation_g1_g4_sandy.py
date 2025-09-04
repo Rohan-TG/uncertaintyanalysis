@@ -1,10 +1,13 @@
 import sandy
-# import os
+import os
 import datetime
 # import numpy as np
 import time
-import subprocess
-subprocess.run('export PYTHONPATH=$PYTHONPATH:/home/rnt26/PycharmProjects/uncertaintyanalysis', shell=True)
+
+custom_path =  "/home/rnt26/PycharmProjects/uncertaintyanalysis"
+os.environ["PYTHONPATH"] = os.environ.get("PYTHONPATH," "") + ":" + custom_path
+
+
 from groupEnergies import Groups
 
 start = time.time()
