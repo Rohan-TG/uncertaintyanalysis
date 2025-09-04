@@ -3,7 +3,7 @@ import sandy
 import datetime
 # import numpy as np
 import time
-from groupEnergies import Groups
+from uncertaintyanalysis.groupEnergies import Groups
 
 
 start = time.time()
