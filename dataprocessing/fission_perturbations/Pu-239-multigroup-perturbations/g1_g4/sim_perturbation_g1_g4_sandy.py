@@ -1,11 +1,9 @@
 import sandy
-import os
 import datetime
 # import numpy as np
 import time
-
-custom_path =  "/home/rnt26/PycharmProjects/uncertaintyanalysis"
-os.environ["PYTHONPATH"] = os.environ.get("PYTHONPATH," "") + ":" + custom_path
+import sys
+sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 
 
 from groupEnergies import Groups
