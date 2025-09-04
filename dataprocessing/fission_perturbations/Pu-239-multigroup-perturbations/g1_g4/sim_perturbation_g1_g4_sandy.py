@@ -3,8 +3,9 @@ import sandy
 import datetime
 # import numpy as np
 import time
+import subprocess
+subprocess.run('export PYTHONPATH=$PYTHONPATH:/home/rnt26/PycharmProjects/uncertaintyanalysis', shell=True)
 from groupEnergies import Groups
-
 
 start = time.time()
 za = 94239
