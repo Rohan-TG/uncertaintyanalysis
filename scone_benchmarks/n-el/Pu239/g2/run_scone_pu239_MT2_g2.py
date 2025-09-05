@@ -11,7 +11,7 @@ ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/nelas
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
-num_cores = 20 # number of cores to use for this specific instance of scone
+num_cores = int(input('Num. cores: ')) # number of cores to use for this specific instance of scone
 
 perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
