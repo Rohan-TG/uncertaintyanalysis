@@ -39,7 +39,8 @@ for file in search_files:
 xsfile_fullpath = os.path.abspath(libfile)
 os.environ["SCONE_ACE"] = xsfile_fullpath
 
-
+if 'outputfiles' not in search_files:
+	subprocess.run('mkdir outputfiles', shell=True)
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	# subprocess.run('echo $SCONE_ACE', shell=True)
