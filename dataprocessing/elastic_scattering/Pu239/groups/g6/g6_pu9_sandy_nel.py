@@ -6,7 +6,7 @@ import time
 import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
-sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+sys.path.append('/home/rnt26/uncertaintyanalysis')
 from groupEnergies import Groups
 
 start = time.time()
