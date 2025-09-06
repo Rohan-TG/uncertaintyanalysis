@@ -14,7 +14,7 @@ from groupEnergies import Groups
 start = time.time()
 za = 94239
 
-perturbation_domain = np.arange(-25, 27, 2)
+perturbation_domain = np.arange(-0.25, 0.27, 0.02)
 
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
@@ -68,10 +68,10 @@ for pg1 in tqdm.tqdm(perturbation_domain, total=len(perturbation_domain)):
 		secondary_pendf_pert = xspert_2_unheated.to_endf6(pendf_pert)
 		secondary_heated_pendf_pert = xspert_2_heated.to_endf6(heated_pendf_pert)
 
-		secondary_heated_pendf_pert.to_file(f'Pu9_dual_g1_{pg1}-g4_{pg2}_MT18.pendf')
+		secondary_heated_pendf_pert.to_file(f'Pu9_dual_g1_{pg1:0.3f}-g4_{pg2:0.3f}_MT18.pendf')
 
 		secondary_outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=secondary_pendf_pert)
-		savefilename2 = f"Pu9_dual_g1_{pg1}-g4_{pg2}_MT18.09c"
+		savefilename2 = f"Pu9_dual_g1_{pg1:0.3f}-g4_{pg2:0.3f}_MT18.09c"
 		with open(f"{savefilename2}", mode="w") as f:
 			f.write(secondary_outs["ace"])
 
