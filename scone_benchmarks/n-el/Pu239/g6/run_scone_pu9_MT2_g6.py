@@ -78,4 +78,3 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 end_time = time.time()
 
 print(f"Time elapsed: {datetime.timedelta(seconds=end_time-start_time)}")
-
