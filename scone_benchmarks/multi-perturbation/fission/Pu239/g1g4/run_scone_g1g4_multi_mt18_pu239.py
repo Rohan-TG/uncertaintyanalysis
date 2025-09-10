@@ -54,7 +54,7 @@ for ACE in tqdm.tqdm(ACE_names, total=len(ACE_names)):
 	coefficient1 = split_name[3][:-3]
 	coefficient2 = split_name[4] # Coefficient string prep
 
-	ACE_filename = f"{ACE_file_directory}/Pu9_dual_g{group1}_{coefficient1:0.3f}-g{group2}_{coefficient2:0.3f}_MT{MT}.09c" # name of ACE file for this SCONE run
+	ACE_filename = f"{ACE_file_directory}/Pu9_dual_g{group1}_{float(coefficient1):0.3f}-g{group2}_{float(coefficient2):0.3f}_MT{MT}.09c" # name of ACE file for this SCONE run
 
 	with open(libfile, 'r') as file:
 		lines = file.readlines()
@@ -77,7 +77,7 @@ for ACE in tqdm.tqdm(ACE_names, total=len(ACE_names)):
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True) # run scone
 
 
-	subprocess.run(f'mv output.m outputfiles/output-g{group1}_{coefficient1:0.3f}_g{group2}_{coefficient2}.m', shell=True) # move output file to output directory for later analysis
+	subprocess.run(f'mv output.m outputfiles/output-g{group1}_{float(coefficient1):0.3f}_g{group2}_{float(coefficient2)}.m', shell=True) # move output file to output directory for later analysis
 
 
 
