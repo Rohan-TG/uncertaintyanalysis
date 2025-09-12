@@ -53,3 +53,12 @@ Pu240 = Nuclide(symbol="Pu", Z=94, A=240, ZA=94240, MAT = 9440)
 Pu241 = Nuclide(symbol="Pu", Z=94, MAT=9443, ZA=94241, A=240)
 Ga69 = Nuclide(symbol="Ga", Z = 31, MAT = 3125, ZA=31069, A = 69)
 Ga71 = Nuclide(symbol="Ga", Z = 31, MAT = 3131, ZA=31071, A = 71)
+
+
+class Reactions:
+	fission = 18
+	capture = 102
+	elastic = 2
+	n2n = 16
+	np = 103
+	nalpha = 107
