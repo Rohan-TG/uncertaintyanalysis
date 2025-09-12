@@ -35,3 +35,21 @@ class Groups:
 	g31 = 5.4000000000e-1
 	g32 = 1.0000000000e-1
 	g33 = 1.0000100000e-5
+
+
+class Nuclide:
+	def __init__(self, symbol: str, Z: int, A: int, MAT: int, ZA: int):
+		self.symbol = symbol
+		self.Z = Z
+		self.A = A
+		self.MAT = MAT
+		self.ZA = ZA
+
+	def __repr__(self):
+		return f"{self.symbol}-{self.A}"
+
+Pu239 = Nuclide("Pu",Z=94, A = 239, MAT= 9437, ZA = 94239)
+Pu240 = Nuclide(symbol="Pu", Z=94, A=240, ZA=94240, MAT = 9440)
+Pu241 = Nuclide(symbol="Pu", Z=94, MAT=9443, ZA=94241, A=240)
+Ga69 = Nuclide(symbol="Ga", Z = 31, MAT = 3125, ZA=31069, A = 69)
+Ga71 = Nuclide(symbol="Ga", Z = 31, MAT = 3131, ZA=31071, A = 71)
