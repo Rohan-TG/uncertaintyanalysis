@@ -9,6 +9,7 @@ import tqdm
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 
 from groupEnergies import Groups, Pu239, Reactions
+processes = int(input("Number of NJOY processes: "))
 
 start = time.time()
 za = Pu239.ZA
@@ -117,7 +118,7 @@ def run_sandy(pair):
 
 
 
-processes = int(input("Number of NJOY processes: "))
+
 
 with ProcessPoolExecutor(max_workers = processes) as executor:
 	futures = [executor.submit(run_sandy, c) for c in perturbation_pairs]
