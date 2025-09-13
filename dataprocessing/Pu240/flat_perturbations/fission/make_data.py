@@ -16,7 +16,7 @@ keff_error_list = []
 coeff_list = []
 
 for filename in tqdm.tqdm(output_files, total=len(output_files)):
-	obj = open(f'{dir}/{filename}')
+	obj = open(f'{scone_run_directory}/{filename}')
 	if len(filename) == 14:
 		coefficient = float(filename[7:12])
 		coeff_list.append(coefficient)
@@ -35,19 +35,14 @@ for filename in tqdm.tqdm(output_files, total=len(output_files)):
 	keff_error_float = float(keff_error.replace('E', 'e'))
 	keff_error_list.append(keff_error_float)
 
+k_df = pd.DataFrame({'keff':keff_list, 'keff_err':keff_error_list, 'p': coeff_list})
 
-
-
-
-
-
-
-
+print("K_eff values retrieved...")
 # ======================================================================================================================
 
-keffs = pd.read_csv('g1_Pu-239_MT18_keffs.csv')
 
-pendf_dir = '/home/rnt26/uncertaintyanalysis/dataprocessing/fission_perturbations/ECCO33_perturbations/group_1/pendf/'
+
+pendf_dir = '/home/rnt26/PycharmProjects/uncertaintyanalysis/dataprocessing/Pu240/flat_perturbations/fission/pendf'
 
 pendf_names = os.listdir(pendf_dir)
 length_list = []
@@ -64,7 +59,7 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 	coefficient = float(name_split[2])
 	coeff_list = [coefficient for i in xs]
 
-	reduced_keff_df = keffs[keffs.p == coefficient]
+	reduced_keff_df = k_df[k_df.p == coefficient]
 	keff_list = [reduced_keff_df['keff'].values[0] for i in xs]
 	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in xs]
 
@@ -74,8 +69,5 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 					   'keff_err': keff_err_list,
 					   'p': coeff_list})
 
-	df.to_csv(f'csvs/g1_Pu9_{coefficient:0.3f}_MT18.csv')
-	# df_temp = pd.DataFrame({'ERG': erg, 'XS': xs, 'P':coeff_list})
 
-
-	# df_temp.to_csv(f'Pu239_{coefficient}_flat_MT18_XS.csv')
+print('Dataframes created.')
