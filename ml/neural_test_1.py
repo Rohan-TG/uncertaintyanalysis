@@ -11,7 +11,7 @@ import random
 import tqdm
 
 
-data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata'
+data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/flatpu9'
 
 all_csvs = os.listdir(data_directory)
 n_training_samples = 290
