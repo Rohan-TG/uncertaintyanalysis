@@ -13,7 +13,7 @@ start_time = time.time()
 group1 = 3
 group2 = 5
 
-ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/multi/mt18/pu9/g{group1}g{group2}'
+ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/multi/pu9/mt18/g{group1}g{group2}'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
