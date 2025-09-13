@@ -69,5 +69,7 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 					   'keff_err': keff_err_list,
 					   'p': coeff_list})
 
+	df.to_csv(f'Pu-240_flatp_XS_{coefficient:0.3f}_MT18.csv')
 
+k_df.to_csv('Pu-240_flat_MT18_keff_data.csv')
 print('Dataframes created.')
