@@ -4,10 +4,10 @@ import subprocess
 import datetime
 import os
 import sys
-
+sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 from groupEnergies import Pu239, Reactions
 
-sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+
 
 start_time = time.time()
 group1 = 3
