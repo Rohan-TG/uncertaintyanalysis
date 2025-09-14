@@ -9,6 +9,10 @@ import sys
 sys.path.append('/home/rnt26/uncertaintyanalysis')
 from groupEnergies import Groups
 
+
+
+processes = int(input("Num. processes: "))
+
 start = time.time()
 
 za = 94239
@@ -64,8 +68,6 @@ def run_sandy(coeff):
 
 
 
-
-processes = 10
 
 
 with ProcessPoolExecutor(max_workers = processes) as executor:
