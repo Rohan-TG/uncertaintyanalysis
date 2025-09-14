@@ -8,7 +8,7 @@ import os
 start_time = time.time()
 group = 12
 
-ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/nelastic/Pu239/g{group}'
+ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/g12/pu9/mt18'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
