@@ -55,7 +55,7 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 
 	input_coefficient = round(coefficient, 3) # Coefficient string prep
 
-	ACE_filename = f"{ACE_file_directory}/ECCO33-g13_Pu9_{input_coefficient:0.3f}_MT18.09c" # name of ACE file for this SCONE run
+	ACE_filename = f"{ACE_file_directory}/Pu239_g13_{input_coefficient:0.3f}_MT18.09c" # name of ACE file for this SCONE run
 
 	with open(libfile, 'r') as file:
 		lines = file.readlines()
