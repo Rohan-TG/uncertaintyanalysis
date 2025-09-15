@@ -5,11 +5,8 @@ import subprocess
 import datetime
 import os
 import sys
-
-from groupEnergies import Pu239
-
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
-import groupEnergies
+from groupEnergies import Pu239
 start_time = time.time()
 
 ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/g13/pu9/mt18' # location of the ECCO Group 6 perturbed ACE files to be used for generating samples
