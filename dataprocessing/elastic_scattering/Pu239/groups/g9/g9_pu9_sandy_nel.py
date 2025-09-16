@@ -7,8 +7,6 @@ import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
 
-from tensorflow.python.ops.gen_io_ops import ReaderResetV2
-
 sys.path.append('/home/rnt26/uncertaintyanalysis')
 from groupEnergies import Groups, Pu239, Reactions
 
