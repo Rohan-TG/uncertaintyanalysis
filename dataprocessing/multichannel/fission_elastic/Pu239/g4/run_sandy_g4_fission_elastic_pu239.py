@@ -1,10 +1,8 @@
 import sandy
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
-
-from groupEnergies import Pu239, Groups, Reactions
-
 sys.path.append('/home/rnt26/uncertaintyanalysis')
+from groupEnergies import Pu239, Groups, Reactions
 import tqdm
 import time
 import datetime
