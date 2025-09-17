@@ -4,13 +4,14 @@ import time
 import subprocess
 import datetime
 import os
-
+import sys
+sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 from groupEnergies import Pu239
 
 start_time = time.time()
 group = 8
 
-ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/nelastic/Pu239/g{group}'
+ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/nelastic/Pu239/g{group}'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
