@@ -6,7 +6,7 @@ from groupEnergies import Pu239, Groups, Reactions
 import tqdm
 import time
 import datetime
-import numpy as np
+# import numpy as np
 
 processes = int(input("Number of NJOY processes: "))
 start = time.time()
@@ -14,16 +14,16 @@ start = time.time()
 group = 4
 za = Pu239.ZA
 
-# perturbation_domain = [-0.25 , -0.236, -0.222, -0.208, -0.194, -0.18 , -0.166, -0.152,
-#        -0.138, -0.124, -0.11 , -0.096, -0.082, -0.068, -0.054, -0.04 ,
-#        -0.026, -0.012,  0.002,  0.016,  0.03 ,  0.044,  0.058,  0.072,
-#         0.086,  0.1  ,  0.114,  0.128,  0.142,  0.156,  0.17 ,  0.184,
-#         0.198,  0.212,  0.226,  0.24 ,  0.25]
+perturbation_domain = [-0.25 , -0.236, -0.222, -0.208, -0.194, -0.18 , -0.166, -0.152,
+       -0.138, -0.124, -0.11 , -0.096, -0.082, -0.068, -0.054, -0.04 ,
+       -0.026, -0.012,  0.002,  0.016,  0.03 ,  0.044,  0.058,  0.072,
+        0.086,  0.1  ,  0.114,  0.128,  0.142,  0.156,  0.17 ,  0.184,
+        0.198,  0.212,  0.226,  0.24 ,  0.25]
 
-perturbation_pairs = [[-0.5, 0.8], [0.0, -0.5], [0.5, -0.7]]
-# for i in perturbation_domain:
-# 	for j in perturbation_domain:
-# 		perturbation_pairs.append([i,j])
+perturbation_pairs = []
+for i in perturbation_domain:
+	for j in perturbation_domain:
+		perturbation_pairs.append([i,j])
 
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
