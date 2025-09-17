@@ -4,6 +4,8 @@ import time
 import subprocess
 import datetime
 import os
+import sys
+sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 
 from groupEnergies import Pu239
 
