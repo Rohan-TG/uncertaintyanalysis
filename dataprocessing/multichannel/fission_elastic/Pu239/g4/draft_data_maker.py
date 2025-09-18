@@ -3,7 +3,7 @@ import tqdm
 import ENDF6
 import os
 
-keffs = pd.read_csv('g1_Pu-239_MT18_keffs.csv')
+outputs_directory = ''
 
 pendf_dir = '/home/rnt26/uncertaintyanalysis/dataprocessing/fission_perturbations/ECCO33_perturbations/group_1/pendf/'
 
