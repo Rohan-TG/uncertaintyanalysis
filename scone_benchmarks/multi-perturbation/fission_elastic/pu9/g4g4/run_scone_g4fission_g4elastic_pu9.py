@@ -1,4 +1,3 @@
-import numpy as np
 import tqdm
 import time
 import subprocess
@@ -6,21 +5,24 @@ import datetime
 import os
 import sys
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+from groupEnergies import Pu239, Reactions
 
-from groupEnergies import Pu239
+
 
 start_time = time.time()
-group = 9
+group1 = 4
+group2 = 4
 
-ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/nelastic/Pu239/g{group}'
+ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/multi/pu9/fission_elastic/g4_g4'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
 num_cores = int(input('Num. cores: ')) # number of cores to use for this specific instance of scone
 
-perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
-ZA = Pu239.ZA # ZA for Ga-69
+ZA = Pu239.ZA # ZA for Pu-239
+First_MT = Reactions.fission
+Second_MT = Reactions.elastic
 
 default_xsfile = 'endfb-viii0.xsfile'
 current_dir = os.getcwd()
@@ -47,12 +49,17 @@ os.environ["SCONE_ACE"] = xsfile_fullpath
 if 'outputfiles' not in search_files:
 	subprocess.run('mkdir outputfiles', shell=True)
 
-for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
+
+ACE_names = os.listdir(ACE_file_directory)
+
+for ACE in tqdm.tqdm(ACE_names, total=len(ACE_names)):
 	# subprocess.run('echo $SCONE_ACE', shell=True)
+	split_name = ACE.split('_')
 
-	input_coefficient = round(coefficient, 3) # Coefficient string prep
+	coefficient1 = split_name[4]
+	coefficient2 = split_name[-1][:-4] # Coefficient string prep
 
-	ACE_filename = f"{ACE_file_directory}/Pu239_g{group}_{input_coefficient:0.3f}_MT2.09c" # name of ACE file for this SCONE run
+	ACE_filename = f"{ACE_file_directory}/Pu-239_g{group1}_MT{First_MT}_{coefficient1:0.3f}_MT{Second_MT}_{coefficient2:0.3f}.09c" # name of ACE file for this SCONE run
 
 	with open(libfile, 'r') as file:
 		lines = file.readlines()
@@ -75,11 +82,10 @@ for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_c
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True) # run scone
 
 
-	subprocess.run(f'mv output.m outputfiles/output-{input_coefficient:0.3f}.m', shell=True) # move output file to output directory for later analysis
+	subprocess.run(f'mv output.m outputfiles/output_MT{First_MT}_{float(coefficient1):0.3f}_MT{Second_MT}_{float(coefficient2)}.m', shell=True) # move output file to output directory for later analysis
 
 
 
 end_time = time.time()
 
 print(f"Time elapsed: {datetime.timedelta(seconds=end_time-start_time)}")
-
