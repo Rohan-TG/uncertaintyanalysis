@@ -56,7 +56,7 @@ for ACE in tqdm.tqdm(ACE_names, total=len(ACE_names)):
 	# subprocess.run('echo $SCONE_ACE', shell=True)
 	split_name = ACE.split('_')
 
-	coefficient1 = float(split_name[4])
+	coefficient1 = float(split_name[3])
 	coefficient2 = float(split_name[-1][:-4]) # Coefficient string prep
 
 	ACE_filename = f"{ACE_file_directory}/Pu-239_g{group1}_MT{First_MT}_{coefficient1:0.3f}_MT{Second_MT}_{coefficient2:0.3f}.09c" # name of ACE file for this SCONE run
