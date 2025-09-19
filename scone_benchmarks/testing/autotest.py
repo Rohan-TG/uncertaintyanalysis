@@ -5,7 +5,7 @@ import datetime
 import subprocess
 import numpy as np
 import sys
-sys.path.append('/home/rnt26/uncertaintyanalysis/')
+sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 start_time = time.time()
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 from groupEnergies import Pu240, Reactions
@@ -17,7 +17,7 @@ files = os.listdir()
 
 # ZA = 94239 # variable
 ZA = Pu240.ZA
-MT = Reactions.elastic
+MT = Reactions.inelastic
 
 num_runs_per_nuclide = 5
 
