@@ -5,11 +5,11 @@ import datetime
 import tqdm
 import sys
 sys.path.append('/home/rnt26/uncertaintyanalysis/')
-from groupEnergies import Pu239, Groups, Reactions
+from groupEnergies import Groups, Reactions, Pu241
 
 start = time.time()
 
-za = Pu239.ZA
+za = Pu241.ZA
 
 
 # perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
@@ -26,7 +26,7 @@ lower_bound = Groups.g33  # eV
 upper_bound = Groups.g0   # eV
 domain = [lower_bound, upper_bound]
 
-MAT = Pu239.MAT
+MAT = Pu241.MAT
 MT = Reactions.elastic
 
 for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
@@ -42,11 +42,11 @@ for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coeffic
     # tag = "_pert"
     outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
 
-    savefilename = f"Flat_Pu240_{coeff:0.3f}_MT{MT}.09c"
+    savefilename = f"Flat_Pu241_{coeff:0.3f}_MT{MT}.09c"
     with open(f"{savefilename}", mode="w") as f:
         f.write(outs["ace"])
 
-    # savefilependf = f"Flat_Pu240_{coeff:0.3f}_MT{MT}.pendf"
+    # savefilependf = f"Flat_Pu241_{coeff:0.3f}_MT{MT}.pendf"
     # heated_pendf_pert.to_file(savefilependf)
 
 
