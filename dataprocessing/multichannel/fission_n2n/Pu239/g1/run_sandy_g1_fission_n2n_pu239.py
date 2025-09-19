@@ -2,7 +2,7 @@ import numpy as np
 import sandy
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
-sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+sys.path.append('/home/rnt26/uncertaintyanalysis')
 from groupEnergies import Pu239, Groups, Reactions
 import tqdm
 import time
