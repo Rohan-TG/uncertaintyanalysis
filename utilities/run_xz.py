@@ -10,6 +10,8 @@ start = time.time()
 target_directory = input("Enter directory: ")
 filetype = input("Enter file type: ")
 processes = int(input("Enter n. processes: "))
+cores_per_job = int(input("Cores per process: "))
+
 all_files = os.listdir(target_directory)
 
 filenames = []
@@ -19,7 +21,7 @@ for x in all_files:
 
 def run_xz(file):
 	"""Runs xz on one file"""
-	subprocess.run(f'xz {target_directory}/{file}', shell=True)
+	subprocess.run(f'xz -T{cores_per_job} {target_directory}/{file}', shell=True)
 
 with ProcessPoolExecutor(max_workers=processes) as executor:
 	futures = [executor.submit(run_xz, f) for f in filenames]
