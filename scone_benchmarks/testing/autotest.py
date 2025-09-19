@@ -8,7 +8,7 @@ import sys
 sys.path.append('/home/rnt26/uncertaintyanalysis/')
 start_time = time.time()
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
-from groupEnergies import Pu241, Reactions
+from groupEnergies import Pu240, Reactions
 
 num_cores = int(input('Core no.: '))# number of cores to use for this specific instance of scone
 
@@ -16,7 +16,7 @@ num_cores = int(input('Core no.: '))# number of cores to use for this specific i
 files = os.listdir()
 
 # ZA = 94239 # variable
-ZA = Pu241.ZA
+ZA = Pu240.ZA
 MT = Reactions.elastic
 
 num_runs_per_nuclide = 5
