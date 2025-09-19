@@ -45,7 +45,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 keff_dataframe = pd.DataFrame({'keff': keff_list, 'keff_err': keff_error_list, 'p1': perturbation_1_list,
 							   'p2': perturbation_2_list})
 
-
+keff_dataframe.to_csv('keff_data_Pu-239_g4_MT18_MT2.csv')
 
 pendf_dir = '/home/rnt26/PycharmProjects/uncertaintyanalysis/dataprocessing/multichannel/fission_elastic/Pu239/g4/pendf'
 
@@ -85,7 +85,7 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 					   'p1': coeff1_list,
 					   'p2': coeff2_list})
 
-	break
+	df.to_parquet(f'Pu-239_g4_MT{FirstMT}_{coefficient1}_MT{SecondMT}_{coefficient2}.parquet', engine='pyarrow')
 
 	# df.to_csv(f'csvs/g1_Pu9_{coefficient:0.3f}_MT18.csv')
 	# df_temp = pd.DataFrame({'ERG': erg, 'XS': xs, 'P':coeff_list})
