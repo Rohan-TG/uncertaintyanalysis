@@ -1,10 +1,10 @@
 import pandas as pd
 import tqdm
-import ENDF6
 import os
 import sys
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
 from groupEnergies import Reactions
+import ENDF6
 
 
 outputs_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/scone_benchmarks/multi-perturbation/fission_elastic/pu9/g4g4/outputfiles'
