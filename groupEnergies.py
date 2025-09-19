@@ -62,3 +62,4 @@ class Reactions:
 	n2n = 16
 	np = 103
 	nalpha = 107
+	inelastic = 4
