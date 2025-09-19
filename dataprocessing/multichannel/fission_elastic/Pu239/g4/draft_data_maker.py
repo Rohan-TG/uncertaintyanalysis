@@ -66,7 +66,7 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 	name_split = filename.split('_')
 	coefficient1 = float(name_split[3])
 
-	coefficient2 = float(name_split[-1][:-4])
+	coefficient2 = float(name_split[-1][:-6])
 	coeff1_list = [coefficient1 for i in firstxs]
 	coeff2_list = [coefficient2 for i in firstxs]
 
