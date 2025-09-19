@@ -21,8 +21,22 @@ while len(training_files) < n_training_samples:
 	if choice not in training_files:
 		training_files.append(choice)
 
-test_csvs = []
-for csv in all_parquets:
-	if csv not in training_files:
-		test_csvs.append(csv)
+test_files = []
+for file in all_parquets:
+	if file not in training_files:
+		test_files.append(file)
+
+XS_fission_train = [] # unscaled fission cross sections
+XS_elastic_train = [] # unscaled elastic scattering cross sections
+
+y_train = [] # k_eff labels
+
+for file in tqdm.tqdm(training_files, total=len(training_files)):
+	dftrain = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow') # Fetch data from parquet file
+
+	y_train += [float(dftrain['keff'].values[0])] # append k_eff value from the file
+
+	XS_fission_train.append(dftrain['MT18XS'].values) # appends a list of fission cross sections to the XS_fission_train matrix
+
+	XS_elastic_train.append(dftrain['MT2XS'].values) # likewise for elastic scattering cross sections
 
