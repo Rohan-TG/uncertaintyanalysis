@@ -83,8 +83,8 @@ print('Training data processed...')
 ########################################## Test data preparation #######################################################
 XS_test = []
 keff_test = []
-for file in tqdm.tqdm(test_files, total=len(test_files)):
-	dftest = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
+for testfile in tqdm.tqdm(test_files, total=len(test_files)):
+	dftest = pd.read_parquet(f'{data_directory}/{testfile}', engine='pyarrow')
 	keff_test += [float(dftest['keff'].values[0])]
 
 	dftest = dftest[dftest.ERG >= g4boundary]
@@ -109,9 +109,9 @@ y_test = zscore(keff_test)
 scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
-for column in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest[1:])):
-	scaled_column_test = zscore(column)
-	scaled_columns_xtest.append(scaled_column)
+for columntest in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest[1:])):
+	scaled_column_test = zscore(columntest)
+	scaled_columns_xtest.append(scaled_column_test)
 
 scaled_columns_xtest = np.array(scaled_columns_xtest)
 Transposed_scaled_xtest = scaled_columns_xtest.transpose()
