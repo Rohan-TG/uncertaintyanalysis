@@ -64,7 +64,6 @@ scaling_matrix_xtrain = XS_train.transpose()
 scaled_columns_xtrain = []
 for column in tqdm.tqdm(scaling_matrix_xtrain[1:], total=len(scaling_matrix_xtrain[1:])):
 	scaled_column = zscore(column)
-	scaled_column = scaled_column[~np.isnan(scaled_column)]
 	scaled_columns_xtrain.append(scaled_column)
 
 scaled_columns_xtrain = np.array(scaled_columns_xtrain)
@@ -104,7 +103,6 @@ scaling_matrix_xtest = XS_test.transpose()
 scaled_columns_xtest = []
 for column in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest[1:])):
 	scaled_column_test = zscore(column)
-	scaled_column_test = scaled_column[~np.isnan(scaled_column)]
 	scaled_columns_xtest.append(scaled_column)
 
 scaled_columns_xtest = np.array(scaled_columns_xtest)
