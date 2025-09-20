@@ -36,9 +36,9 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 
 	y_train += [float(dftrain['keff'].values[0])] # append k_eff value from the file
 
-	mt18xs = dftrain['MT18XS'].values # appends a list of fission cross sections to the XS_fission_train matrix
+	mt18xs = dftrain['MT18_XS'].values # appends a list of fission cross sections to the XS_fission_train matrix
 
-	mt2xs = dftrain['MT2XS'].values # likewise for elastic scattering cross sections
+	mt2xs = dftrain['MT2_XS'].values # likewise for elastic scattering cross sections
 
 
 
