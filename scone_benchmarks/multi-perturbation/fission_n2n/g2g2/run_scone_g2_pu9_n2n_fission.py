@@ -10,10 +10,10 @@ from groupEnergies import Pu239, Reactions
 
 
 start_time = time.time()
-group1 = 1
-group2 = 1
+group1 = 2
+group2 = 2
 
-ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/multi/pu9/fission_n2n/g1g1'
+ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/multi/pu9/fission_n2n/g2g2'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
