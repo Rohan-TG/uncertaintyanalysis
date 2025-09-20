@@ -46,9 +46,9 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	dftrain = dftrain[dftrain.ERG >= g4boundary]
 	dftrain = dftrain[dftrain.ERG <= g3boundary]
 
-	mt18xs = dftrain['MT18_XS'].values # appends a list of fission cross sections to the XS_fission_train matrix
+	mt18xs = np.log(dftrain['MT18_XS'].values) # appends a list of fission cross sections to the XS_fission_train matrix
 
-	mt2xs = dftrain['MT2_XS'].values # likewise for elastic scattering cross sections
+	mt2xs = np.log(dftrain['MT2_XS'].values) # likewise for elastic scattering cross sections
 
 	mt18xs = mt18xs.tolist()
 	mt2xs = mt2xs.tolist()
@@ -91,9 +91,9 @@ for testfile in tqdm.tqdm(test_files, total=len(test_files)):
 	dftest = dftest[dftest.ERG >= g4boundary]
 	dftest = dftest[dftest.ERG <= g3boundary]
 
-	mt18xstest = dftest['MT18_XS'].values  # appends a list of fission cross sections to the XS_fission_train matrix
+	mt18xstest = np.log(dftest['MT18_XS'].values)  # appends a list of fission cross sections to the XS_fission_train matrix
 
-	mt2xstest = dftest['MT2_XS'].values  # likewise for elastic scattering cross sections
+	mt2xstest = np.log(dftest['MT2_XS'].values)  # likewise for elastic scattering cross sections
 
 	mt18xstest = mt18xstest.tolist()
 	mt2xstest = mt2xstest.tolist()
