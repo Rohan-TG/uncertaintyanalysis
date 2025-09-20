@@ -46,7 +46,7 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	xsobject = mt2xs + mt18xs
 	XS_train.append(xsobject)
 
-Xs = np.array(XS_train)
+XS_train = np.array(XS_train)
 y = np.array(y_train)
 
 
