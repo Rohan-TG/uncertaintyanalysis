@@ -67,12 +67,20 @@ for column in tqdm.tqdm(scaling_matrix_xtrain[1:], total=len(scaling_matrix_xtra
 	scaled_columns_xtrain.append(scaled_column)
 
 scaled_columns_xtrain = np.array(scaled_columns_xtrain)
-X_train = scaled_columns_xtrain.transpose()
+Transposed_scaled_xtrain = scaled_columns_xtrain.transpose()
+
+X_train = []
+for i in Transposed_scaled_xtrain:
+	row = i[~np.isnan(i)]
+	X_train.append(row)
+
+X_train = np.array(X_train)
+
 
 print('Training data processed...')
 
 
-########################################## Test data preparation ######################################################
+########################################## Test data preparation #######################################################
 XS_test = []
 keff_test = []
 for file in tqdm.tqdm(test_files, total=len(test_files)):
@@ -105,9 +113,14 @@ for column in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest
 	scaled_column_test = zscore(column)
 	scaled_columns_xtest.append(scaled_column)
 
-scaled_columns_xtest = np.array(scaled_columns_xtest)
-X_test = scaled_columns_xtest.transpose()
+Transposed_scaled_xtest = scaled_columns_xtest.transpose()
 
+X_test = []
+for i in Transposed_scaled_xtest:
+	row = i[~np.isnan(i)]
+	X_test.append(row)
+
+X_test = np.array(X_test)
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
