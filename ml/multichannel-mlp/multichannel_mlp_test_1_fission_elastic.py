@@ -56,7 +56,7 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	XS_train.append(xsobject)
 
 XS_train = np.array(XS_train)
-y = np.array(y_train)
+y_train = np.array(y_train)
 
 
 scaling_matrix_xtrain = XS_train.transpose()
