@@ -8,8 +8,14 @@ import random
 import tqdm
 import matplotlib.pyplot as plt
 import datetime
-
+import sys
+sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+from groupEnergies import Groups
 data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/g4_fission_elastic_pu9'
+
+
+g4boundary = Groups.g4
+g3boundary = Groups.g3
 
 all_parquets = os.listdir(data_directory)
 
@@ -35,6 +41,9 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	dftrain = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow') # Fetch data from parquet file
 
 	y_train += [float(dftrain['keff'].values[0])] # append k_eff value from the file
+
+	dftrain = dftrain[dftrain.ERG >= g4boundary]
+	dftrain = dftrain[dftrain.ERG <= g3boundary]
 
 	mt18xs = dftrain['MT18_XS'].values # appends a list of fission cross sections to the XS_fission_train matrix
 
@@ -69,6 +78,9 @@ keff_test = []
 for file in tqdm.tqdm(test_files, total=len(test_files)):
 	dftest = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
 	keff_test += [float(dftest['keff'].values[0])]
+
+	dftest = dftest[dftest.ERG >= g4boundary]
+	dftest = dftest[dftest.ERG <= g3boundary]
 
 	mt18xstest = dftest['MT18_XS'].values  # appends a list of fission cross sections to the XS_fission_train matrix
 
