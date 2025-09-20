@@ -113,6 +113,7 @@ for column in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest
 	scaled_column_test = zscore(column)
 	scaled_columns_xtest.append(scaled_column)
 
+scaled_columns_xtest = np.array(scaled_columns_xtest)
 Transposed_scaled_xtest = scaled_columns_xtest.transpose()
 
 X_test = []
