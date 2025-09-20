@@ -60,7 +60,7 @@ for column in tqdm.tqdm(scaling_matrix_xtrain[1:], total=len(scaling_matrix_xtra
 scaled_columns_xtrain = np.array(scaled_columns_xtrain)
 X_train = scaled_columns_xtrain.transpose()
 
-
+print('Training data processed...')
 
 
 ########################################## Test data preparation ######################################################
