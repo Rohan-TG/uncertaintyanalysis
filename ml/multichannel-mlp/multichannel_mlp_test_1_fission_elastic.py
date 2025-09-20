@@ -34,14 +34,14 @@ for file in all_parquets:
 		test_files.append(file)
 
 
-y_train = [] # k_eff labels
+keff_train = [] # k_eff labels
 
 XS_train = []
 
 for file in tqdm.tqdm(training_files, total=len(training_files)):
 	dftrain = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow') # Fetch data from parquet file
 
-	y_train += [float(dftrain['keff'].values[0])] # append k_eff value from the file
+	keff_train += [float(dftrain['keff'].values[0])] # append k_eff value from the file
 
 	dftrain = dftrain[dftrain.ERG >= g4boundary]
 	dftrain = dftrain[dftrain.ERG <= g3boundary]
@@ -57,8 +57,11 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	XS_train.append(xsobject)
 
 XS_train = np.array(XS_train)
-y_train = np.array(y_train)
+y_train = np.array(keff_train)
+y_train = zscore(y_train)
 
+keff_train_mean = np.mean(keff_train)
+keff_train_std = np.std(keff_train)
 
 scaling_matrix_xtrain = XS_train.transpose()
 
