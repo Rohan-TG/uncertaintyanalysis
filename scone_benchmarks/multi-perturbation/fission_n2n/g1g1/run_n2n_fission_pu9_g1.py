@@ -13,7 +13,7 @@ start_time = time.time()
 group1 = 1
 group2 = 1
 
-ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/multi/pu9/fission_elastic/g4_g4/run2'
+ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/multi/pu9/fission_n2n/g1g1'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
@@ -22,7 +22,7 @@ num_cores = int(input('Num. cores: ')) # number of cores to use for this specifi
 
 ZA = Pu239.ZA # ZA for Pu-239
 First_MT = Reactions.fission
-Second_MT = Reactions.elastic
+Second_MT = Reactions.n2n
 
 default_xsfile = 'endfb-viii0.xsfile'
 current_dir = os.getcwd()
