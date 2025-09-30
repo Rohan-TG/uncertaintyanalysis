@@ -12,7 +12,7 @@ start_time = time.time()
 ZA = Pu240.ZA # ZA for Pu-240
 group = 1
 
-ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/Pu240/n2n/g{group}'
+ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/n2n/pu240/g{group}'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
