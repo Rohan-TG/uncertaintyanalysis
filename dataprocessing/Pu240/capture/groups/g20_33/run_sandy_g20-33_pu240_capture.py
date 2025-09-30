@@ -18,6 +18,7 @@ za = Pu240.ZA
 group = '2033'
 
 perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+perturbation_coefficients = [round(i,3) for i in perturbation_coefficients]
 
 # endf6 = sandy.Endf6.from_file('/home/rnt26/uncertaintyanalysis/n-094_Pu_240.endf')
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
