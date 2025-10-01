@@ -83,86 +83,61 @@ def scaler(channel_matrix):
 	final_matrix = np.array(final_matrix)
 	return final_matrix
 
-scaled_fission = scaler(fission_train)
-scaled_elastic = scaler(elastic_train)
+scaled_fission_train = scaler(fission_train)
+scaled_elastic_train = scaler(elastic_train)
 
 X_train = []
-for f_data, e_data in zip(fission_train, elastic_train):
+for f_data, e_data in zip(scaled_fission_train, scaled_elastic_train):
 	X_train.append([f_data, e_data])
 
 X_train = np.array(X_train)
 
+print('Training data processed...')
 
-# scaling_matrix_xtrain = XS_train.transpose()
-#
-# scaled_columns_xtrain = []
-# for sample in tqdm.tqdm(scaling_matrix_xtrain, total=len(scaling_matrix_xtrain)):
-# 	for feature_column in sample:
-# 		scaled_column = zscore(column)
-# 		scaled_columns_xtrain.append(scaled_column)
-#
-# scaled_columns_xtrain = np.array(scaled_columns_xtrain)
-# Transposed_scaled_xtrain = scaled_columns_xtrain.transpose()
-#
-# X_train = []
-# for i in Transposed_scaled_xtrain:
-# 	row = i[~np.isnan(i)]
-# 	X_train.append(row)
-#
-# X_train = np.array(X_train)
-#
-#
-# print('Training data processed...')
-#
-#
-# ########################################## Test data preparation #######################################################
-# XS_test = []
-# keff_test = []
-# for testfile in tqdm.tqdm(test_files, total=len(test_files)):
-# 	dftest = pd.read_parquet(f'{data_directory}/{testfile}', engine='pyarrow')
-# 	keff_test += [float(dftest['keff'].values[0])]
-#
-# 	dftest = dftest[dftest.ERG >= g4boundary]
-# 	dftest = dftest[dftest.ERG <= g3boundary]
-#
-# 	mt18xstest = np.log(dftest['MT18_XS'].values)  # appends a list of fission cross sections to the XS_fission_train matrix
-#
-# 	mt2xstest = np.log(dftest['MT2_XS'].values)  # likewise for elastic scattering cross sections
-#
-# 	mt18xstest = mt18xstest.tolist()
-# 	mt2xstest = mt2xstest.tolist()
-#
-# 	XS_test.append(xsobjecttest)
-#
-# XS_test = np.array(XS_test)
-# keff_mean = np.mean(keff_test)
-# keff_std = np.std(keff_test)
-# y_test = zscore(keff_test)
-#
-# scaling_matrix_xtest = XS_test.transpose()
-#
-# scaled_columns_xtest = []
-# for columntest in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest[1:])):
-# 	scaled_column_test = zscore(columntest)
-# 	scaled_columns_xtest.append(scaled_column_test)
-#
-# scaled_columns_xtest = np.array(scaled_columns_xtest)
-# Transposed_scaled_xtest = scaled_columns_xtest.transpose()
-#
-# X_test = []
-# for i in Transposed_scaled_xtest:
-# 	row = i[~np.isnan(i)]
-# 	X_test.append(row)
-#
-# X_test = np.array(X_test)
-#
-# callback = keras.callbacks.EarlyStopping(monitor='val_loss',
-# 										 # min_delta=0.005,
-# 										 patience=20,
-# 										 mode='min',
-# 										 start_from_epoch=5,
-# 										 restore_best_weights=True)
-#
+
+########################################## Test data preparation #######################################################
+keff_test = []
+
+fission_test = []
+elastic_test = []
+for testfile in tqdm.tqdm(test_files, total=len(test_files)):
+	dftest = pd.read_parquet(f'{data_directory}/{testfile}', engine='pyarrow')
+	keff_test += [float(dftest['keff'].values[0])]
+
+	dftest = dftest[dftest.ERG >= g4boundary]
+	dftest = dftest[dftest.ERG <= g3boundary]
+
+	mt18xstest = dftest['MT18_XS'].values  # appends a list of fission cross sections to the XS_fission_train matrix
+
+	mt2xstest = dftest['MT2_XS'].values  # likewise for elastic scattering cross sections
+
+	fission_test.append(mt18xstest)
+	elastic_test.append(mt2xstest)
+
+
+y_test = np.array(keff_test)
+keff_mean = np.mean(keff_test)
+keff_std = np.std(keff_test)
+y_test = zscore(y_test)
+
+scaled_fission_test = scaler(fission_test)
+scaled_elastic_test = scaler(elastic_test)
+X_test = []
+
+for f_data, e_data in zip(scaled_fission_test, scaled_elastic_test):
+	X_test.append([f_data, e_data])
+
+X_test = np.array(X_test)
+print('Test data processed...')
+
+
+callback = keras.callbacks.EarlyStopping(monitor='val_loss',
+										 # min_delta=0.005,
+										 patience=20,
+										 mode='min',
+										 start_from_epoch=5,
+										 restore_best_weights=True)
+
 # model =keras.Sequential()
 # model.add(keras.layers.Dense(10, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 # model.add(keras.layers.Dense(10, activation='relu'))
