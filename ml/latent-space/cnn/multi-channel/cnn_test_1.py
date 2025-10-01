@@ -36,7 +36,6 @@ for file in all_parquets:
 
 keff_train = [] # k_eff labels
 
-XS_train = []
 
 fission_train = []
 elastic_train = []
@@ -49,9 +48,9 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	dftrain = dftrain[dftrain.ERG >= g4boundary]
 	dftrain = dftrain[dftrain.ERG <= g3boundary]
 
-	mt18xs = np.log(dftrain['MT18_XS'].values) # appends a list of fission cross sections to the XS_fission_train matrix
+	mt18xs = dftrain['MT18_XS'].values # appends a list of fission cross sections to the XS_fission_train matrix
 
-	mt2xs = np.log(dftrain['MT2_XS'].values) # likewise for elastic scattering cross sections
+	mt2xs = dftrain['MT2_XS'].values # likewise for elastic scattering cross sections
 
 
 	fission_train.append(mt18xs)
@@ -84,6 +83,14 @@ def scaler(channel_matrix):
 	final_matrix = np.array(final_matrix)
 	return final_matrix
 
+scaled_fission = scaler(fission_train)
+scaled_elastic = scaler(elastic_train)
+
+X_train = []
+for f_data, e_data in zip(fission_train, elastic_train):
+	X_train.append([f_data, e_data])
+
+X_train = np.array(X_train)
 
 
 # scaling_matrix_xtrain = XS_train.transpose()
