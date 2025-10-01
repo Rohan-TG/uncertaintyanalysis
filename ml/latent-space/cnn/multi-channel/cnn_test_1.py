@@ -38,6 +38,9 @@ keff_train = [] # k_eff labels
 
 XS_train = []
 
+fission_train = []
+elastic_train = []
+
 for file in tqdm.tqdm(training_files, total=len(training_files)):
 	dftrain = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow') # Fetch data from parquet file
 
@@ -50,18 +53,39 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 
 	mt2xs = np.log(dftrain['MT2_XS'].values) # likewise for elastic scattering cross sections
 
-	mt18xs = mt18xs.tolist()
-	mt2xs = mt2xs.tolist()
 
-	XS_train.append([mt18xs, mt2xs])
+	fission_train.append(mt18xs)
+	elastic_train.append(mt2xs)
 
-XS_train = np.array(XS_train)
+
 y_train = np.array(keff_train)
 y_train = zscore(y_train)
 
 keff_train_mean = np.mean(keff_train)
 keff_train_std = np.std(keff_train)
-#
+
+
+def scaler(channel_matrix):
+
+	transposed_matrix = np.transpose(np.array(channel_matrix))
+	scaled_rows = []
+	for row in tqdm.tqdm(transposed_matrix, total=len(transposed_matrix)):
+		scaled_row = zscore(row)
+		scaled_rows.append(scaled_row)
+
+	scaled_rows = np.array(scaled_rows)
+	transposed_scaled_matrix = np.transpose(scaled_rows)
+
+	final_matrix = []
+	for i in transposed_scaled_matrix:
+		row = i[~np.isnan(i)]
+		final_matrix.append(row)
+
+	final_matrix = np.array(final_matrix)
+	return final_matrix
+
+
+
 # scaling_matrix_xtrain = XS_train.transpose()
 #
 # scaled_columns_xtrain = []
