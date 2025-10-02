@@ -10,7 +10,7 @@ import sys
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 from groupEnergies import Groups, Pu239, Reactions
 
-processes = int(input("Num. processes: "))
+processes = int(input("Num. processes (recommended < 30): "))
 
 start = time.time()
 
