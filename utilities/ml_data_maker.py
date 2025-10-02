@@ -2,7 +2,10 @@ import pandas as pd
 import tqdm
 import os
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
+
+processes = int(input("Enter n. processes: "))
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
@@ -59,7 +62,6 @@ keff_dataframe = pd.DataFrame({'keff': keff_list, 'keff_err': keff_error_list, '
 							   # 'p2': perturbation_2_list,
 							   })
 
-# keff_dataframe.to_csv('keff_data_Pu-239_g4_MT18_MT2.csv')
 
 # PENDF directory
 
@@ -68,40 +70,84 @@ pendf_names = os.listdir(pendf_dir)
 length_list = []
 
 print('Reading PENDFs and forming dataframes...')
-for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
+
+def parquet_maker(filename):
+	"""Filename should be the name of the PENDF we're reading from"""
 	f = open(f'{pendf_dir}/{filename}')
 	lines = f.readlines()
 	FirstMTsection = ENDF6.find_section(lines, MF=3, MT=MT)
 	erg, firstxs = ENDF6.read_table(FirstMTsection)
 
-
-	# SecondMTsection = ENDF6.find_section(lines, MF=3, MT=SecondMT)
-	# seconderg, secondxs = ENDF6.read_table(SecondMTsection)
-
 	name_split = filename.split('_')
 	coefficient = float(name_split[2])
 
-	# coefficient2 = float(name_split[-1][:-6])
 	coeff_list = [coefficient for i in firstxs]
-	# coeff2_list = [coefficient2 for i in firstxs]
 
 	reduced_keff_df = keff_dataframe[keff_dataframe.p == coefficient]
-	# reduced_keff_df = reduced_keff_df[reduced_keff_df.p2 == coefficient2]
-
 
 	keff_list = [reduced_keff_df['keff'].values[0] for i in firstxs]
 	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in firstxs]
 
 	df = pd.DataFrame({'ERG': erg,
 					   'XS': firstxs,
-					   # 'MT2_XS': secondxs,
 					   'keff': keff_list,
 					   'keff_err': keff_err_list,
 					   'p': coeff_list,
-					   # 'p2': coeff2_list,
 					   })
 
 	df.to_parquet(f'{parquet_directory}/Pu-239_g{group}_{coefficient:0.3f}_MT{MT}.parquet', engine='pyarrow')
+
+
+
+
+with ProcessPoolExecutor(max_workers=processes) as executor:
+	futures = [executor.submit(parquet_maker, file) for file in pendf_names]
+
+	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		pass
+
+
+
+
+
+
+
+
+
+# for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
+# 	f = open(f'{pendf_dir}/{filename}')
+# 	lines = f.readlines()
+# 	FirstMTsection = ENDF6.find_section(lines, MF=3, MT=MT)
+# 	erg, firstxs = ENDF6.read_table(FirstMTsection)
+#
+#
+# 	# SecondMTsection = ENDF6.find_section(lines, MF=3, MT=SecondMT)
+# 	# seconderg, secondxs = ENDF6.read_table(SecondMTsection)
+#
+# 	name_split = filename.split('_')
+# 	coefficient = float(name_split[2])
+#
+# 	# coefficient2 = float(name_split[-1][:-6])
+# 	coeff_list = [coefficient for i in firstxs]
+# 	# coeff2_list = [coefficient2 for i in firstxs]
+#
+# 	reduced_keff_df = keff_dataframe[keff_dataframe.p == coefficient]
+# 	# reduced_keff_df = reduced_keff_df[reduced_keff_df.p2 == coefficient2]
+#
+#
+# 	keff_list = [reduced_keff_df['keff'].values[0] for i in firstxs]
+# 	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in firstxs]
+#
+# 	df = pd.DataFrame({'ERG': erg,
+# 					   'XS': firstxs,
+# 					   # 'MT2_XS': secondxs,
+# 					   'keff': keff_list,
+# 					   'keff_err': keff_err_list,
+# 					   'p': coeff_list,
+# 					   # 'p2': coeff2_list,
+# 					   })
+#
+# 	df.to_parquet(f'{parquet_directory}/Pu-239_g{group}_{coefficient:0.3f}_MT{MT}.parquet', engine='pyarrow')
 
 	# df.to_csv(f'csvs/g1_Pu9_{coefficient:0.3f}_MT18.csv')
 	# df_temp = pd.DataFrame({'ERG': erg, 'XS': xs, 'P':coeff_list})
