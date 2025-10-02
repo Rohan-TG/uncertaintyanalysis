@@ -101,7 +101,7 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 					   # 'p2': coeff2_list,
 					   })
 
-	df.to_parquet(f'{parquet_directory}/Pu-239_g{group}_{coefficient}_MT{MT}.parquet', engine='pyarrow')
+	df.to_parquet(f'{parquet_directory}/Pu-239_g{group}_{coefficient:0.3f}_MT{MT}.parquet', engine='pyarrow')
 
 	# df.to_csv(f'csvs/g1_Pu9_{coefficient:0.3f}_MT18.csv')
 	# df_temp = pd.DataFrame({'ERG': erg, 'XS': xs, 'P':coeff_list})
