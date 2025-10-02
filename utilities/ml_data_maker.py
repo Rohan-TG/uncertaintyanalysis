@@ -77,7 +77,7 @@ for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 	# seconderg, secondxs = ENDF6.read_table(SecondMTsection)
 
 	name_split = filename.split('_')
-	coefficient = float(name_split[3])
+	coefficient = float(name_split[2])
 
 	# coefficient2 = float(name_split[-1][:-6])
 	coeff_list = [coefficient for i in firstxs]
