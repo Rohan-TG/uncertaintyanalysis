@@ -27,6 +27,8 @@ keff_error_list = []
 perturbation_list = []
 # perturbation_2_list = []
 
+
+print("Reading output files...")
 for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 	read_object = open(f'{outputs_directory}/{outputfile}', 'r')
 
@@ -38,7 +40,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 		perturbation_list.append(coefficient)
 	# perturbation_2 = float(name_split[-1][:-2])
 
-	perturbation_list.append(coefficient)
+	# perturbation_list.append(coefficient)
 	# perturbation_2_list.append(perturbation_2)
 
 	lines = read_object.readlines()
@@ -65,7 +67,7 @@ keff_dataframe = pd.DataFrame({'keff': keff_list, 'keff_err': keff_error_list, '
 pendf_names = os.listdir(pendf_dir)
 length_list = []
 
-
+print('Reading PENDFs and forming dataframes...')
 for filename in tqdm.tqdm(pendf_names, total=len(pendf_names)):
 	f = open(f'{pendf_dir}/{filename}')
 	lines = f.readlines()
