@@ -6,7 +6,7 @@ import datetime
 import os
 
 start_time = time.time()
-ZA = 94239 # ZA for Ga-69
+ZA = 94239 # ZA for Pu-239
 group = 3
 
 ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/n2n/pu9/g{group}'
