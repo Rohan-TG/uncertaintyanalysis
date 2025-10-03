@@ -15,21 +15,19 @@ from groupEnergies import Reactions
 import ENDF6
 
 # k_eff directory
+MT = int(input("Enter MT number: "))
 outputs_directory = input("Enter SCONE output directory: ")
 pendf_dir = input("Enter PENDF directory: ")
 group = input("Enter group: ")
 parquet_directory = input("Enter parquet directory: ")
 
-MT = Reactions.fission
-# SecondMT = Reactions.elastic
+
 
 output_files = os.listdir(outputs_directory)
 
 keff_list = []
 keff_error_list = []
 perturbation_list = []
-# perturbation_2_list = []
-
 
 print("Reading output files...")
 for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
@@ -41,10 +39,6 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 	elif len(outputfile) == 15:
 		coefficient = float(outputfile[7:13])
 		perturbation_list.append(coefficient)
-	# perturbation_2 = float(name_split[-1][:-2])
-
-	# perturbation_list.append(coefficient)
-	# perturbation_2_list.append(perturbation_2)
 
 	lines = read_object.readlines()
 	keffline = lines[12]
