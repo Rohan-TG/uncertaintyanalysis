@@ -11,10 +11,10 @@ ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/ecco1
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of the scone executable
 
 num_cores = 20 # number of cores to use for this specific instance of scone
-# perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
 
-perturbation_coefficients = [-0.499, 0.000, 0.300]
+# perturbation_coefficients = [-0.499, 0.000, 0.300]
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	libfile = 'lib19.xsfile'
