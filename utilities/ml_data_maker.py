@@ -89,7 +89,7 @@ def parquet_maker(filename):
 					   'p': coeff_list,
 					   })
 
-	df.to_parquet(f'{parquet_directory}/Pu-239_g{group}_{coefficient:0.3f}_MT{MT}.parquet', engine='pyarrow')
+	df.to_parquet(f'{parquet_directory}/Pu-241_g{group}_{coefficient:0.3f}_MT{MT}.parquet', engine='pyarrow')
 
 
 
