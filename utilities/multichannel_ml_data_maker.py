@@ -38,7 +38,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 
 	name_split = outputfile.split('_')
 
-	perturbation_1 = float(name_split[2])
+	perturbation_1 = float(name_split[1])
 	perturbation_2 = float(name_split[-1][:-2])
 
 	perturbation_1_list.append(perturbation_1)
