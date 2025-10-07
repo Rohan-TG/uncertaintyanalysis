@@ -15,6 +15,7 @@ from groupEnergies import Reactions
 import ENDF6
 
 # k_eff directory
+isotope = input("Enter Element-nucleon_number: ")
 MT = int(input("Enter MT number: "))
 outputs_directory = input("Enter SCONE output directory: ")
 pendf_dir = input("Enter PENDF directory: ")
@@ -89,7 +90,7 @@ def parquet_maker(filename):
 					   'p': coeff_list,
 					   })
 
-	df.to_parquet(f'{parquet_directory}/Pu-239_g{group}_{coefficient:0.3f}_MT{MT}.parquet', engine='pyarrow')
+	df.to_parquet(f'{parquet_directory}/{isotope}_g{group}_{coefficient:0.3f}_MT{MT}.parquet', engine='pyarrow')
 
 
 
