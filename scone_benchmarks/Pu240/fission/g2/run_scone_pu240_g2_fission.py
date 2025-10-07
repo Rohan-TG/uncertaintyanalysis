@@ -12,7 +12,7 @@ from groupEnergies import Pu240, Reactions
 start_time = time.time()
 group = 2
 
-ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/Pu240/fission/g{group}'
+ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/pu240/fission/g{group}'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
