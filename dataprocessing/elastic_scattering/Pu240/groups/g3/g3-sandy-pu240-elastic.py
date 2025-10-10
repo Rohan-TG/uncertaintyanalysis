@@ -6,8 +6,12 @@ import time
 import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
-
-sys.path.append('/home/rnt26/uncertaintyanalysis')
+import os
+computer = os.uname().nodename
+if computer == 'fermiac':
+	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
+elif computer == 'oppie':
+	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 from groupEnergies import Groups, Pu240, Reactions
 
 processes = int(input("Num. processes: "))
