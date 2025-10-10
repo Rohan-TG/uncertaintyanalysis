@@ -67,7 +67,6 @@ def run_sandy(coeff):
 
 
 
-
 with ProcessPoolExecutor(max_workers = processes) as executor:
 	futures = [executor.submit(run_sandy, c) for c in perturbation_coefficients]
 
