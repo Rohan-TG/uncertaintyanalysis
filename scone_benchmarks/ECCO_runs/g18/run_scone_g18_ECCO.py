@@ -6,22 +6,20 @@ import datetime
 
 start_time = time.time()
 
-ACE_file_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/data/ecco18Pu9/' # location of the ECCO Group 18 perturbed ACE files to be used for generating samples
+ACE_file_directory = '/home/rnt26/uncertaintyanalysis/data/ecco18Pu9/' # location of the ECCO Group 18 perturbed ACE files to be used for generating samples
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out' # location of the scone executable
 
 num_cores = 20 # number of cores to use for this specific instance of scone
-# perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
-
-perturbation_coefficients = [-0.499, 0.000, 0.300]
 
 for coefficient in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
 	libfile = 'lib18.xsfile'
 
 	input_coefficient = round(coefficient, 3) # Coefficient string prep
 
-	ACE_filename = f"{ACE_file_directory}/ECCO33-g18_Pu9_{input_coefficient:0.3f}_MT18.09c" # name of ACE file for this SCONE run
+	ACE_filename = f"{ACE_file_directory}/Pu239_g18_{input_coefficient:0.3f}_MT18.09c" # name of ACE file for this SCONE run
 
 	with open(libfile, 'r') as file:
 		lines = file.readlines()
