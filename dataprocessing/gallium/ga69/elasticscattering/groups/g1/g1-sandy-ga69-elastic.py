@@ -20,7 +20,7 @@ group = 2
 perturbation_coefficients = np.arange(-0.800, 0.801, 0.001)
 
 # endf6 = sandy.Endf6.from_file('/home/rnt26/PycharmProjects/uncertaintyanalysis/n-094_Pu_239.endf')
-endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za)
+endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
 pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
