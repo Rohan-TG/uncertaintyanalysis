@@ -19,7 +19,7 @@ g3boundary = Groups.g3
 
 all_parquets = os.listdir(data_directory)
 
-training_fraction = 0.95
+training_fraction = 0.80
 n_training_samples = int(training_fraction * len(all_parquets))
 
 training_files = []
