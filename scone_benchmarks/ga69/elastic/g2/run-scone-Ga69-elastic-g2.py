@@ -10,7 +10,7 @@ sys.path.append('/home/rnt26/uncertaintyanalysis')
 from groupEnergies import Ga69, Reactions
 
 start_time = time.time()
-group = 2 # it's actually group 1
+group = 2
 
 ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/ga69/elastic-scattering/g{group}'
 
