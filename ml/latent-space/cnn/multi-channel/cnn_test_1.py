@@ -64,45 +64,28 @@ keff_train_mean = np.mean(keff_train)
 keff_train_std = np.std(keff_train)
 
 
-# def scaler(channel_matrix):
-#
-# 	transposed_matrix = np.transpose(np.array(channel_matrix))
-# 	scaled_rows = []
-# 	for row in tqdm.tqdm(transposed_matrix, total=len(transposed_matrix)):
-# 		scaled_row = zscore(row)
-# 		scaled_rows.append(scaled_row)
-#
-# 	scaled_rows = np.array(scaled_rows)
-# 	transposed_scaled_matrix = np.transpose(scaled_rows)
-#
-# 	final_matrix = []
-# 	for i in transposed_scaled_matrix:
-# 		row = i[~np.isnan(i)]
-# 		final_matrix.append(row)
-#
-# 	final_matrix = np.array(final_matrix)
-# 	return final_matrix
-
-
-
 def scaler(channel_matrix):
 
-	transposed_matrix = np.array(channel_matrix)
+	transposed_matrix = np.transpose(np.array(channel_matrix))
 	scaled_rows = []
 	for row in tqdm.tqdm(transposed_matrix, total=len(transposed_matrix)):
 		scaled_row = zscore(row)
 		scaled_rows.append(scaled_row)
 
 	scaled_rows = np.array(scaled_rows)
-	# transposed_scaled_matrix = np.transpose(scaled_rows)
+	transposed_scaled_matrix = np.transpose(scaled_rows)
 
 	final_matrix = []
-	for i in scaled_rows:
+	for i in transposed_scaled_matrix:
 		row = i[~np.isnan(i)]
 		final_matrix.append(row)
 
 	final_matrix = np.array(final_matrix)
 	return final_matrix
+
+
+
+
 
 scaled_fission_train = scaler(fission_train)
 scaled_elastic_train = scaler(elastic_train)
