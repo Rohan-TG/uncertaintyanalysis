@@ -61,8 +61,8 @@ for file in tqdm.tqdm(all_fission_parquets, total=len(all_fission_parquets)):
 
 	mt2xs = elastic_df['XS'].values # likewise for elastic scattering cross sections
 
-	fission_train.append(mt18xs)
-	elastic_train.append(mt2xs)
+	fission_train.append(mt18xs[:-1])
+	elastic_train.append(mt2xs[:-1])
 
 for file in tqdm.tqdm(all_elastic_parquets, total=len(all_elastic_parquets)):
 	dftrain = pd.read_parquet(f'{file}', engine='pyarrow')  # Fetch data from parquet file
