@@ -15,7 +15,7 @@ training_fission_data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalys
 training_elastic_data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/Pu239/elastic_scattering/g4'
 test_data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/g4_fission_elastic_pu9'
 
-g4boundary = Groups.g4a
+g4boundary = Groups.g4
 g3boundary = Groups.g3
 
 all_fission_parquets = [os.path.join(training_fission_data_directory, f) for f in os.listdir(training_fission_data_directory)]
