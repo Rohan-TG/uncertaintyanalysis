@@ -56,40 +56,42 @@ for file in tqdm.tqdm(all_fission_parquets, total=len(all_fission_parquets)):
 	elastic_df = pd.read_parquet('/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/Pu239/elastic_scattering/g4/Pu-239_g4_0.000_MT2.parquet',
 								 engine='pyarrow')
 
+	elastic_df = elastic_df[elastic_df.ERG >= g4boundary]
+	elastic_df = elastic_df[elastic_df.ERG <= g3boundary]
+
 	mt2xs = elastic_df['XS'].values # likewise for elastic scattering cross sections
 
 	fission_train.append(mt18xs)
 	elastic_train.append(mt2xs)
 
-# for file in tqdm.tqdm(all_elastic_parquets, total=len(all_elastic_parquets)):
-# 	dftrain = pd.read_parquet(f'{file}', engine='pyarrow')  # Fetch data from parquet file
-#
-# 	keff_train += [float(dftrain['keff'].values[0])]  # append k_eff value from the file
-#
-# 	dftrain = dftrain[dftrain.ERG >= g4boundary]
-# 	dftrain = dftrain[dftrain.ERG <= g3boundary]
-#
-# 	mt2xs = np.log(dftrain['XS'].values)  # appends a list of cross sections to the XS_train matrix
-#
-# 	fission_df = pd.read_parquet(
-# 		'/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/Pu239/fission/g4/Pu-239_g4_0.000_MT18.parquet',
-# 		engine='pyarrow')
-# 	#
-# 	mt18xs = np.log(fission_df['XS'].values)  # likewise for elastic scattering cross sections
-# 	#
-# 	# mt18xs = mt18xs.tolist()
-# 	# mt2xs = mt2xs.tolist()
-# 	#
-# 	# 	xsobject = mt2xs + mt18xs
-# 	fission_train.append(mt18xs)
-# 	elastic_train.append(mt2xs)
-#
-#
-# y_train = np.array(keff_train)
-# y_train = zscore(y_train)
-#
-# keff_train_mean = np.mean(keff_train)
-# keff_train_std = np.std(keff_train)
+for file in tqdm.tqdm(all_elastic_parquets, total=len(all_elastic_parquets)):
+	dftrain = pd.read_parquet(f'{file}', engine='pyarrow')  # Fetch data from parquet file
+
+	keff_train += [float(dftrain['keff'].values[0])]  # append k_eff value from the file
+
+	dftrain = dftrain[dftrain.ERG >= g4boundary]
+	dftrain = dftrain[dftrain.ERG <= g3boundary]
+
+	mt2xs = np.log(dftrain['XS'].values)  # appends a list of cross sections to the XS_train matrix
+
+	fission_df = pd.read_parquet(
+		'/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/Pu239/fission/g4/Pu-239_g4_0.000_MT18.parquet',
+		engine='pyarrow')
+
+	fission_df = fission_df[fission_df.ERG >= g4boundary]
+	fission_df = fission_df[fission_df.ERG <= g3boundary]
+
+	mt18xs = np.log(fission_df['XS'].values)  # likewise for elastic scattering cross sections
+
+	fission_train.append(mt18xs)
+	elastic_train.append(mt2xs)
+
+
+y_train = np.array(keff_train)
+y_train = zscore(y_train)
+
+keff_train_mean = np.mean(keff_train)
+keff_train_std = np.std(keff_train)
 
 
 
