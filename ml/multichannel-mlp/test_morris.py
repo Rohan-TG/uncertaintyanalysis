@@ -83,8 +83,8 @@ for file in tqdm.tqdm(all_elastic_parquets, total=len(all_elastic_parquets)):
 
 	mt18xs = np.log(fission_df['XS'].values)  # likewise for elastic scattering cross sections
 
-	fission_train.append(mt18xs)
-	elastic_train.append(mt2xs)
+	fission_train.append(mt18xs[:-1])
+	elastic_train.append(mt2xs[:-1])
 
 
 y_train = np.array(keff_train)
