@@ -5,14 +5,14 @@ import subprocess
 import datetime
 import os
 import sys
-sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+sys.path.append('/home/rnt26/uncertaintyanalysis')
 
 from groupEnergies import Pu241, Reactions
 
 start_time = time.time()
 group = 5
 
-ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Pu241/fission/g{group}'
+ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/Pu241/fission/g{group}'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
