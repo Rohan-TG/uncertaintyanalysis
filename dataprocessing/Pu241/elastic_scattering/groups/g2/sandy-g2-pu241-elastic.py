@@ -27,8 +27,8 @@ pendf = endf6.get_pendf(err=0.0001, verbose=True)
 xs = sandy.Xs.from_endf6(pendf)
 heated_xs = sandy.Xs.from_endf6(pendfheated)
 
-lower_bound = Groups.g1
-upper_bound = Groups.g0
+lower_bound = Groups.g2
+upper_bound = Groups.g1
 domain = [lower_bound, upper_bound]
 
 
