@@ -62,7 +62,7 @@ def extract_flux(output_file):
 		plt.ylabel('Flux')
 		plt.title(f'Flux for {coefficient * 100}% perturbation')
 		plt.savefig(f'{saveplot_directory}/{output_file}.png', dpi=300)
-		plt.show()
+		# plt.show()
 
 with ProcessPoolExecutor(max_workers=processes) as executor:
 	futures = [executor.submit(extract_flux, out_file) for out_file in output_files]
