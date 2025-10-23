@@ -22,7 +22,7 @@ scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
 num_cores = int(input('Num. cores: ')) # number of cores to use for this specific instance of scone
 
-perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+perturbation_coefficients = np.arange(-0.800, 0.801, 0.001)
 
 ZA = Ga71.ZA # ZA for Ga-71
 MT = Reactions.elastic
