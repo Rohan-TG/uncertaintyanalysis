@@ -16,7 +16,7 @@ from groupEnergies import Ga71, Reactions
 start_time = time.time()
 group = 2
 
-ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Ga71/elastic-scattering/g{group}'
+ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/Ga71/elastic-scattering/g{group}'
 
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
