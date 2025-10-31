@@ -20,7 +20,7 @@ MT = int(input("Enter MT number: "))
 outputs_directory = input("Enter SCONE output directory: ")
 pendf_dir = input("Enter PENDF directory: ")
 group = input("Enter group: ")
-parquet_directory = input("Enter parquet directory: ")
+parquet_directory = os.getcwd()
 
 
 

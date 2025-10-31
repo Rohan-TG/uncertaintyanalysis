@@ -21,7 +21,7 @@ MT = int(input("Enter MT number: "))
 outputs_directory = input("Enter SCONE output file directory: ")
 # xserg_ml_directory = input("Enter ERG/XS directory: ")
 group = input("Enter group: ")
-destination_directory = input("Enter destination directory: ")
+destination_directory = os.getcwd()
 # all_parquets = os.listdir(parquet_directory)
 
 
