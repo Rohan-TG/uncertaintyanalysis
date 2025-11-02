@@ -38,11 +38,11 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 
 	split_name = outputfile.split('_')
 
-	coefficient1 = float(split_name[2])
-	perturbation_g1_list.append(coefficient1)
+	coefficient1_global = float(split_name[2])
+	perturbation_g1_list.append(coefficient1_global)
 
-	coefficient2 = float(split_name[-1].split('.m')[0])
-	perturbation_g2_list.append(coefficient2)
+	coefficient2_global = float(split_name[-1].split('.m')[0])
+	perturbation_g2_list.append(coefficient2_global)
 
 	lines = read_object.readlines()
 	keffline = lines[12]
@@ -97,7 +97,7 @@ def parquet_maker(filename):
 					   'p2': coeff2_list,
 					   })
 
-	df.to_parquet(f'{parquet_directory}/{isotope}_g{group1}_{coefficient1:0.3f}_g{group2}_{coefficient2:0.3f}_MT{MT}.parquet',
+	df.to_parquet(f'{parquet_directory}/{isotope}_g{group1}_{coefficient_1:0.3f}_g{group2}_{coefficient_2:0.3f}_MT{MT}.parquet',
 				  engine='pyarrow')
 
 
