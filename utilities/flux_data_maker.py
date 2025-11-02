@@ -3,7 +3,6 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import tqdm
 import os
 import sys
-# import matplotlib.pyplot as plt
 import numpy as np
 
 processes = int(input("Enter n. processes: "))
@@ -12,40 +11,37 @@ if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-# import ENDF6
 
 
-
+mode = int(input("Enter mode (1/2 perturbations): "))
 isotope = input("Enter Element-nucleon_number: ")
 MT = int(input("Enter MT number: "))
 outputs_directory = input("Enter SCONE output file directory: ")
-# xserg_ml_directory = input("Enter ERG/XS directory: ")
-group = input("Enter group: ")
+if mode == 1:
+	group = input("Enter group: ")
+elif mode == 2:
+	group_1 = int(input("Enter group 1: "))
+	group_2 = int(input("Enter group 2: "))
 destination_directory = os.getcwd()
-# all_parquets = os.listdir(parquet_directory)
+
+
 
 
 output_files = os.listdir(outputs_directory)
 
-# saveplot_directory = input("Enter flux save plot directory: ")
 
 
 def extract_flux(output_file):
 
-	if len(output_file) == 14:
-		coefficient = float(output_file[7:12])
-	elif len(output_file) == 15:
-		coefficient = float(output_file[7:13])
-
-	# for pq in all_parquets:
-	# 	namesplit_pq = pq.split('_')
-	# 	if float(namesplit_pq[2]) == coefficient:
-	# 		corresponding_pq = pq
-	# 		break
-
-	# working_xsfile = pd.read_parquet(f'{xserg_ml_directory}/{corresponding_pq}', engine='pyarrow')
-	# working_keff = working_xsfile['keff'].values[0]
-	# working_keff_error = working_xsfile['keff_err'].values[0]
+	if mode == 1:
+		if len(output_file) == 14:
+			coefficient = float(output_file[7:12])
+		elif len(output_file) == 15:
+			coefficient = float(output_file[7:13])
+	elif mode == 2:
+		split_name = output_file.split('_')
+		coefficient_g1 = float(split_name[2])
+		coefficient_g2 = float(split_name[-1].split('.m')[0])
 
 	with open(f'{outputs_directory}/{output_file}', 'r') as f:
 		lines = f.readlines()
@@ -76,8 +72,10 @@ def extract_flux(output_file):
 
 		df = pd.DataFrame({'flux': active_flux_Res[0][0], 'flux_std': active_flux_Res[1][0]})
 
-	df_name = f'{isotope}_g{group}_flux_{coefficient:0.3f}_MT{MT}.parquet'
-
+	if mode == 1:
+		df_name = f'{isotope}_flux_g{group}_{coefficient:0.3f}_MT{MT}.parquet'
+	elif mode == 2:
+		df_name = f'{isotope}_flux_g{group_1}_{coefficient_g1:0.3f}_g{group_2}_{coefficient_g2:0.3f}_MT{MT}.parquet'
 	df.to_parquet(f'{destination_directory}/{df_name}', engine='pyarrow')
 
 
