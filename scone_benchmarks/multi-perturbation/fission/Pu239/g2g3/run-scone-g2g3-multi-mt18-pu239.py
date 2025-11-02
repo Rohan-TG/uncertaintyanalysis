@@ -81,7 +81,7 @@ for ACE in tqdm.tqdm(ACE_names, total=len(ACE_names)):
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True) # run scone
 
 
-	subprocess.run(f'mv output.m outputfiles/output_g{group1}_{float(coefficient1):0.3f}_g{group2}_{float(coefficient2)}.m', shell=True) # move output file to output directory for later analysis
+	subprocess.run(f'mv output.m outputfiles/output_g{group1}_{float(coefficient1):0.3f}_g{group2}_{float(coefficient2):0.3f}.m', shell=True) # move output file to output directory for later analysis
 
 
 
