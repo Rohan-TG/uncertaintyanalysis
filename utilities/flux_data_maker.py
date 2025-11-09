@@ -19,7 +19,7 @@ MT = int(input("Enter MT number: "))
 outputs_directory = input("Enter SCONE output file directory: ")
 if mode == 1:
 	group = input("Enter group: ")
-elif mode == 2:
+elif mode == 2: # for 2 groups perturbed simultaneously in the same channel
 	group_1 = int(input("Enter group 1: "))
 	group_2 = int(input("Enter group 2: "))
 destination_directory = os.getcwd()
