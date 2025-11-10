@@ -15,7 +15,7 @@ num_samples = 2  # number of samples
 samples = endf6.get_perturbations(
     num_samples,
     njoy_kws=dict(
-        err=1,   # very fast calculation, for testing
+        err=0.0001,   # very fast calculation, for testing
         chi=False,
         mubar=False,
         xs=True,
@@ -27,9 +27,9 @@ samples = endf6.get_perturbations(
 
 outs = endf6.apply_perturbations(
     samples,
-    njoy_kws=dict(err=1),   # very fast calculation, for testing
+    njoy_kws=dict(err=0.0001),   # very fast calculation, for testing
     to_ace=True,   # produce ACE files
     to_file=True,
-    ace_kws=dict(err=1, temperature=300, verbose=True, purr=False, heatr=False, thermr=False, gaspr=False),
+    ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=False, heatr=False, thermr=False, gaspr=False),
     verbose=True,
 )
