@@ -36,7 +36,6 @@ outs = endf6.apply_perturbations(
     samples,
     njoy_kws=dict(err=0.0001),   # very fast calculation, for testing
     to_ace=True,   # produce ACE files
-	to_pendf=True,
     to_file=True,
     ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
     verbose=True,
