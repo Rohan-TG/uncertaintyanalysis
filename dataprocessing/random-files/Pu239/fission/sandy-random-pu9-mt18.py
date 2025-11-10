@@ -15,6 +15,7 @@ filename = f"{nucl}.{lib_name}"
 endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 endf6.to_file(filename)
 
+
 num_samples = 2  # number of samples
 
 # this generates samples for cross sections and nubar
