@@ -40,3 +40,13 @@ outs = endf6.apply_perturbations(
     ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
     verbose=True,
 )
+
+
+default_pendf = endf6.get_pendf(err=0.0001)
+default_pendf.to_file('Unperturbed_file_pu239.pendf')
+
+xs_0 = sandy.Xs.from_endf6(outs[0]['pendf']).data[9437]
+xs_1 = sandy.Xs.from_endf6(outs[1]['pendf']).data[9437]
+
+attempt_pendf = outs[0]['pendf']
+attempt_pendf_2 = outs[1]['pendf']
