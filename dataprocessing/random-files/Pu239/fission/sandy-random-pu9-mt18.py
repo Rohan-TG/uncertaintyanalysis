@@ -14,15 +14,17 @@ filename = f"{nucl}.{lib_name}"
 
 endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 endf6.to_file(filename)
-
+pendf = endf6.get_pendf(err=0.0001)
 
 num_samples = 2  # number of samples
+processes = 2
 
 # this generates samples for cross sections and nubar
 samples = endf6.get_perturbations(
     num_samples,
     njoy_kws=dict(
         err=0.0001,
+		errorr33_kws=dict(mt=[18]),
         chi=False,
         mubar=False,
         xs=True,
@@ -32,6 +34,7 @@ samples = endf6.get_perturbations(
 )
 
 
+
 outs = endf6.apply_perturbations(
     samples,
     njoy_kws=dict(err=0.0001),   # very fast calculation, for testing
@@ -39,11 +42,12 @@ outs = endf6.apply_perturbations(
     to_file=True,
     ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
     verbose=True,
+	pendf=pendf
 )
 
 
 default_pendf = endf6.get_pendf(err=0.0001)
-default_pendf.to_file('Unperturbed_file_pu239.pendf')
+default_pendf.to_file('test_file_pu239.pendf')
 
 xs_0 = sandy.Xs.from_endf6(outs[0]['pendf']).data[9437]
 xs_1 = sandy.Xs.from_endf6(outs[1]['pendf']).data[9437]
