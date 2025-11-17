@@ -18,30 +18,33 @@ pendf = endf6.get_pendf(err=0.0001)
 
 num_samples = 1  # number of samples
 
-# this generates samples for cross sections and nubar
 samples = endf6.get_perturbations(
-    num_samples,
-    njoy_kws=dict(
-        err=0.0001,
+	num_samples,
+	njoy_kws=dict(
+		err=0.0001,
 		errorr33_kws=dict(mt=[18]),
-        chi=False,
-        mubar=False,
-        xs=True,
-        nubar=False,
-        verbose=True,
-    ),
+		chi=False,
+		mubar=False,
+		xs=True,
+		nubar=False,
+		verbose=True,
+	),
 )
 
-
+def generate_random_files():
+	pass
 
 outs = endf6.apply_perturbations(
-    samples,
-    njoy_kws=dict(err=0.0001),   # very fast calculation, for testing
-    # to_ace=True,   # produce ACE files
-    to_file=True,
-    # ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
-    verbose=True,
+	samples,
+	njoy_kws=dict(err=0.0001),  # very fast calculation, for testing
+	# to_ace=True,   # produce ACE files
+	to_file=True,
+	# ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
+	verbose=True,
 )
+
+# this generates samples for cross sections and nubar
+
 
 
 
@@ -50,13 +53,8 @@ ace_outs = endf6.apply_perturbations(
 	njoy_kws=dict(err=0.0001),
 	to_ace = True,
 	ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
-	# to_file=True,
+	to_file=True,
 	verbose=True,
 )
 
 
-xs_0 = sandy.Xs.from_endf6(outs[0]['pendf']).data[9437]
-xs_1 = sandy.Xs.from_endf6(outs[1]['pendf']).data[9437]
-
-attempt_pendf = outs[0]['pendf']
-attempt_pendf_2 = outs[1]['pendf']
