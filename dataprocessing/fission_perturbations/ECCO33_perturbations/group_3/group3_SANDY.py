@@ -1,67 +1,78 @@
 import sandy
 import subprocess
 import numpy as np
-# from concurrent.futures import ThreadPoolExecutor, as_completed
-# import random
-# from os.path import join
 import datetime
 import time
 import tqdm
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import sys
+
+sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+from groupEnergies import Groups, Pu239, Reactions
+
+processes = int(input("Num. processes: "))
 
 start = time.time()
 
-za = 94239
-
+za = Pu239.ZA
+group = 3
 
 perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
 
-# perturbation_coefficients = [-0.3, -0.1, 0.1, 0.2, 0.3, 0.4]
-
+# endf6 = sandy.Endf6.from_file('/home/rnt26/PycharmProjects/uncertaintyanalysis/n-094_Pu_239.endf')
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
-# pendf = endf6.get_pendf(err=0.0001, verbose=True)
+pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
-# xs = sandy.Xs.from_endf6(pendf)
+xs = sandy.Xs.from_endf6(pendf)
 heated_xs = sandy.Xs.from_endf6(pendfheated)
 
-lower_bound = 3.6787940000e6  # group 3 eV
-upper_bound = 	6.0653070000e6   # group 2 eV
+lower_bound = Groups.g3
+upper_bound = Groups.g2
 domain = [lower_bound, upper_bound]
 
 
-mat = 9437
-mt = 18
-
-
-for coeff in tqdm.tqdm(perturbation_coefficients, total=len(perturbation_coefficients)):
-
-    perturbation = sandy.Pert([1, 1 + coeff], index=domain)
-
-    # xspert = xs.custom_perturbation(mat, mt, perturbation)
-    heated_xspert = heated_xs.custom_perturbation(mat, mt, perturbation)
-
-    # pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
-    heated_pendf_pert = heated_xspert.to_endf6(pendfheated)
-
-    # tag = "_pert"
-    # outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf_pert)
-
-    # savefilename = f"ECCO33-g2_Pu9_{coeff:0.3f}_MT18.09c"
-    # with open(f"{savefilename}", mode="w") as f:
-    #     f.write(outs["ace"])
-
-    savefilependf = f"ECCO33-g3_Pu9_{coeff:0.3f}_MT18.pendf"
-    heated_pendf_pert.to_file(savefilependf)
+mat = Pu239.MAT
+mt = Reactions.fission
 
 
 
+def run_sandy(coeff):
+	perturbation = sandy.Pert([1, 1 + coeff], index=domain)
 
+	# xspert = xs.custom_perturbation(mat, mt, perturbation)
+	heated_xspert = heated_xs.custom_perturbation(mat, mt, perturbation)
+
+	# pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
+	heated_pendf_pert = heated_xspert.to_endf6(pendfheated)
+
+	# outs = endf6.get_ace(temperature=300,
+	# 					 heatr=False,
+	# 					 thermr=False,
+	# 					 gaspr=False,
+	# 					 purr=True,
+	# 					 verbose=True,
+	# 					 pendf=pendf_pert)
+
+	# savefilename = f"Pu239_g{group}_{coeff:0.3f}_MT{mt}.09c"
+	# with open(f"{savefilename}", mode="w") as f:
+	# 	f.write(outs["ace"])
+
+	savefilependf = f"Pu239_g{group}_{coeff:0.3f}_MT{mt}.pendf"
+	heated_pendf_pert.to_file(savefilependf)
+
+
+
+
+with ProcessPoolExecutor(max_workers = processes) as executor:
+	futures = [executor.submit(run_sandy, c) for c in perturbation_coefficients]
+
+	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		pass
 
 end = time.time()
 
 elapsed = end - start
 print(f"Time elapsed: {datetime.timedelta(seconds=elapsed)}")
-
-
 
 
