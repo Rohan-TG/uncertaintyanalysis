@@ -10,8 +10,6 @@ import matplotlib.pyplot as plt
 import datetime
 import sys
 
-from dataprocessing.fission_perturbations.parallel_processing.data_maker import xscsv_dir
-from ml.flux_mlp_test import dftest
 
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 from groupEnergies import Groups
