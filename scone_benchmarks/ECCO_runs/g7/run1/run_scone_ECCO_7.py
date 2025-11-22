@@ -15,7 +15,7 @@ from groupEnergies import Pu239, Reactions
 start_time = time.time()
 ZA = Pu239.ZA # ZA for Pu-240
 group = 7
-ACE_file_directory = f'/home/rnt26/uncertaintyanalysis/data/Pu239/fission/g15/run1'
+ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Pu239/fission/g7/run1'
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
 num_cores = int(input('Num. cores: ')) # number of cores to use for this specific instance of scone
