@@ -17,7 +17,7 @@ g14boundary = Groups.g14
 
 all_parquets = []
 
-groups = list(range(15))
+groups = list(range(1,15))
 
 for group in groups:
 	data_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/Pu239/fission/g{group}/xserg_data/'
