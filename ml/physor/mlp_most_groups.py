@@ -28,7 +28,7 @@ for group in groups:
 	all_parquets += files
 
 
-training_fraction = int(input('Enter training data fraction: '))
+training_fraction = float(input('Enter training data fraction: '))
 n_training_samples = int(training_fraction * len(all_parquets))
 
 
