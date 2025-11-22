@@ -9,6 +9,10 @@ import tqdm
 import matplotlib.pyplot as plt
 import datetime
 import sys
+
+from dataprocessing.fission_perturbations.parallel_processing.data_maker import xscsv_dir
+from ml.flux_mlp_test import dftest
+
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 from groupEnergies import Groups
 
@@ -43,10 +47,7 @@ for file in all_parquets:
 
 
 keff_train = [] # k_eff labels
-
 XS_train = []
-
-
 for file in tqdm.tqdm(training_files, total=len(training_files)):
 	# group = file.split('_')[1][1]
 
@@ -81,8 +82,13 @@ keff_test = []
 for file in tqdm.tqdm(test_files, total=len(test_files)):
 	# group = file.split('_')[1][1]
 	dftest = pd.read_parquet(f'{file}', engine='pyarrow')
+	dftest = dftest[dftest.ERG >= g14boundary]
+	dftest = dftest[dftest.ERG <= g0boundary]
+
 	keff_test += [float(dftest['keff'].values[0])]
-	XS_test.append(dftest['XS'].values[1:391])
+	xs_values = dftest['XS'].values
+
+	XS_test.append(xs_values[1:391])
 
 XS_test = np.array(XS_test)
 keff_mean = np.mean(keff_test)
@@ -114,8 +120,9 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 model =keras.Sequential()
-model.add(keras.layers.Dense(200, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 # model.add(keras.layers.Dense(200, activation='relu'))
+model.add(keras.layers.Dense(300, activation='relu'))
 model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
@@ -126,7 +133,7 @@ trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=50,
-					batch_size=16,
+					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
 					verbose=1)
