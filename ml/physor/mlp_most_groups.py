@@ -73,7 +73,7 @@ y_train = zscore(keff_train)
 scaling_matrix_xtrain = XS_train.transpose()
 
 scaled_columns_xtrain = []
-for column in tqdm.tqdm(scaling_matrix_xtrain[1:391], total=len(scaling_matrix_xtrain[1:391])):
+for column in tqdm.tqdm(scaling_matrix_xtrain[1:390], total=len(scaling_matrix_xtrain[1:390])):
 	scaled_column = zscore(column)
 	scaled_columns_xtrain.append(scaled_column)
 
@@ -97,7 +97,7 @@ y_test = zscore(keff_test)
 scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
-for column in tqdm.tqdm(scaling_matrix_xtest[1:391], total=len(scaling_matrix_xtest[1:391])):
+for column in tqdm.tqdm(scaling_matrix_xtest[1:390], total=len(scaling_matrix_xtest[1:390])):
 	scaled_column = zscore(column)
 	scaled_columns_xtest.append(scaled_column)
 
