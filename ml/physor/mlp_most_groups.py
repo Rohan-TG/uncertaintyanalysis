@@ -26,7 +26,7 @@ for group in groups:
 	all_parquets += files
 
 
-training_fraction = 0.80
+training_fraction = 0.2
 n_training_samples = int(training_fraction * len(all_parquets))
 
 
