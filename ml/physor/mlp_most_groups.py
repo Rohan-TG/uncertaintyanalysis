@@ -118,10 +118,11 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 model =keras.Sequential()
-model.add(keras.layers.Dense(300, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(400, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 # model.add(keras.layers.Dense(200, activation='relu'))
-model.add(keras.layers.Dense(200, activation='relu'))
-model.add(keras.layers.Dense(100, activation='relu'))
+model.add(keras.layers.Dense(400, activation='relu'))
+model.add(keras.layers.Dense(300, activation='relu'))
+model.add(keras.layers.Dense(150, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
@@ -130,7 +131,7 @@ import datetime
 trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
-					epochs=50,
+					epochs=75,
 					batch_size=16,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
