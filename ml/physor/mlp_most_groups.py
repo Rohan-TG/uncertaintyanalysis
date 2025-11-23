@@ -77,11 +77,16 @@ X_train = scaled_columns_xtrain.transpose()
 
 XS_test = []
 keff_test = []
+
+perturbations_test = []
 for file in tqdm.tqdm(test_files, total=len(test_files)):
 	# group = file.split('_')[1][1]
 	dftest = pd.read_parquet(f'{file}', engine='pyarrow')
 	dftest = dftest[dftest.ERG >= g14boundary]
 	dftest = dftest[dftest.ERG <= g0boundary]
+
+	perturbation_level = dftest['p'].values[0]
+	perturbations_test.append(perturbation_level)
 
 	keff_test += [float(dftest['keff'].values[0])]
 	xs_values = dftest['XS'].values
@@ -163,3 +168,15 @@ print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]
 
 
 print(f"Smallest absolute error: {min(absolute_errors)} pcm")
+
+
+
+
+
+plt.figure()
+plt.plot(keff_test, errors, 'x')
+plt.grid()
+plt.legend()
+plt.xlabel('SCONE k_eff')
+plt.ylabel('ML Error / pcm')
+plt.savefig('test_error2.png', dpi = 300)
