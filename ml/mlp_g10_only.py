@@ -19,7 +19,7 @@ g9boundary = Groups.g9
 
 all_parquets = []
 
-data_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/Pu239/fission/g5/xserg_data/'
+data_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/Pu239/fission/g10/xserg_data/'
 files = [os.path.join(data_directory, f) for f in os.listdir(data_directory)] # stores absolute paths
 
 all_parquets += files
