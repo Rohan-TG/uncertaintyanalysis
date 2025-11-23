@@ -169,9 +169,15 @@ print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]
 
 print(f"Smallest absolute error: {min(absolute_errors)} pcm")
 
+perturbations_test = [i*100 for i in perturbations_test]
 
-
-
+plt.figure()
+plt.plot(perturbations_test, errors)
+plt.grid()
+plt.legend()
+plt.xlabel('Perturbation level / %')
+plt.ylabel('ML Error / pcm')
+plt.savefig('pert_error1.png', dpi = 300)
 
 plt.figure()
 plt.plot(keff_test, errors, 'x')
