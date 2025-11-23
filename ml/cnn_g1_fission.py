@@ -94,7 +94,7 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 model = keras.Sequential()
-model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
+model.add(keras.layers.Input(shape=(X_train.shape[0], X_train.shape[1])))
 model.add(keras.layers.Conv1D(filters=16, kernel_size=3, padding='same', activation='relu',))
 model.add(keras.layers.Flatten())
 # model.add(keras.layers.Dense(10, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
