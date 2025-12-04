@@ -16,8 +16,8 @@ endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 endf6.to_file(filename)
 pendf = endf6.get_pendf(err=0.0001)
 
-num_samples = 1000  # number of samples
-processes = 10
+num_samples = 2000  # number of samples
+processes = 20
 
 samples = endf6.get_perturbations(
 	num_samples,
@@ -32,13 +32,11 @@ samples = endf6.get_perturbations(
 	),
 )
 
-def generate_random_files():
-	pass
 
-outs = endf6.apply_perturbations(
+outs = endf6.apply_perturbations( # generates the PENDFs only
 	samples,
 	processes=processes,
-	njoy_kws=dict(err=0.0001),  # very fast calculation, for testing
+	njoy_kws=dict(err=0.0001),  # low error
 	# to_ace=True,   # produce ACE files
 	to_file=True,
 	# ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
