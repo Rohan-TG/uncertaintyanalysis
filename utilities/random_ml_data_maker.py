@@ -10,6 +10,7 @@ elif computer == 'oppie':
 import pandas as pd
 import ENDF6
 import tqdm
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 isotope = input("Enter Element-nucleon_number: ")
 MT = int(input("Enter MT number: "))
@@ -78,3 +79,10 @@ def parquet_maker(filename):
 					   })
 
 	df.to_parquet(f'{parquet_directory}/{isotope}_random_{pendf_index}_MT{MT}.parquet', engine='pyarrow')
+
+
+with ProcessPoolExecutor(max_workers=processes) as executor:
+	futures = [executor.submit(parquet_maker, file) for file in pendf_names]
+
+	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		pass
