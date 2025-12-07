@@ -40,7 +40,7 @@ XS_train = []
 for file in tqdm.tqdm(training_files, total=len(training_files)):
 	# group = file.split('_')[1][1]
 
-	dftrain = pd.read_parquet(f'{file}', engine='pyarrow')
+	dftrain = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
 
 	keff_train += [float(dftrain['keff'].values[0])]  # append k_eff value from the file
 
@@ -68,7 +68,7 @@ keff_test = []
 
 for file in tqdm.tqdm(test_files, total=len(test_files)):
 	# group = file.split('_')[1][1]
-	dftest = pd.read_parquet(f'{file}', engine='pyarrow')
+	dftest = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
 
 	keff_test += [float(dftest['keff'].values[0])]
 	xs_values = dftest['XS'].values
