@@ -59,7 +59,7 @@ scaled_columns_xtrain = []
 print('Scaling training data...')
 
 
-le_bound_index = 2e5
+le_bound_index = int(2e5)
 
 
 
