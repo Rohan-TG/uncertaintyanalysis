@@ -11,8 +11,8 @@ import random
 import numpy as np
 from scipy.stats import zscore
 import tqdm
-
-
+import keras
+import time
 
 
 
@@ -95,3 +95,59 @@ for column in tqdm.tqdm(scaling_matrix_xtest[1:-1], total=len(scaling_matrix_xte
 scaled_columns_xtest = np.array(scaled_columns_xtest)
 X_test = scaled_columns_xtest.transpose()
 
+
+callback = keras.callbacks.EarlyStopping(monitor='val_loss',
+										 # min_delta=0.005,
+										 patience=20,
+										 mode='min',
+										 start_from_epoch=3,
+										 restore_best_weights=True)
+
+
+
+model =keras.Sequential()
+model.add(keras.layers.Dense(200, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(200, activation='relu'))
+# model.add(keras.layers.Dense(400, activation='relu'))
+# model.add(keras.layers.Dense(300, activation='relu'))
+model.add(keras.layers.Dense(150, activation='relu'))
+model.add(keras.layers.Dense(1, activation='linear'))
+model.compile(loss='MeanSquaredError', optimizer='adam')
+
+
+import datetime
+trainstart = time.time()
+history = model.fit(X_train,
+					y_train,
+					epochs=75,
+					batch_size=16,
+					callbacks=callback,
+					validation_data=(X_test, y_test),
+					verbose=1)
+
+train_end = time.time()
+print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+predictions = model.predict(X_test)
+predictions = predictions.ravel()
+
+
+rescaled_predictions = []
+predictions_list = predictions.tolist()
+
+for pred in predictions_list:
+	descaled_p = pred * keff_std + keff_mean
+	rescaled_predictions.append(float(descaled_p))
+
+errors = []
+for predicted, true in zip(rescaled_predictions, keff_test):
+	errors.append((predicted - true) * 1e5)
+	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+sorted_errors = sorted(errors)
+absolute_errors = [abs(x) for x in sorted_errors]
+print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+
+print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
+
+
+print(f"Smallest absolute error: {min(absolute_errors)} pcm")
