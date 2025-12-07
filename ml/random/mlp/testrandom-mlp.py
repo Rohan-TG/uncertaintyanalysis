@@ -35,6 +35,7 @@ for file in all_parquets:
 	if file not in training_files:
 		test_files.append(file)
 
+print('Fetching training data...')
 keff_train = [] # k_eff labels
 XS_train = []
 for file in tqdm.tqdm(training_files, total=len(training_files)):
@@ -55,7 +56,8 @@ y_train = zscore(keff_train)
 scaling_matrix_xtrain = XS_train.transpose()
 
 scaled_columns_xtrain = []
-for column in tqdm.tqdm(scaling_matrix_xtrain[1:], total=len(scaling_matrix_xtrain[1:])):
+print('Scaling training data...')
+for column in tqdm.tqdm(scaling_matrix_xtrain[1:-1], total=len(scaling_matrix_xtrain[1:-1])):
 	scaled_column = zscore(column)
 	scaled_columns_xtrain.append(scaled_column)
 
@@ -66,6 +68,7 @@ X_train = scaled_columns_xtrain.transpose()
 XS_test = []
 keff_test = []
 
+print('Fetching test data...')
 for file in tqdm.tqdm(test_files, total=len(test_files)):
 	# group = file.split('_')[1][1]
 	dftest = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
@@ -84,7 +87,8 @@ y_test = zscore(keff_test)
 scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
-for column in tqdm.tqdm(scaling_matrix_xtest[1:], total=len(scaling_matrix_xtest[1:])):
+print('Scaling test data...')
+for column in tqdm.tqdm(scaling_matrix_xtest[1:-1], total=len(scaling_matrix_xtest[1:-1])):
 	scaled_column = zscore(column)
 	scaled_columns_xtest.append(scaled_column)
 
