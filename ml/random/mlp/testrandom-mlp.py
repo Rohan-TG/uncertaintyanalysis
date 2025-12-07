@@ -57,7 +57,14 @@ scaling_matrix_xtrain = XS_train.transpose()
 
 scaled_columns_xtrain = []
 print('Scaling training data...')
-for column in tqdm.tqdm(scaling_matrix_xtrain[1:-1], total=len(scaling_matrix_xtrain[1:-1])):
+
+
+le_bound_index = 2e5
+
+
+
+
+for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
 	scaled_column = zscore(column)
 	scaled_columns_xtrain.append(scaled_column)
 
@@ -88,7 +95,7 @@ scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
 print('Scaling test data...')
-for column in tqdm.tqdm(scaling_matrix_xtest[1:-1], total=len(scaling_matrix_xtest[1:-1])):
+for column in tqdm.tqdm(scaling_matrix_xtest[le_bound_index:-1], total=len(scaling_matrix_xtest[le_bound_index:-1])):
 	scaled_column = zscore(column)
 	scaled_columns_xtest.append(scaled_column)
 
