@@ -28,7 +28,7 @@ for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(orig
 	new_pendf_filename = f'94239_{new_i}.pendf'
 	old_pendf_filename = f'94239_{old_i}.pendf'
 
-	print(f'{old_i} -> {new_i} \n')
+	# print(f'{old_i} -> {new_i} \n')
 
 	# subprocess.run(f'mv {ace_dir}/{old_ace_filename} {ace_dir}/{new_ace_filename}', shell=True)
 
