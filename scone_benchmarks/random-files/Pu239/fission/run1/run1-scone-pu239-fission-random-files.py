@@ -22,10 +22,10 @@ num_cores = int(input('Num. cores: ')) # number of cores to use for this specifi
 default_xsfile = 'endfb-viii0.xsfile'
 current_dir = os.getcwd()
 target_dir = 'scone_benchmarks'
-idx = current_dir.find(target_dir)
+idxt = current_dir.find(target_dir)
 default_Jezebel = 'Jezebel'
 
-target_path = current_dir[:(idx + len(target_dir))]
+target_path = current_dir[:(idxt + len(target_dir))]
 libfilename = f'lib{ZA}.xsfile'
 mt = Reactions.fission
 
@@ -46,11 +46,12 @@ if 'outputfiles' not in search_files:
 	subprocess.run('mkdir outputfiles', shell=True)
 
 
+ACE_files = os.listdir(ACE_file_directory)
 
-file_indices = list(range(0,2000))
+for ace_file in tqdm.tqdm(ACE_files):
+	file_index = int(ace_file.split('.03c')[0].split('_')[1])
 
-for idx in tqdm.tqdm(file_indices):
-	ACE_filename = f'{ACE_file_directory}/94239_{idx}.03c' # ACE file for this iteration
+	ACE_filename = f'{ACE_file_directory}/94239_{file_index}.03c' # ACE file for this iteration
 
 	with open(libfile, 'r') as file: # the ACE address file (.xsfile)
 		lines = file.readlines()
@@ -70,7 +71,7 @@ for idx in tqdm.tqdm(file_indices):
 		file.writelines(lines)
 
 	subprocess.run(f'{scone_executable_path} --omp {num_cores} Jezebel', shell=True)  # run scone
-	subprocess.run(f'mv output.m outputfiles/output-{int(idx)}.m',
+	subprocess.run(f'mv output.m outputfiles/output-{int(file_index)}.m',
 				   shell=True)  # move output file to output directory for later analysis
 
 end_time = time.time()
