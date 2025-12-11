@@ -12,7 +12,7 @@ from groupEnergies import Pu239, Reactions
 start_time = time.time()
 ZA = Pu239.ZA # ZA for Pu-240
 
-ACE_file_directory = f'/home/rnt26/PycharmProjects/uncertaintyanalysis/data/Pu239/random/fission/files0_1999'
+ACE_file_directory = input("Enter ACE file directory: ")
 scone_executable_path = '/home/rnt26/scone/SCONE/Build/scone.out'
 
 
