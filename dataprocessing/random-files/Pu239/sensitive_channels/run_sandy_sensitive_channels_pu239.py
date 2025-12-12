@@ -16,8 +16,8 @@ nucl = Pu239.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
 endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
-endf6.to_file(filename)
-pendf = endf6.get_pendf(err=0.0001)
+# endf6.to_file(filename)
+# pendf = endf6.get_pendf(err=0.0001)
 
 
 num_samples = 1  # number of samples
@@ -33,7 +33,7 @@ samples = endf6.get_perturbations(
 	num_samples,
 	njoy_kws=dict(
 		err=0.0001,
-		errorr33_kws=dict(mt=[fission_channel, elastic_channel]),
+		errorr33_kws=dict(mt=[fission_channel]),
 		chi=False,
 		mubar=False,
 		xs=True,
@@ -42,7 +42,10 @@ samples = endf6.get_perturbations(
 	),
 )
 
-
+# samples_updated = endf6.get_perturbations(
+# 	num_samples,
+#
+# )
 
 
 outs = endf6.apply_perturbations( # generates the PENDFs only
