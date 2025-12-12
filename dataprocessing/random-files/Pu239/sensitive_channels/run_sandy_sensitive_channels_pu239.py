@@ -2,13 +2,14 @@ import sandy
 import sys
 import os
 
-from groupEnergies import Pu239, Reactions
 
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
+from groupEnergies import Pu239, Reactions
+
 
 lib_name = "ENDFB_80"
 nucl = Pu239.ZA * 10
