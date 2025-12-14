@@ -3,11 +3,10 @@ import numpy as np
 import subprocess
 import tqdm
 
-pendf_dir = input('Enter PENDF dir: ')
-ace_dir = input('Enter ACE dir: ')
 
-pendfs = os.listdir(pendf_dir)
-aces = os.listdir(ace_dir)
+
+
+
 
 
 
@@ -21,6 +20,8 @@ new_indices = list(range(new_lower_index, new_upper_index))
 mode = input('Enter mode ace/pendf: ')
 
 if mode == 'ace':
+	ace_dir = input('Enter ACE dir: ')
+	aces = os.listdir(ace_dir)
 	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
 
 		new_ace_filename = f'94239_{new_i}.03c'
@@ -30,6 +31,8 @@ if mode == 'ace':
 
 
 if mode == 'pendf':
+	pendf_dir = input('Enter PENDF dir: ')
+	pendfs = os.listdir(pendf_dir)
 	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
 
 		new_pendf_filename = f'94239_{new_i}.pendf'
