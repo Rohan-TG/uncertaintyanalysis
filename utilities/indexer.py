@@ -18,19 +18,21 @@ new_upper_index = int(input('Enter new upper index: '))
 
 new_indices = list(range(new_lower_index, new_upper_index))
 
-for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
+mode = input('Enter mode ace/pendf: ')
 
-	new_ace_filename = f'94239_{new_i}.03c'
-	old_ace_filename = f'94239_{old_i}.03c'
+if mode == 'ace':
+	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
 
+		new_ace_filename = f'94239_{new_i}.03c'
+		old_ace_filename = f'94239_{old_i}.03c'
 
-	new_pendf_filename = f'94239_{new_i}.pendf'
-	old_pendf_filename = f'94239_{old_i}.pendf'
-
-	# print(f'{old_i} -> {new_i} \n')
-
-	subprocess.run(f'mv {ace_dir}/{old_ace_filename} {ace_dir}/{new_ace_filename}', shell=True)
-
-	subprocess.run(f'mv {pendf_dir}/{old_pendf_filename} {pendf_dir}/{new_pendf_filename}', shell=True)
+		subprocess.run(f'mv {ace_dir}/{old_ace_filename} {ace_dir}/{new_ace_filename}', shell=True)
 
 
+if mode == 'pendf':
+	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
+
+		new_pendf_filename = f'94239_{new_i}.pendf'
+		old_pendf_filename = f'94239_{old_i}.pendf'
+
+		subprocess.run(f'mv {pendf_dir}/{old_pendf_filename} {pendf_dir}/{new_pendf_filename}', shell=True)
