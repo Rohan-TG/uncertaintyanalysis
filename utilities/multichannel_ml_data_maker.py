@@ -21,7 +21,7 @@ pendf_dir = input("Enter PENDF directory: ")
 group_1 = input("Enter group 1: ")
 group_2 = input("Enter group 2: ")
 
-parquet_directory = input("Enter parquet directory: ")
+parquet_directory = os.getcwd()
 
 output_files = os.listdir(outputs_directory)
 
@@ -38,7 +38,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 
 	name_split = outputfile.split('_')
 
-	perturbation_1 = float(name_split[1])
+	perturbation_1 = float(name_split[2])
 	perturbation_2 = float(name_split[-1][:-2])
 
 	perturbation_1_list.append(perturbation_1)
@@ -61,37 +61,38 @@ keff_dataframe = pd.DataFrame({'keff': keff_list, 'keff_err': keff_error_list, '
 pendf_names = os.listdir(pendf_dir)
 length_list = []
 
-# def parquet_maker(filename):
-# 	"""Filename should be the name of the PENDF we're reading from"""
-# 	f = open(f'{pendf_dir}/{filename}')
-# 	lines = f.readlines()
-# 	FirstMTsection = ENDF6.find_section(lines, MF=3, MT=First_MT)
-# 	erg, firstxs = ENDF6.read_table(FirstMTsection)
+def parquet_maker(filename):
+	"""Filename should be the name of the PENDF we're reading from"""
+	f = open(f'{pendf_dir}/{filename}')
+	lines = f.readlines()
+	FirstMTsection = ENDF6.find_section(lines, MF=3, MT=First_MT)
+	erg, firstxs = ENDF6.read_table(FirstMTsection)
+
+
+	SecondMTsection = ENDF6.find_section(lines, MF=3, MT=Second_MT)
+	seconderg, secondxs = ENDF6.read_table(SecondMTsection)
+
+	name_split = filename.split('_')
+	coefficient1 = float(name_split[3])
 #
-#
-# 	SecondMTsection = ENDF6.find_section(lines, MF=3, MT=Second_MT)
-# 	seconderg, secondxs = ENDF6.read_table(SecondMTsection)
-#
-# 	name_split = filename.split('_')
-# 	coefficient1 = float(name_split[3])
-#
-# 	coefficient2 = float(name_split[-1][:-6])
-# 	coeff1_list = [coefficient1 for i in firstxs]
-# 	coeff2_list = [coefficient2 for i in firstxs]
-#
-# 	reduced_keff_df = keff_dataframe[keff_dataframe.p1 == coefficient1]
-# 	reduced_keff_df = reduced_keff_df[reduced_keff_df.p2 == coefficient2]
-#
-#
-# 	keff_list = [reduced_keff_df['keff'].values[0] for i in firstxs]
-# 	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in firstxs]
-#
-# 	df = pd.DataFrame({'ERG': erg,
-# 					   'MT18_XS': firstxs,
-# 					   'MT2_XS': secondxs,
-# 					   'keff': keff_list,
-# 					   'keff_err': keff_err_list,
-# 					   'p1': coeff1_list,
-# 					   'p2': coeff2_list})
-#
-# 	df.to_parquet(f'Pu-239_g4_MT{FirstMT}_{coefficient1}_MT{SecondMT}_{coefficient2}.parquet', engine='pyarrow')
+	coefficient2 = float(name_split[-1][:-6])
+	coeff1_list = [coefficient1 for i in firstxs]
+	coeff2_list = [coefficient2 for i in firstxs]
+
+	reduced_keff_df = keff_dataframe[keff_dataframe.p1 == coefficient1]
+	reduced_keff_df = reduced_keff_df[reduced_keff_df.p2 == coefficient2]
+
+
+	keff_list = [reduced_keff_df['keff'].values[0] for i in firstxs]
+	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in firstxs]
+
+	df = pd.DataFrame({'ERG': erg,
+					   f'MT{First_MT}_XS': firstxs,
+					   f'MT{Second_MT}_XS': secondxs,
+					   'keff': keff_list,
+					   'keff_err': keff_err_list,
+					   'p1': coeff1_list,
+					   'p2': coeff2_list})
+
+	df.to_parquet(f'{parquet_directory}/Pu-239_g4_MT{First_MT}_{coefficient1}_MT{Second_MT}_{coefficient2}.parquet',
+				  engine='pyarrow')
