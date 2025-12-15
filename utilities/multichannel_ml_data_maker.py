@@ -96,3 +96,10 @@ def parquet_maker(filename):
 
 	df.to_parquet(f'{parquet_directory}/Pu-239_g4_MT{First_MT}_{coefficient1}_MT{Second_MT}_{coefficient2}.parquet',
 				  engine='pyarrow')
+
+
+with ProcessPoolExecutor(max_workers=processes) as executor:
+	futures = [executor.submit(parquet_maker, file) for file in pendf_names]
+
+	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		pass
