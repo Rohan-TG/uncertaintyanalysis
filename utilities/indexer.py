@@ -7,10 +7,11 @@ import tqdm
 
 
 
+original_lower_index = int(input('Original lower index: '))
+original_upper_index = int(input('Original upper index: '))
 
 
-
-original_indices = list(range(0,2000))
+original_indices = list(range(original_lower_index,original_upper_index))
 
 new_lower_index = int(input('Enter new lower index: '))
 new_upper_index = int(input('Enter new upper index: '))
