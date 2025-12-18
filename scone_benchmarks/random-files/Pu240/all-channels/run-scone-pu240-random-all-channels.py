@@ -55,7 +55,7 @@ ACE_files = os.listdir(ACE_file_directory)
 for ace_file in tqdm.tqdm(ACE_files):
 	file_index = int(ace_file.split('.03c')[0].split('_')[1])
 
-	ACE_filename = f'{ACE_file_directory}/94239_{file_index}.03c' # ACE file for this iteration
+	ACE_filename = f'{ACE_file_directory}/{ZA}_{file_index}.03c' # ACE file for this iteration
 
 	with open(libfile, 'r') as file: # the ACE address file (.xsfile)
 		lines = file.readlines()
