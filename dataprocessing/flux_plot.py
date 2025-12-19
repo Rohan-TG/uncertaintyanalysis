@@ -25,7 +25,7 @@ def extract_flux(output_file):
 
 
 
-with open('output-normal.m', 'r') as file:
+with open('output.m', 'r') as file:
 	lines = file.readlines()
 
 	active_flux_EnergyBounds = lines[16]
@@ -44,8 +44,20 @@ with open('output-normal.m', 'r') as file:
 
 	active_flux_Res = np.array(afR, dtype=float).reshape((2, 1, 300), order='F')
 
+
+	upper_bound_flux = []
+	lower_bound_flux = []
+	for value, error in zip(active_flux_Res[0][0], active_flux_Res[1][0]):
+		upper_bound_flux.append(value + error)
+		lower_bound_flux.append(value - error)
+
+
+	xthing = np.arange(0,300, 1)
+
 	plt.figure()
-	plt.plot(active_flux_Res[1][0])
+	# plt.plot(active_flux_Res[1][0])
+	plt.plot(active_flux_Res[0][0])
+	plt.fill_between(xthing, upper_bound_flux, lower_bound_flux, color='blue', alpha=0.5)
 	plt.grid()
 	plt.ylabel('Flux')
 	plt.show()
