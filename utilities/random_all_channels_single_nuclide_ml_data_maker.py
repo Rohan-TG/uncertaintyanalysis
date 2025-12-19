@@ -19,6 +19,7 @@ output_files = os.listdir(outputs_directory)
 lower_energy_bound = float(input("Truncation: "))
 
 pendf_directory = input("Enter PENDF directory: ")
+processes = int(input("Number of processes: "))
 
 parquet_directory = os.getcwd()
 
@@ -116,3 +117,9 @@ def parquet_maker(filename):
 					   })
 
 	df.to_parquet(f'{parquet_directory}/{isotope}_random_{pendf_index}_all_channels.parquet', engine='pyarrow')
+
+with ProcessPoolExecutor(max_workers=processes) as executor:
+	futures = [executor.submit(parquet_maker, file) for file in pendf_names]
+
+	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		pass
