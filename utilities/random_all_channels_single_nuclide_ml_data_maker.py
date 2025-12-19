@@ -106,7 +106,7 @@ def parquet_maker(filename):
 	keff_list = [reduced_keff_df['keff'].values[0] for i in truncated_fission_erg]
 	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in truncated_fission_erg]
 
-	df = pd.DataFrame({'ERG': fission_erg,
+	df = pd.DataFrame({'ERG': truncated_fission_erg,
 					   'MT2_XS': elastic_to_fission,
 					   'MT4_XS': inelastic_to_fission,
 					   'MT16_XS': n2n_to_fission,
