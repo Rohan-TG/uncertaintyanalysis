@@ -1,16 +1,11 @@
 import os
 import sys
-
-from networkx.generators.small import truncated_cube_graph
-
-from groupEnergies import Reactions
-
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-
+from groupEnergies import Reactions
 import pandas as pd
 import tqdm
 from concurrent.futures import ProcessPoolExecutor, as_completed
