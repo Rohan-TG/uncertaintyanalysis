@@ -3,8 +3,6 @@ import subprocess
 import tqdm
 
 
-ZA = input('Enter the ZA combination (e.g. 94239): ')
-
 
 original_lower_index = int(input('Original lower index: '))
 original_upper_index = int(input('Original upper index: '))
