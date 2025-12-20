@@ -5,6 +5,7 @@ import tqdm
 
 
 
+ZA = input('Enter the ZA combination (e.g. 94239): ')
 
 
 original_lower_index = int(input('Original lower index: '))
@@ -25,8 +26,8 @@ if mode == 'ace':
 	aces = os.listdir(ace_dir)
 	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
 
-		new_ace_filename = f'94239_{new_i}.03c'
-		old_ace_filename = f'94239_{old_i}.03c'
+		new_ace_filename = f'{ZA}_{new_i}.03c'
+		old_ace_filename = f'{ZA}_{old_i}.03c'
 
 		subprocess.run(f'mv {ace_dir}/{old_ace_filename} {ace_dir}/{new_ace_filename}', shell=True)
 
@@ -36,7 +37,7 @@ if mode == 'pendf':
 	pendfs = os.listdir(pendf_dir)
 	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
 
-		new_pendf_filename = f'94239_{new_i}.pendf'
-		old_pendf_filename = f'94239_{old_i}.pendf'
+		new_pendf_filename = f'{ZA}_{new_i}.pendf'
+		old_pendf_filename = f'{ZA}_{old_i}.pendf'
 
 		subprocess.run(f'mv {pendf_dir}/{old_pendf_filename} {pendf_dir}/{new_pendf_filename}', shell=True)
