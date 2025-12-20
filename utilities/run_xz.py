@@ -7,7 +7,10 @@ import datetime
 
 start = time.time()
 
-target_directory = input("Enter directory: ")
+target_directory = input("Enter directory (type here for cwd): ")
+if target_directory == "here":
+	target_directory = os.getcwd()
+
 filetype = input("Enter file type: ")
 processes = int(input("Enter n. processes: "))
 cores_per_job = int(input("Cores per process: "))
