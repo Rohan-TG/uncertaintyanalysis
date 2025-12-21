@@ -11,7 +11,7 @@ if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-from groupEnergies import Pu239, Reactions
+from groupEnergies import Pu239
 
 start_time = time.time()
 ZA = Pu239.ZA # ZA for Pu-240
@@ -31,7 +31,7 @@ default_Jezebel = 'Jezebel'
 
 target_path = current_dir[:(idxt + len(target_dir))]
 libfilename = f'lib{ZA}.xsfile'
-mt = Reactions.fission
+# mt = Reactions.fission
 
 subprocess.run(f"cp {target_path}/{default_xsfile} {libfilename}", shell=True)
 subprocess.run(f"cp {target_path}/{default_Jezebel} Jezebel", shell=True)
