@@ -61,6 +61,11 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 	pu241_file_index_list.append(Pu241_file_index)
 
 
+index_matrix = []
+for pu9_idx, pu0_idx, pu1_idx in zip(pu239_file_index_list, pu240_file_index_list, pu241_file_index_list):
+	index_matrix.append([pu9_idx, pu0_idx, pu1_idx])
+
+
 keff_dataframe = pd.DataFrame({'keff': keff_list,
 							   'keff_err': keff_error_list,
 							   'pu239_file_index': pu239_file_index_list,
@@ -75,8 +80,12 @@ pu241_pendf_names = os.listdir(pu241_pendf_directory)
 
 print('Reading PENDFs and forming dataframes...')
 
-def parquet_maker(pu239_index, pu240_index, pu241_index):
+def parquet_maker(index_combination):
 	"""Filename should be the name of the PENDF we're reading from"""
+
+	pu239_index = index_combination[0]
+	pu240_index = index_combination[1]
+	pu241_index = index_combination[2]
 
 	reduced_keff_df = keff_dataframe[keff_dataframe.pu239_file_index == pu239_index]
 	# reduced_keff_df = reduced_keff_df[reduced_keff_df.pu240_file_index == pu240_index]
@@ -220,8 +229,7 @@ def parquet_maker(pu239_index, pu240_index, pu241_index):
 
 # run the whole thing
 with ProcessPoolExecutor(max_workers=processes) as executor:
-	futures = [
-		executor.submit(parquet_maker, pu9_ix, pu0_ix, pu1_ix) for pu9_ix, pu0_ix, pu1_ix in zip(pu239_file_index_list, pu240_file_index_list, pu241_file_index_list)
+	futures = [executor.submit(parquet_maker, indices) for indices in index_matrix
 	]
 
 	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
