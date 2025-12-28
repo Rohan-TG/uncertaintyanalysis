@@ -95,7 +95,7 @@ reduced_keff_df = keff_dataframe[keff_dataframe.pu239_file_index == pu239_index]
 
 pu239_filename = f'94239_{pu239_index}.pendf'
 pu240_filename = f'94240_{pu240_index}.pendf'
-pu241_filename = f'92241_{pu241_index}.pendf'
+pu241_filename = f'94241_{pu241_index}.pendf'
 
 
 # Extract Pu-239 data
