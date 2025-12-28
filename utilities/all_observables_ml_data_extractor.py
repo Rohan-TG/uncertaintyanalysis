@@ -83,8 +83,8 @@ def parquet_maker(pu239_index, pu240_index, pu241_index):
 	reduced_keff_df = reduced_keff_df[reduced_keff_df.pu241_file_index == pu241_index]
 
 	pu239_filename = f'94239_{pu239_index}.pendf'
-	pu240_filename = f'94239_{pu240_index}.pendf'
-	pu241_filename = f'9240_{pu241_index}.pendf'
+	pu240_filename = f'94240_{pu240_index}.pendf'
+	pu241_filename = f'92241_{pu241_index}.pendf'
 
 
 	# Extract Pu-239 data
