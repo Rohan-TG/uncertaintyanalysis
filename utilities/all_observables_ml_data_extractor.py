@@ -79,8 +79,8 @@ def parquet_maker(pu239_index, pu240_index, pu241_index):
 	"""Filename should be the name of the PENDF we're reading from"""
 
 	reduced_keff_df = keff_dataframe[keff_dataframe.pu239_file_index == pu239_index]
-	reduced_keff_df = reduced_keff_df[reduced_keff_df.pu240_file_index == pu240_index]
-	reduced_keff_df = reduced_keff_df[reduced_keff_df.pu241_file_index == pu241_index]
+	# reduced_keff_df = reduced_keff_df[reduced_keff_df.pu240_file_index == pu240_index]
+	# reduced_keff_df = reduced_keff_df[reduced_keff_df.pu241_file_index == pu241_index]
 
 	pu239_filename = f'94239_{pu239_index}.pendf'
 	pu240_filename = f'94240_{pu240_index}.pendf'
