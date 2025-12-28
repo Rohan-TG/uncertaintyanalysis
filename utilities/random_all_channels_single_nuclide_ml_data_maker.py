@@ -52,7 +52,7 @@ keff_dataframe = pd.DataFrame({'keff': keff_list,
 							   'file_index': file_index_list})
 
 pendf_names = os.listdir(pendf_directory)
-length_list = []
+
 print('Reading PENDFs and forming dataframes...')
 
 def parquet_maker(filename):
