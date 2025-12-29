@@ -1,4 +1,6 @@
 import os
+
+import numpy as np
 import pandas as pd
 import tqdm
 import sys
@@ -72,6 +74,10 @@ def parquet_maker(filename):
 	SecondMTsection = ENDF6.find_section(lines, MF=3, MT=Second_MT)
 	seconderg, secondxs = ENDF6.read_table(SecondMTsection)
 
+
+
+	interpolated_mt_xs = np.interp(erg, seconderg, secondxs)
+
 	name_split = filename.split('_')
 	coefficient1 = float(name_split[3])
 #
@@ -88,7 +94,7 @@ def parquet_maker(filename):
 
 	df = pd.DataFrame({'ERG': erg,
 					   f'MT{First_MT}_XS': firstxs,
-					   f'MT{Second_MT}_XS': secondxs,
+					   f'MT{Second_MT}_XS': interpolated_mt_xs,
 					   'keff': keff_list,
 					   'keff_err': keff_err_list,
 					   'p1': coeff1_list,
