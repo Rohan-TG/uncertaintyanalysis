@@ -149,6 +149,13 @@ scaled_columns_xtest = np.array(scaled_columns_xtest)
 X_test = scaled_columns_xtest.transpose()
 
 
+test_mask = ~np.isnan(X_test).any(axis=0)
+X_test = X_test[:, test_mask]
+
+train_mask = ~np.isnan(X_train).any(axis=0)
+X_train = X_train[:, train_mask]
+
+
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
 										 patience=20,
