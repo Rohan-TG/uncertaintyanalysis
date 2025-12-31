@@ -19,7 +19,7 @@ import time
 
 
 
-data_directory = ''
+data_directory = input('Data directory: ')
 
 all_parquets = os.listdir(data_directory)
 
