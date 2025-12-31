@@ -58,20 +58,20 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	pu0_mt2xs = dftrain['94240_MT2_XS'].values.tolist()
 	pu1_mt2xs = dftrain['94241_MT2_XS'].values.tolist()
 
-	# pu9_mt4xs = dftrain['94239_MT4_XS'].values.tolist()
-	# pu0_mt4xs = dftrain['94240_MT4_XS'].values.tolist()
-	# pu1_mt4xs = dftrain['94241_MT4_XS'].values.tolist()
+	pu9_mt4xs = dftrain['94239_MT4_XS'].values.tolist()
+	pu0_mt4xs = dftrain['94240_MT4_XS'].values.tolist()
+	pu1_mt4xs = dftrain['94241_MT4_XS'].values.tolist()
 
-	# pu9_mt16xs = dftrain['94239_MT16_XS'].values.tolist()
-	# pu0_mt16xs = dftrain['94240_MT16_XS'].values.tolist()
-	# pu1_mt16xs = dftrain['94241_MT16_XS'].values.tolist()
+	pu9_mt16xs = dftrain['94239_MT16_XS'].values.tolist()
+	pu0_mt16xs = dftrain['94240_MT16_XS'].values.tolist()
+	pu1_mt16xs = dftrain['94241_MT16_XS'].values.tolist()
 
 	pu9_mt102xs = dftrain['94239_MT102_XS'].values.tolist()
 	pu0_mt102xs = dftrain['94240_MT102_XS'].values.tolist()
 	pu1_mt102xs = dftrain['94241_MT102_XS'].values.tolist()
 
-	# xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
-	xsobject = pu9_mt2xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt18xs + pu1_mt102xs
+	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	# xsobject = pu9_mt2xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt18xs + pu1_mt102xs
 	XS_train.append(xsobject)
 
 XS_train = np.array(XS_train)
@@ -112,13 +112,13 @@ for file in tqdm.tqdm(test_files, total=len(test_files)):
 	pu0_mt2xs = dftest['94240_MT2_XS'].values.tolist()
 	pu1_mt2xs = dftest['94241_MT2_XS'].values.tolist()
 
-	# pu9_mt4xs = dftest['94239_MT4_XS'].values.tolist()
-	# pu0_mt4xs = dftest['94240_MT4_XS'].values.tolist()
-	# pu1_mt4xs = dftest['94241_MT4_XS'].values.tolist()
-	#
-	# pu9_mt16xs = dftest['94239_MT16_XS'].values.tolist()
-	# pu0_mt16xs = dftest['94240_MT16_XS'].values.tolist()
-	# pu1_mt16xs = dftest['94241_MT16_XS'].values.tolist()
+	pu9_mt4xs = dftest['94239_MT4_XS'].values.tolist()
+	pu0_mt4xs = dftest['94240_MT4_XS'].values.tolist()
+	pu1_mt4xs = dftest['94241_MT4_XS'].values.tolist()
+
+	pu9_mt16xs = dftest['94239_MT16_XS'].values.tolist()
+	pu0_mt16xs = dftest['94240_MT16_XS'].values.tolist()
+	pu1_mt16xs = dftest['94241_MT16_XS'].values.tolist()
 
 	pu9_mt102xs = dftest['94239_MT102_XS'].values.tolist()
 	pu0_mt102xs = dftest['94240_MT102_XS'].values.tolist()
@@ -126,8 +126,8 @@ for file in tqdm.tqdm(test_files, total=len(test_files)):
 
 	keff_test += [float(dftest['keff'].values[0])]
 
-	# xsobject_test = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
-	xsobject_test = pu9_mt2xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs  + pu1_mt18xs + pu1_mt102xs
+	xsobject_test = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	# xsobject_test = pu9_mt2xs + pu9_mt18xs + pu9_mt18xs + pu0_mt2xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs  + pu1_mt18xs + pu1_mt102xs
 
 	XS_test.append(xsobject_test)
 
