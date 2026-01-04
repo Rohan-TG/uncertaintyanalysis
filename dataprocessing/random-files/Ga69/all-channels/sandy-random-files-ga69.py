@@ -150,7 +150,7 @@ for i, energy_bounds in tqdm.tqdm(enumerate(domains), total=len(domains)):
 
 
 	working_perturbed_endf6.append(pendf_pert_5)
-	working_perturbed_endf6.append(heated_pendf_pert_5)
+	working_perturbed_endf6_heated.append(heated_pendf_pert_5)
 
 
 heated_pendf_pert_5.to_file('Ga-69_all_groups_random_perturbations_test.pendf')
