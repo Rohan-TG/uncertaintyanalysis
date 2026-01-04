@@ -1,15 +1,16 @@
 import sandy
 import sys
 import os
-
+import numpy as np
+import random
+import tqdm
 
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-from groupEnergies import Ga69
-
+from groupEnergies import Ga69, Groups
 
 lib_name = "ENDFB_80"
 nucl = Ga69.ZA * 10
@@ -20,43 +21,141 @@ endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 # pendf = endf6.get_pendf(err=0.0001)
 
 
-num_samples = 10  # number of samples
-processes = 2
+perturbation_coefficients = np.arange(-0.40, 0.41, 0.01)
+
+endf6 = sandy.get_endf6_file("ENDFB_80", "xs", nucl)
+
+pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
+pendf = endf6.get_pendf(err=0.0001, verbose=True)
+
+# xs = sandy.Xs.from_endf6(pendf)
+# heated_xs = sandy.Xs.from_endf6(pendfheated)
+
+mat = Ga69.MAT
+
+sensitive_MTs = [2, 4, 16, 18, 102]
+
+
+domains = [[Groups.g1, Groups.g0],
+		   [Groups.g2, Groups.g1],
+		   [Groups.g3, Groups.g2],
+		   [Groups.g4, Groups.g3],
+		   [Groups.g5, Groups.g4],
+		   [Groups.g6, Groups.g5],
+		   [Groups.g7, Groups.g6],
+		   [Groups.g8, Groups.g7],
+		   [Groups.g9, Groups.g8],
+		   [Groups.g10, Groups.g9],
+		   [Groups.g11, Groups.g10],
+		   [Groups.g12, Groups.g11],
+		   [Groups.g13, Groups.g12],
+		   [Groups.g14, Groups.g13],
+		   [Groups.g15, Groups.g14],
+		   [Groups.g16, Groups.g15],
+		   [Groups.g17, Groups.g16],
+		   [Groups.g33, Groups.g17],]
+
+
+working_perturbed_endf6 = [pendf]
+working_perturbed_endf6_heated = [pendfheated]
+
+for i, energy_bounds in tqdm.tqdm(enumerate(domains), total=len(domains)):
+
+	channel_1 = sensitive_MTs[0]
+
+	group_perturbation_coefficient_1 = round(random.uniform(-0.50, 0.50),2)
+
+	perturbation = sandy.Pert([1, 1 + group_perturbation_coefficient_1], index = energy_bounds)
+
+	xs = sandy.Xs.from_endf6(working_perturbed_endf6[i])
+	heated_xs = sandy.Xs.from_endf6(working_perturbed_endf6_heated[i])
+
+	xspert = xs.custom_perturbation(mat, channel_1, perturbation)
+	heated_xspert = heated_xs.custom_perturbation(mat, channel_1, perturbation)
+
+	pendf_pert = xspert.to_endf6(pendf)  # Create PENDF of perturbed data
+	heated_pendf_pert = heated_xspert.to_endf6(pendfheated)
+
+	#### begin secondary perturbation, second MT
+
+	channel_2 = sensitive_MTs[1]
+
+	group_perturbation_coefficient_2 = round(random.uniform(-0.50, 0.50),2)
+
+	xs_2_unheated = sandy.Xs.from_endf6(pendf_pert)
+	xs_2_heated = sandy.Xs.from_endf6(heated_pendf_pert)
+
+	secondary_perturbation = sandy.Pert([1, 1 + group_perturbation_coefficient_2], index= energy_bounds)
+	xspert_2_unheated = xs_2_unheated.custom_perturbation(mat, channel_2, secondary_perturbation)
+
+	xspert_2_heated = xs_2_heated.custom_perturbation(mat, channel_2, secondary_perturbation)
+
+	pendf_pert_2 = xspert_2_unheated.to_endf6(pendf_pert)
+	heated_pendf_pert_2 = xspert_2_heated.to_endf6(heated_pendf_pert)
+
+
+	#### begin 3rd perturbation
+
+	channel_3 = sensitive_MTs[2]
+
+	group_perturbation_coefficient_3 = round(random.uniform(-0.50, 0.50),2)
+
+	xs_3_unheated = sandy.Xs.from_endf6(pendf_pert_2)
+	xs_3_heated = sandy.Xs.from_endf6(heated_pendf_pert_2)
+
+	perturbations_3 = sandy.Pert([1, 1 + group_perturbation_coefficient_3], index = energy_bounds)
+	xspert_3_unheated = xs_3_unheated.custom_perturbation(mat, channel_3, perturbations_3)
+
+	xspert_3_heated = xs_3_heated.custom_perturbation(mat, channel_3, perturbations_3)
+
+	pendf_pert_3 = xspert_3_unheated.to_endf6(pendf_pert)
+	heated_pendf_pert_3 = xspert_3_heated.to_endf6(heated_pendf_pert)
+
+
+	##### perturbation of 4th channel
+
+	channel_4 = sensitive_MTs[3]
+
+	group_perturbation_coefficient_4 = round(random.uniform(-0.50, 0.50),2)
+
+	xs_4_unheated = sandy.Xs.from_endf6(pendf_pert_3)
+	xs_4_heated = sandy.Xs.from_endf6(heated_pendf_pert_3)
+
+	perturbations_4 = sandy.Pert([1, 1 + group_perturbation_coefficient_4], index = energy_bounds)
+	xspert_4_unheated = xs_4_unheated.custom_perturbation(mat, channel_4, perturbations_4)
+
+	xspert_4_heated = xs_4_heated.custom_perturbation(mat, channel_4, perturbations_4)
+
+	pendf_pert_4 = xspert_4_unheated.to_endf6(pendf_pert)
+	heated_pendf_pert_4 = xspert_4_heated.to_endf6(heated_pendf_pert)
 
 
 
-samples = endf6.get_perturbations(
-	num_samples,
-	njoy_kws=dict(
-		err=0.0001,
-		chi=False,
-		mubar=False,
-		xs=True,
-		nubar=False,
-		verbose=True,
-	),
-)
+	#### Perturbation 5
 
-outs = endf6.apply_perturbations( # generates the PENDFs only
-	samples,
-	processes=processes,
-	njoy_kws=dict(err=0.0001),  # low error
-	# to_ace=True,   # produce ACE files
-	to_file=True,
-	# ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
-	verbose=True,
-)
+	channel_5 = sensitive_MTs[3]
+
+	group_perturbation_coefficient_5 = round(random.uniform(-0.50, 0.50), 2)
+
+	xs_5_unheated = sandy.Xs.from_endf6(pendf_pert_4)
+	xs_5_heated = sandy.Xs.from_endf6(heated_pendf_pert_4)
+
+	perturbations_5 = sandy.Pert([1, 1 + group_perturbation_coefficient_5], index=energy_bounds)
+	xspert_5_unheated = xs_5_unheated.custom_perturbation(mat, channel_5, perturbations_5)
+
+	xspert_5_heated = xs_5_heated.custom_perturbation(mat, channel_5, perturbations_5)
+
+	pendf_pert_5 = xspert_5_unheated.to_endf6(pendf_pert)
+	heated_pendf_pert_5 = xspert_5_heated.to_endf6(heated_pendf_pert)
 
 
-ace_outs = endf6.apply_perturbations(
-	samples,
-	processes=processes,
-	njoy_kws=dict(err=0.0001),
-	to_ace = True,
-	ace_kws=dict(err=0.0001, temperature=300, verbose=True, purr=True, heatr=False, thermr=False, gaspr=False),
-	to_file=True,
-	verbose=True,
-)
+	working_perturbed_endf6.append(pendf_pert_5)
+	working_perturbed_endf6.append(heated_pendf_pert_5)
 
 
+heated_pendf_pert_5.to_file('Ga-69_all_groups_random_perturbations_test.pendf')
 
+pendf.to_file('Ga-69_unperturbed_test.pendf')
+
+# outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True,
+# 								   pendf=pendf_pert_5)
