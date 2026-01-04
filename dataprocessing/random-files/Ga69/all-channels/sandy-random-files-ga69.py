@@ -133,7 +133,7 @@ for i, energy_bounds in tqdm.tqdm(enumerate(domains), total=len(domains)):
 
 	#### Perturbation 5
 
-	channel_5 = sensitive_MTs[3]
+	channel_5 = sensitive_MTs[4]
 
 	group_perturbation_coefficient_5 = round(random.uniform(-0.50, 0.50), 2)
 
