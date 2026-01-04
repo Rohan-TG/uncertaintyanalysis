@@ -33,7 +33,7 @@ pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
 mat = Ga69.MAT
 
-sensitive_MTs = [2, 4, 16, 18, 102]
+sensitive_MTs = [2, 4, 16, 102]
 
 
 domains = [[Groups.g1, Groups.g0],
@@ -131,29 +131,13 @@ for i, energy_bounds in tqdm.tqdm(enumerate(domains), total=len(domains)):
 
 
 
-	#### Perturbation 5
-
-	channel_5 = sensitive_MTs[4]
-
-	group_perturbation_coefficient_5 = round(random.uniform(-0.50, 0.50), 2)
-
-	xs_5_unheated = sandy.Xs.from_endf6(pendf_pert_4)
-	xs_5_heated = sandy.Xs.from_endf6(heated_pendf_pert_4)
-
-	perturbations_5 = sandy.Pert([1, 1 + group_perturbation_coefficient_5], index=energy_bounds)
-	xspert_5_unheated = xs_5_unheated.custom_perturbation(mat, channel_5, perturbations_5)
-
-	xspert_5_heated = xs_5_heated.custom_perturbation(mat, channel_5, perturbations_5)
-
-	pendf_pert_5 = xspert_5_unheated.to_endf6(pendf_pert)
-	heated_pendf_pert_5 = xspert_5_heated.to_endf6(heated_pendf_pert)
 
 
-	working_perturbed_endf6.append(pendf_pert_5)
-	working_perturbed_endf6_heated.append(heated_pendf_pert_5)
+	working_perturbed_endf6.append(pendf_pert_4)
+	working_perturbed_endf6_heated.append(heated_pendf_pert_4)
 
 
-heated_pendf_pert_5.to_file('Ga-69_all_groups_random_perturbations_test.pendf')
+heated_pendf_pert_4.to_file('Ga-69_all_groups_random_perturbations_test.pendf')
 
 pendf.to_file('Ga-69_unperturbed_test.pendf')
 
