@@ -25,7 +25,7 @@ data_directory = input('Data directory: ')
 all_parquets = os.listdir(data_directory)
 
 training_fraction = float(input('Enter training data fraction: '))
-# lower_energy_bound = float(input('Enter lower energy bound in eV: '))
+lower_energy_bound = float(input('Enter lower energy bound in eV: '))
 
 n_training_samples = int(training_fraction * len(all_parquets))
 
@@ -47,7 +47,7 @@ for file in tqdm.tqdm(training_files, total=len(training_files)):
 	# group = file.split('_')[1][1]
 
 	dftrain = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
-	# dftrain = dftrain[dftrain['ERG'] >= lower_energy_bound]
+	dftrain = dftrain[dftrain['ERG'] >= lower_energy_bound]
 
 	keff_train += [float(dftrain['keff'].values[0])]  # append k_eff value from the file
 
@@ -104,6 +104,7 @@ print('Fetching test data...')
 for file in tqdm.tqdm(test_files, total=len(test_files)):
 	# group = file.split('_')[1][1]
 	dftest = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
+	dftest = dftest[dftest['ERG'] >= lower_energy_bound]
 
 	pu9_mt18xs = dftest['94239_MT18_XS'].values.tolist()
 	pu0_mt18xs = dftest['94240_MT18_XS'].values.tolist()
