@@ -89,7 +89,7 @@ XS_train = []
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
 
-	for future in as_completed(futures):
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		xs_values, keff_value = future.result()
 		XS_train.append(xs_values)
 		keff_train.append(keff_value)
@@ -189,7 +189,7 @@ print('Fetching test data...')
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
 
-	for future in as_completed(futures):
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		xs_values_test, keff_value_test = future.result()
 		XS_test.append(xs_values_test)
 		keff_test.append(keff_value_test)
