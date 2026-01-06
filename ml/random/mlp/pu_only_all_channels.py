@@ -241,7 +241,7 @@ import datetime
 trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
-					epochs=75,
+					epochs=150,
 					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
