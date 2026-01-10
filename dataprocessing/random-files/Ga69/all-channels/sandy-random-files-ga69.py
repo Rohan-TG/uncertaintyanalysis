@@ -14,6 +14,10 @@ elif computer == 'oppie':
 from groupEnergies import Ga69, Groups
 import time
 
+
+num_processes = int(input('Num cores: '))
+num_files = int(input('Number of files to generate: '))
+
 start = time.time()
 
 lib_name = "ENDFB_80"
@@ -59,8 +63,6 @@ domains = [[Groups.g1, Groups.g0],
 		   [Groups.g17, Groups.g16],
 		   [Groups.g33, Groups.g17],]
 
-num_processes = int(input('Num cores: '))
-num_files = int(input('Number of files to generate: '))
 index_numbers = list(range(0, num_files))
 
 
