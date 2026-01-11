@@ -280,9 +280,10 @@ borderline_predictions = []
 for x in absolute_errors:
 	if x <= 5.0:
 		acceptable_predictions.append(x)
-	elif x <= 10.0:
+	if x <= 10.0:
 		borderline_predictions.append(x)
 
 
 print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+
