@@ -1,22 +1,33 @@
-import pandas as pd
-import keras
-import numpy as np
 import os
-import time
-from scipy.stats import zscore
-import random
-import tqdm
-# import matplotlib.pyplot as plt
-import datetime
 import sys
-sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
-data_directory = input('Enter data directory: ')
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+# 1D CNN
+
+computer = os.uname().nodename
+if computer == 'fermiac':
+	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
+elif computer == 'oppie':
+	sys.path.append('/home/rnt26/uncertaintyanalysis/')
+import pandas as pd
+import random
+import numpy as np
+from scipy.stats import zscore
+import tqdm
+import keras
+import time
 
 
+
+
+data_directory = input('Data directory: ')
+data_processes = int(input('Num. data processors: '))
 
 all_parquets = os.listdir(data_directory)
 
 training_fraction = float(input('Enter training data fraction: '))
+lower_energy_bound = float(input('Enter lower energy bound in eV: '))
+
 n_training_samples = int(training_fraction * len(all_parquets))
 
 training_files = []
@@ -30,139 +41,158 @@ for file in all_parquets:
 	if file not in training_files:
 		test_files.append(file)
 
+print('Fetching training data...')
+
+
+
+
+
+def fetch_data(datafile):
+
+	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
+
+	keff_value = float(temp_df['keff'].values[0])
+
+	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
+	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
+	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
+
+	pu9_mt2xs = temp_df['94239_MT2_XS'].values.tolist()
+	pu0_mt2xs = temp_df['94240_MT2_XS'].values.tolist()
+	pu1_mt2xs = temp_df['94241_MT2_XS'].values.tolist()
+
+	pu9_mt4xs = temp_df['94239_MT4_XS'].values.tolist()
+	pu0_mt4xs = temp_df['94240_MT4_XS'].values.tolist()
+	pu1_mt4xs = temp_df['94241_MT4_XS'].values.tolist()
+
+	pu9_mt16xs = temp_df['94239_MT16_XS'].values.tolist()
+	pu0_mt16xs = temp_df['94240_MT16_XS'].values.tolist()
+	pu1_mt16xs = temp_df['94241_MT16_XS'].values.tolist()
+
+	pu9_mt102xs = temp_df['94239_MT102_XS'].values.tolist()
+	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
+	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
+
+	# xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	#
+	# XS_obj = xsobject
+
+	XS_obj = [pu9_mt2xs, pu9_mt4xs, pu9_mt16xs, pu9_mt18xs, pu9_mt102xs,
+				pu0_mt2xs, pu0_mt4xs, pu0_mt16xs, pu0_mt18xs, pu0_mt102xs,
+				pu1_mt2xs, pu1_mt4xs, pu1_mt16xs, pu1_mt18xs, pu1_mt102xs,]
+
+	return(XS_obj, keff_value)
+
+
 
 keff_train = [] # k_eff labels
+XS_train = []
+
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
+
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values, keff_value = future.result()
+		XS_train.append(xs_values)
+		keff_train.append(keff_value)
+
+XS_train = np.array(XS_train)
+y_train = zscore(keff_train)
 
 
-fission_train = []
+scaling_matrix_xtrain = XS_train.transpose()
 
-for file in tqdm.tqdm(training_files, total=len(training_files)):
-	dftrain = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow') # Fetch data from parquet file
-
-	keff_train += [float(dftrain['keff'].values[0])] # append k_eff value from the file
+scaled_columns_xtrain = []
+print('Scaling training data...')
 
 
-	mt18xs = dftrain['MT18_XS'].values # appends a list of fission cross sections to the XS_fission_train matrix
-
-
-	fission_train.append(mt18xs)
-
-
-y_train = np.array(keff_train)
-y_train = zscore(y_train)
-
-keff_train_mean = np.mean(keff_train)
-keff_train_std = np.std(keff_train)
-
-
-def scaler(channel_matrix):
-
-	transposed_matrix = np.transpose(np.array(channel_matrix))
-	scaled_rows = []
-	for row in tqdm.tqdm(transposed_matrix, total=len(transposed_matrix)):
-		scaled_row = zscore(row)
-		scaled_rows.append(scaled_row)
-
-	scaled_rows = np.array(scaled_rows)
-	transposed_scaled_matrix = np.transpose(scaled_rows)
-
-	final_matrix = []
-	for i in transposed_scaled_matrix:
-		row = i[~np.isnan(i)]
-		final_matrix.append(row)
-
-	final_matrix = np.array(final_matrix)
-	return final_matrix
+le_bound_index = 1 # filters out NaNs
 
 
 
 
+for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
+	scaled_column = zscore(column)
+	scaled_columns_xtrain.append(scaled_column)
 
-scaled_fission_train = scaler(fission_train)
-scaled_elastic_train = scaler(elastic_train)
-
-X_train = []
-for f_data, e_data in zip(scaled_fission_train, scaled_elastic_train):
-	X_train.append([f_data, e_data])
-
-X_train = np.array(X_train)
-X_train = X_train.reshape([X_train.shape[0], X_train.shape[2], X_train.shape[1]])
-
-print('Training data processed...')
+scaled_columns_xtrain = np.array(scaled_columns_xtrain)
+X_train = scaled_columns_xtrain.transpose()
 
 
-########################################## Test data preparation #######################################################
+XS_test = []
 keff_test = []
 
-fission_test = []
-elastic_test = []
-for testfile in tqdm.tqdm(test_files, total=len(test_files)):
-	dftest = pd.read_parquet(f'{data_directory}/{testfile}', engine='pyarrow')
-	keff_test += [float(dftest['keff'].values[0])]
-
-	dftest = dftest[dftest.ERG >= g4boundary]
-	dftest = dftest[dftest.ERG <= g3boundary]
-
-	mt18xstest = dftest['MT18_XS'].values  # appends a list of fission cross sections to the XS_fission_train matrix
-
-	mt2xstest = dftest['MT2_XS'].values  # likewise for elastic scattering cross sections
-
-	fission_test.append(mt18xstest)
-	elastic_test.append(mt2xstest)
+print('Fetching test data...')
 
 
-y_test = np.array(keff_test)
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values_test, keff_value_test = future.result()
+		XS_test.append(xs_values_test)
+		keff_test.append(keff_value_test)
+
+XS_test = np.array(XS_test)
 keff_mean = np.mean(keff_test)
 keff_std = np.std(keff_test)
-y_test = zscore(y_test)
+y_test = zscore(keff_test)
 
-scaled_fission_test = scaler(fission_test)
-scaled_elastic_test = scaler(elastic_test)
-X_test = []
+scaling_matrix_xtest = XS_test.transpose()
 
-for f_data, e_data in zip(scaled_fission_test, scaled_elastic_test):
-	X_test.append([f_data, e_data])
+scaled_columns_xtest = []
+print('Scaling test data...')
+for column in tqdm.tqdm(scaling_matrix_xtest[le_bound_index:-1], total=len(scaling_matrix_xtest[le_bound_index:-1])):
+	scaled_column = zscore(column)
+	scaled_columns_xtest.append(scaled_column)
 
-X_test = np.array(X_test)
-X_test = X_test.reshape([X_test.shape[0], X_test.shape[2], X_test.shape[1]])
-print('Test data processed...')
+scaled_columns_xtest = np.array(scaled_columns_xtest)
+X_test = scaled_columns_xtest.transpose()
+
+
+test_mask = ~np.isnan(X_test).any(axis=0)
+X_test = X_test[:, test_mask]
+
+train_mask = ~np.isnan(X_train).any(axis=0)
+X_train = X_train[:, train_mask]
 
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
 										 patience=20,
 										 mode='min',
-										 start_from_epoch=5,
+										 start_from_epoch=3,
 										 restore_best_weights=True)
 
-model = keras.Sequential()
-model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
-model.add(keras.layers.Conv1D(filters=16, kernel_size=3, padding='same', activation='relu',))
-model.add(keras.layers.Flatten())
-# model.add(keras.layers.Dense(10, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(10, activation='relu'))
+
+
+model =keras.Sequential()
+model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(475, activation='relu'))
+model.add(keras.layers.Dense(375, activation='relu'))
+model.add(keras.layers.Dense(300, activation='relu'))
+model.add(keras.layers.Dense(270, activation='relu'))
+model.add(keras.layers.Dense(140, activation='relu'))
+model.add(keras.layers.Dense(120, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
-# # model.add(keras.layers.Dense(1000, activation='relu'))
-# # model.add(keras.layers.Dense(500, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
 
+import datetime
 trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
-					epochs=100,
-					batch_size=4,
+					epochs=150,
+					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
 					verbose=1)
-
 
 train_end = time.time()
 print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
-
 
 
 rescaled_predictions = []
@@ -177,7 +207,6 @@ for predicted, true in zip(rescaled_predictions, keff_test):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
-
 sorted_errors = sorted(errors)
 absolute_errors = [abs(x) for x in sorted_errors]
 print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
@@ -186,3 +215,15 @@ print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]
 
 
 print(f"Smallest absolute error: {min(absolute_errors)} pcm")
+acceptable_predictions = []
+borderline_predictions = []
+for x in absolute_errors:
+	if x <= 5.0:
+		acceptable_predictions.append(x)
+	if x <= 10.0:
+		borderline_predictions.append(x)
+
+
+print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
+print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+
