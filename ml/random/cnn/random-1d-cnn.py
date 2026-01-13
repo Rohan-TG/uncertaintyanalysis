@@ -105,66 +105,71 @@ print('Scaling training data...')
 
 le_bound_index = 1 # filters out NaNs
 
+def process_data(XS_matrix):
 
-channel_matrix = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
-# Pu-239 (n,el)
-scaled_channel_matrix = []
 
-for matrix in tqdm.tqdm(XS_train, total =len(XS_train)):
-	# Each matrix has shape (num channels, points per channel)
-	for channel_index, channel in enumerate(matrix):
-		channel_matrix[channel_index].append(channel)
+	channel_matrix = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
+	# Pu-239 (n,el)
+	scaled_channel_matrix = []
 
-	# channel_matrix now has shape (num channels, num samples, points per channel)
-	# Each element of channel matrix has shape (num samples, points per channel)
+	for matrix in tqdm.tqdm(XS_train, total =len(XS_train)):
+		# Each matrix has shape (num channels, points per channel)
+		for channel_index, channel in enumerate(matrix):
+			channel_matrix[channel_index].append(channel)
 
-for channel_data in channel_matrix: # each iterative variable is the matrix of one specific channel e.g. Pu-239 fission
-	transposed_matrix = np.transpose(channel_data) # shape (points per sample, num samples)
+		# channel_matrix now has shape (num channels, num samples, points per channel)
+		# Each element of channel matrix has shape (num samples, points per channel)
 
-	transposed_scaled_channel = []
-	for energy_point in transposed_matrix[:-1]: # each point on the unionised energy grid
-		scaled_point = zscore(energy_point)
-		transposed_scaled_channel.append(scaled_point)
+	for channel_data in channel_matrix: # each iterative variable is the matrix of one specific channel e.g. Pu-239 fission
+		transposed_matrix = np.transpose(channel_data) # shape (points per sample, num samples)
 
-	scaled_channel = np.array(transposed_scaled_channel)
-	scaled_channel = scaled_channel.transpose()
+		transposed_scaled_channel = []
+		for energy_point in transposed_matrix[:-1]: # each point on the unionised energy grid
+			scaled_point = zscore(energy_point)
+			transposed_scaled_channel.append(scaled_point)
 
-	scaled_channel_matrix.append(scaled_channel)
+		scaled_channel = np.array(transposed_scaled_channel)
+		scaled_channel = scaled_channel.transpose()
 
-print('Forming scaled training data...')
-X_train = [[] for i in range(n_training_samples)] # number of samples
-for scaled_observable in scaled_channel_matrix:
-	for sample_index, channel_sample in enumerate(scaled_observable):
-		X_train[sample_index].append(channel_sample)
+		scaled_channel_matrix.append(scaled_channel)
 
-X_train = np.array(X_train)
-	# for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
-	# 	scaled_column = zscore(column)
-	# 	scaled_columns_xtrain.append(scaled_column)
 
-# scaled_columns_xtrain = np.array(scaled_columns_xtrain)
-# X_train = scaled_columns_xtrain.transpose()
-#
-#
-# XS_test = []
-# keff_test = []
-#
-# print('Fetching test data...')
-#
-#
-# with ProcessPoolExecutor(max_workers=data_processes) as executor:
-# 	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
-#
-# 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-# 		xs_values_test, keff_value_test = future.result()
-# 		XS_test.append(xs_values_test)
-# 		keff_test.append(keff_value_test)
 
-# XS_test = np.array(XS_test)
-# keff_mean = np.mean(keff_test)
-# keff_std = np.std(keff_test)
-# y_test = zscore(keff_test)
-#
+	# print('Forming scaled training data...')
+	X_matrix = [[] for i in range(n_training_samples)] # number of samples
+	for scaled_observable in scaled_channel_matrix:
+		for sample_index, channel_sample in enumerate(scaled_observable):
+			X_matrix[sample_index].append(channel_sample)
+
+	X_matrix = np.array(X_matrix)
+	X_matrix[np.isnan(X_matrix)] = 0
+
+	return X_matrix
+
+X_train = process_data(XS_train)
+
+
+
+
+XS_test = []
+keff_test = []
+
+print('Fetching test data...')
+
+
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values_test, keff_value_test = future.result()
+		XS_test.append(xs_values_test)
+		keff_test.append(keff_value_test)
+
+XS_test = np.array(XS_test)
+keff_mean = np.mean(keff_test)
+keff_std = np.std(keff_test)
+y_test = zscore(keff_test)
+
 # scaling_matrix_xtest = XS_test.transpose()
 #
 # scaled_columns_xtest = []
