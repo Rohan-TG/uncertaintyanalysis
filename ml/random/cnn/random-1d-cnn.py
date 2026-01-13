@@ -136,7 +136,7 @@ def process_data(XS_matrix):
 
 
 	# print('Forming scaled training data...')
-	X_matrix = [[] for i in range(len(XS_matrix.shape[0]))] # number of samples
+	X_matrix = [[] for i in range(XS_matrix.shape[0])] # number of samples
 	for scaled_observable in scaled_channel_matrix:
 		for sample_index, channel_sample in enumerate(scaled_observable):
 			X_matrix[sample_index].append(channel_sample)
