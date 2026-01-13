@@ -108,11 +108,11 @@ le_bound_index = 1 # filters out NaNs
 def process_data(XS_matrix):
 
 
-	channel_matrix = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
+	channel_matrix = [[] for i in range(len(XS_matrix[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
 	# Pu-239 (n,el)
 	scaled_channel_matrix = []
 
-	for matrix in tqdm.tqdm(XS_train, total =len(XS_train)):
+	for matrix in tqdm.tqdm(XS_matrix, total =len(XS_matrix)):
 		# Each matrix has shape (num channels, points per channel)
 		for channel_index, channel in enumerate(matrix):
 			channel_matrix[channel_index].append(channel)
@@ -136,7 +136,7 @@ def process_data(XS_matrix):
 
 
 	# print('Forming scaled training data...')
-	X_matrix = [[] for i in range(n_training_samples)] # number of samples
+	X_matrix = [[] for i in range(len(XS_matrix.shape[0]))] # number of samples
 	for scaled_observable in scaled_channel_matrix:
 		for sample_index, channel_sample in enumerate(scaled_observable):
 			X_matrix[sample_index].append(channel_sample)
