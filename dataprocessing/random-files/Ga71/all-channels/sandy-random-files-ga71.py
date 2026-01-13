@@ -11,7 +11,7 @@ if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-from groupEnergies import Ga69, Groups
+from groupEnergies import Ga71, Groups
 import time
 
 
@@ -21,12 +21,10 @@ num_files = int(input('Number of files to generate: '))
 start = time.time()
 
 lib_name = "ENDFB_80"
-nucl = Ga69.ZA * 10
+nucl = Ga71.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
 endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
-# endf6.to_file(filename)
-# pendf = endf6.get_pendf(err=0.0001)
 
 
 perturbation_coefficients = np.arange(-0.40, 0.41, 0.01)
@@ -36,10 +34,8 @@ endf6 = sandy.get_endf6_file("ENDFB_80", "xs", nucl)
 pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
 pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
-# xs = sandy.Xs.from_endf6(pendf)
-# heated_xs = sandy.Xs.from_endf6(pendfheated)
 
-mat = Ga69.MAT
+mat = Ga71.MAT
 
 sensitive_MTs = [2, 4, 16, 102]
 
@@ -150,7 +146,7 @@ def generate_gallium_files(idx):
 							 verbose=True,
 							 pendf=pendf_pert_4)
 
-		savefile_ace_name = f"3169_{idx}.03c"
+		savefile_ace_name = f"3171_{idx}.03c"
 		with open(f"{savefile_ace_name}", mode="w") as f:
 			f.write(outs["ace"])
 
@@ -160,7 +156,7 @@ def generate_gallium_files(idx):
 		working_perturbed_endf6_heated.append(heated_pendf_pert_4)
 
 
-	heated_pendf_pert_4.to_file(f'3169_{idx}.pendf')
+	heated_pendf_pert_4.to_file(f'3171_{idx}.pendf')
 
 
 with ProcessPoolExecutor(max_workers=num_processes) as executor:
