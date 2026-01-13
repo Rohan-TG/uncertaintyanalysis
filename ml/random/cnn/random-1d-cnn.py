@@ -110,7 +110,7 @@ channel_matrix = [[] for i in range(len(XS_train[0]))] # each element is a matri
 # Pu-239 (n,el)
 scaled_channel_matrix = [[] for i in range(len(XS_train[0]))]
 
-for matrix in XS_train:
+for matrix in tqdm.tqdm(XS_train, total =len(XS_train)):
 	# Each matrix has shape (num channels, points per channel)
 	for channel_index, channel in enumerate(matrix):
 		channel_matrix[channel_index].append(channel)
