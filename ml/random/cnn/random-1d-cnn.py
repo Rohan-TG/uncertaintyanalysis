@@ -170,6 +170,8 @@ keff_mean = np.mean(keff_test)
 keff_std = np.std(keff_test)
 y_test = zscore(keff_test)
 
+X_test = process_data(XS_test)
+
 # scaling_matrix_xtest = XS_test.transpose()
 #
 # scaled_columns_xtest = []
@@ -189,72 +191,69 @@ y_test = zscore(keff_test)
 # X_train = X_train[:, train_mask]
 #
 #
-# callback = keras.callbacks.EarlyStopping(monitor='val_loss',
-# 										 # min_delta=0.005,
-# 										 patience=20,
-# 										 mode='min',
-# 										 start_from_epoch=3,
-# 										 restore_best_weights=True)
-#
-#
-#
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(475, activation='relu'))
-# model.add(keras.layers.Dense(375, activation='relu'))
-# model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(270, activation='relu'))
-# model.add(keras.layers.Dense(140, activation='relu'))
-# model.add(keras.layers.Dense(120, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MeanSquaredError', optimizer='adam')
-#
-#
-# import datetime
-# trainstart = time.time()
-# history = model.fit(X_train,
-# 					y_train,
-# 					epochs=150,
-# 					batch_size=32,
-# 					callbacks=callback,
-# 					validation_data=(X_test, y_test),
-# 					verbose=1)
-#
-# train_end = time.time()
-# print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-# predictions = model.predict(X_test)
-# predictions = predictions.ravel()
-#
-#
-# rescaled_predictions = []
-# predictions_list = predictions.tolist()
-#
-# for pred in predictions_list:
-# 	descaled_p = pred * keff_std + keff_mean
-# 	rescaled_predictions.append(float(descaled_p))
-#
-# errors = []
-# for predicted, true in zip(rescaled_predictions, keff_test):
-# 	errors.append((predicted - true) * 1e5)
-# 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
-#
-# sorted_errors = sorted(errors)
-# absolute_errors = [abs(x) for x in sorted_errors]
-# print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
-#
-# print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
-#
-#
-# print(f"Smallest absolute error: {min(absolute_errors)} pcm")
-# acceptable_predictions = []
-# borderline_predictions = []
-# for x in absolute_errors:
-# 	if x <= 5.0:
-# 		acceptable_predictions.append(x)
-# 	if x <= 10.0:
-# 		borderline_predictions.append(x)
-#
-#
-# print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
-# print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
-#
+callback = keras.callbacks.EarlyStopping(monitor='val_loss',
+										 # min_delta=0.005,
+										 patience=20,
+										 mode='min',
+										 start_from_epoch=3,
+										 restore_best_weights=True)
+
+
+
+model = keras.Sequential()
+model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
+model.add(keras.layers.Conv1D(filters=16, kernel_size=3, padding='same', activation='relu',))
+model.add(keras.layers.Flatten())
+model.add(keras.layers.Dense(10, activation='relu'))
+model.add(keras.layers.Dense(1, activation='linear'))
+model.compile(loss='MeanSquaredError', optimizer='adam')
+
+
+import datetime
+trainstart = time.time()
+history = model.fit(X_train,
+					y_train,
+					epochs=150,
+					batch_size=32,
+					callbacks=callback,
+					validation_data=(X_test, y_test),
+					verbose=1)
+
+train_end = time.time()
+print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+predictions = model.predict(X_test)
+predictions = predictions.ravel()
+
+
+rescaled_predictions = []
+predictions_list = predictions.tolist()
+
+for pred in predictions_list:
+	descaled_p = pred * keff_std + keff_mean
+	rescaled_predictions.append(float(descaled_p))
+
+errors = []
+for predicted, true in zip(rescaled_predictions, keff_test):
+	errors.append((predicted - true) * 1e5)
+	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+sorted_errors = sorted(errors)
+absolute_errors = [abs(x) for x in sorted_errors]
+print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+
+print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
+
+
+print(f"Smallest absolute error: {min(absolute_errors)} pcm")
+acceptable_predictions = []
+borderline_predictions = []
+for x in absolute_errors:
+	if x <= 5.0:
+		acceptable_predictions.append(x)
+	if x <= 10.0:
+		borderline_predictions.append(x)
+
+
+print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
+print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+
