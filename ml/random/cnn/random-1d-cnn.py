@@ -122,7 +122,7 @@ for channel_data in channel_matrix: # each iterative variable is the matrix of o
 	transposed_matrix = np.transpose(channel_data) # shape (points per sample, num samples)
 
 	transposed_scaled_channel = []
-	for energy_point in transposed_matrix: # each point on the unionised energy grid
+	for energy_point in transposed_matrix[:-1]: # each point on the unionised energy grid
 		scaled_point = zscore(energy_point)
 		transposed_scaled_channel.append(scaled_point)
 
@@ -131,7 +131,13 @@ for channel_data in channel_matrix: # each iterative variable is the matrix of o
 
 	scaled_channel_matrix.append(scaled_channel)
 
+print('Forming scaled training data...')
+X_train = [[] for i in range(n_training_samples)] # number of samples
+for scaled_observable in scaled_channel_matrix:
+	for sample_index, channel_sample in enumerate(scaled_observable):
+		X_train[sample_index].append(channel_sample)
 
+X_train = np.array(X_train)
 	# for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
 	# 	scaled_column = zscore(column)
 	# 	scaled_columns_xtrain.append(scaled_column)
