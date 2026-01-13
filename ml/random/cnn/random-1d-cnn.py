@@ -97,10 +97,9 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		XS_train.append(xs_values)
 		keff_train.append(keff_value)
 
-XS_train = np.array(XS_train)
+XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per channel)
 y_train = zscore(keff_train)
 
-scaled_columns_xtrain = []
 print('Scaling training data...')
 
 
@@ -109,11 +108,29 @@ le_bound_index = 1 # filters out NaNs
 
 channel_matrix = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
 # Pu-239 (n,el)
+scaled_channel_matrix = [[] for i in range(len(XS_train[0]))]
 
 for matrix in XS_train:
-	# Each matrix has shape (num channels)
+	# Each matrix has shape (num channels, points per channel)
 	for channel_index, channel in enumerate(matrix):
 		channel_matrix[channel_index].append(channel)
+
+	# channel_matrix now has shape (num channels, num samples, points per channel)
+	# Each element of channel matrix has shape (num samples, points per channel)
+
+	for scaling_channel_index, channel_data in enumerate(channel_matrix): # each iterative variable is the matrix of one specific channel e.g. Pu-239 fission
+		transposed_matrix = np.transpose(channel_data) # shape (points per sample, num samples)
+
+		transposed_scaled_channel = []
+		for energy_point in transposed_matrix: # each point on the unionised energy grid
+			scaled_point = zscore(energy_point)
+			transposed_scaled_channel.append(scaled_point)
+
+		scaled_channel = np.array(transposed_scaled_channel)
+		scaled_channel = scaled_channel.transpose()
+
+		scaled_channel_matrix[scaling_channel_index].append(scaled_channel)
+
 
 	# for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
 	# 	scaled_column = zscore(column)
