@@ -100,62 +100,65 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 XS_train = np.array(XS_train)
 y_train = zscore(keff_train)
 
-
-# scaling_matrix_xtrain = XS_train.transpose()
-
 scaled_columns_xtrain = []
 print('Scaling training data...')
 
 
 le_bound_index = 1 # filters out NaNs
 
+
+channel_matrix = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
+# Pu-239 (n,el)
+
 for matrix in XS_train:
 	# Each matrix has shape (num channels)
+	for channel_index, channel in enumerate(matrix):
+		channel_matrix[channel_index].append(channel)
 
-	for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
-		scaled_column = zscore(column)
-		scaled_columns_xtrain.append(scaled_column)
+	# for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
+	# 	scaled_column = zscore(column)
+	# 	scaled_columns_xtrain.append(scaled_column)
 
-scaled_columns_xtrain = np.array(scaled_columns_xtrain)
-X_train = scaled_columns_xtrain.transpose()
+# scaled_columns_xtrain = np.array(scaled_columns_xtrain)
+# X_train = scaled_columns_xtrain.transpose()
+#
+#
+# XS_test = []
+# keff_test = []
+#
+# print('Fetching test data...')
+#
+#
+# with ProcessPoolExecutor(max_workers=data_processes) as executor:
+# 	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+#
+# 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+# 		xs_values_test, keff_value_test = future.result()
+# 		XS_test.append(xs_values_test)
+# 		keff_test.append(keff_value_test)
 
-
-XS_test = []
-keff_test = []
-
-print('Fetching test data...')
-
-
-with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
-
-	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values_test, keff_value_test = future.result()
-		XS_test.append(xs_values_test)
-		keff_test.append(keff_value_test)
-
-XS_test = np.array(XS_test)
-keff_mean = np.mean(keff_test)
-keff_std = np.std(keff_test)
-y_test = zscore(keff_test)
-
-scaling_matrix_xtest = XS_test.transpose()
-
-scaled_columns_xtest = []
-print('Scaling test data...')
-for column in tqdm.tqdm(scaling_matrix_xtest[le_bound_index:-1], total=len(scaling_matrix_xtest[le_bound_index:-1])):
-	scaled_column = zscore(column)
-	scaled_columns_xtest.append(scaled_column)
-
-scaled_columns_xtest = np.array(scaled_columns_xtest)
-X_test = scaled_columns_xtest.transpose()
-
-
-test_mask = ~np.isnan(X_test).any(axis=0)
-X_test = X_test[:, test_mask]
-
-train_mask = ~np.isnan(X_train).any(axis=0)
-X_train = X_train[:, train_mask]
+# XS_test = np.array(XS_test)
+# keff_mean = np.mean(keff_test)
+# keff_std = np.std(keff_test)
+# y_test = zscore(keff_test)
+#
+# scaling_matrix_xtest = XS_test.transpose()
+#
+# scaled_columns_xtest = []
+# print('Scaling test data...')
+# for column in tqdm.tqdm(scaling_matrix_xtest[le_bound_index:-1], total=len(scaling_matrix_xtest[le_bound_index:-1])):
+# 	scaled_column = zscore(column)
+# 	scaled_columns_xtest.append(scaled_column)
+#
+# scaled_columns_xtest = np.array(scaled_columns_xtest)
+# X_test = scaled_columns_xtest.transpose()
+#
+#
+# test_mask = ~np.isnan(X_test).any(axis=0)
+# X_test = X_test[:, test_mask]
+#
+# train_mask = ~np.isnan(X_train).any(axis=0)
+# X_train = X_train[:, train_mask]
 #
 #
 # callback = keras.callbacks.EarlyStopping(monitor='val_loss',
