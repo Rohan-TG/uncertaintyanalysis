@@ -175,11 +175,8 @@ else:
 	truncated_fission_erg_239 = truncated_fission_erg_239.tolist()
 
 
-truncated_fission_xs_239 = []
-for ERG, xsval in zip(fission_erg_239, fission_xs_239):
-	if ERG >= lower_energy_bound:
-		truncated_fission_erg_239.append(ERG)
-		truncated_fission_xs_239.append(xsval)
+truncated_fission_xs_239 = np.interp(truncated_fission_erg_239, fission_erg_239, fission_xs_239)
+
 
 capture_to_fission_239 = np.interp(truncated_fission_erg_239, capture_erg_239, capture_xs_239)
 n2n_to_fission_239 = np.interp(truncated_fission_erg_239, n2n_erg_239, n2n_xs_239)
@@ -212,7 +209,7 @@ df = pd.DataFrame({'ERG': truncated_fission_erg_239,
 				   '94239_MT2_XS': elastic_to_fission_239,
 				   '94239_MT4_XS': inelastic_to_fission_239,
 				   '94239_MT16_XS': n2n_to_fission_239,
-				   '94239_MT18_XS': truncated_fission_xs_239,
+				   '94239_MT18_XS': truncated_fission_xs_239, # bug
 				   '94239_MT102_XS': capture_to_fission_239,
 				   '94240_MT2_XS': elastic_to_fission_240,
 				   '94240_MT4_XS': inelastic_to_fission_240,
