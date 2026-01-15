@@ -235,9 +235,9 @@ def parquet_maker(index_combination):
 
 
 # run the whole thing
-	with ProcessPoolExecutor(max_workers=processes) as executor:
-		futures = [executor.submit(parquet_maker, indices) for indices in index_matrix
-		]
+with ProcessPoolExecutor(max_workers=processes) as executor:
+	futures = [executor.submit(parquet_maker, indices) for indices in index_matrix
+	]
 
-		for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
-			pass
+	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		pass
