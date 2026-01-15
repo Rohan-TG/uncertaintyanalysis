@@ -175,6 +175,10 @@ else:
 	truncated_fission_erg_239 = truncated_fission_erg_239.tolist()
 
 
+for erg in fission_erg_239:
+	if erg >= lower_energy_bound:
+		truncated_fission_erg_239.append(erg)
+
 truncated_fission_xs_239 = np.interp(truncated_fission_erg_239, fission_erg_239, fission_xs_239)
 
 
