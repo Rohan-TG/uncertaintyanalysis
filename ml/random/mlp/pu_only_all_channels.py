@@ -168,7 +168,6 @@ model =keras.Sequential()
 model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 model.add(keras.layers.Dense(475, activation='relu'))
 model.add(keras.layers.Dense(375, activation='relu'))
-model.add(keras.layers.Dropout(0.1))
 model.add(keras.layers.Dense(300, activation='relu'))
 model.add(keras.layers.Dense(270, activation='relu'))
 model.add(keras.layers.Dense(140, activation='relu'))
@@ -183,7 +182,7 @@ trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=200,
-					batch_size=32,
+					batch_size=16,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
 					verbose=1)
