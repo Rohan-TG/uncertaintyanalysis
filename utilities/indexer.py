@@ -3,7 +3,7 @@ import numpy as np
 import subprocess
 import tqdm
 
-
+print('WARNING: Run in correct directory')
 
 ZA = input('Enter the ZA combination (e.g. 94239): ')
 
@@ -22,7 +22,7 @@ new_indices = list(range(new_lower_index, new_upper_index))
 mode = input('Enter mode ace/pendf: ')
 
 if mode == 'ace':
-	ace_dir = input('Enter ACE dir: ')
+	ace_dir = os.getcwd()
 	aces = os.listdir(ace_dir)
 	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
 
@@ -33,7 +33,7 @@ if mode == 'ace':
 
 
 if mode == 'pendf':
-	pendf_dir = input('Enter PENDF dir: ')
+	pendf_dir = os.getcwd()
 	pendfs = os.listdir(pendf_dir)
 	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
 
