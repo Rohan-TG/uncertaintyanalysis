@@ -84,7 +84,6 @@ print('Reading PENDFs and forming dataframes...')
 def parquet_maker(index_combination):
 	"""Filename should be the name of the PENDF we're reading from"""
 
-	index_combination = [8186, 8324, 8430]
 
 	pu239_index = index_combination[0]
 	pu240_index = index_combination[1]
