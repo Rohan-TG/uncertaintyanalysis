@@ -17,7 +17,7 @@ outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
 lower_energy_bound = float(input("Lower energy bound: "))
-n_points = int(input("Num. interpolation points below LEB (x for skip): "))
+n_points = input("Num. interpolation points below LEB (x for skip): ")
 
 
 pu239_pendf_directory = input("Pu-239 PENDF directory: ")
@@ -171,7 +171,7 @@ def parquet_maker(index_combination):
 	if n_points == 'x':
 		truncated_fission_erg_239 = []
 	else:
-		truncated_fission_erg_239 = np.logspace(np.log10(fission_erg_239[0]), np.log10(lower_energy_bound), n_points) # This is x_coarse
+		truncated_fission_erg_239 = np.logspace(np.log10(fission_erg_239[0]), np.log10(lower_energy_bound), int(n_points)) # This is x_coarse
 		truncated_fission_erg_239 = truncated_fission_erg_239.tolist()
 
 
