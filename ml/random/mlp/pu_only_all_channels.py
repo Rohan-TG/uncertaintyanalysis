@@ -2,6 +2,8 @@ import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
+import matplotlib.pyplot as plt
+
 # MLP
 
 computer = os.uname().nodename
@@ -157,7 +159,7 @@ X_train = X_train[:, train_mask]
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=20,
+										 patience=30,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
@@ -248,3 +250,13 @@ for x in absolute_errors:
 print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
 
+save_histogram = input('Save histogram? (y): ')
+if save_histogram == 'y':
+	plt.figure()
+	plt.hist(sorted_errors, bins=30)
+	plt.grid()
+	plt.title('Distribution of absolute errors')
+	plt.xlabel('Absolute error / pcm')
+	plt.ylabel('Count')
+	plt.savefig('absolute_errors.png')
+	plt.show()
