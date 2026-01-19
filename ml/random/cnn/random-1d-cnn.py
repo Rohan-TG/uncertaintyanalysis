@@ -193,7 +193,7 @@ X_test = process_data(XS_test)
 #
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=20,
+										 patience=30,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
@@ -217,7 +217,7 @@ import datetime
 trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
-					epochs=150,
+					epochs=200,
 					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
