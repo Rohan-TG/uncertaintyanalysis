@@ -5,7 +5,7 @@ import tqdm
 
 ZA = input('Enter ZA (e.g. 94239): ')
 home_directory = input("Enter home directory (here for cwd): ")
-if home_directory == "cwd":
+if home_directory == "here":
 	home_directory = os.getcwd()
 
 mode = input("Enter mode ace/pendf: ")
