@@ -175,7 +175,7 @@ model.add(keras.layers.Dense(270, activation='relu'))
 model.add(keras.layers.Dense(140, activation='relu'))
 model.add(keras.layers.Dense(120, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
-model.compile(loss='MeanSquaredError', optimizer='adam')
+model.compile(loss='MAE', optimizer='adam')
 
 
 # model =keras.Sequential()
