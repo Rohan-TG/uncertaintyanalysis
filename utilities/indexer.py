@@ -41,3 +41,14 @@ if mode == 'pendf':
 		old_pendf_filename = f'{ZA}_{old_i}.pendf'
 
 		subprocess.run(f'mv {pendf_dir}/{old_pendf_filename} {pendf_dir}/{new_pendf_filename}', shell=True)
+
+
+if mode = 'fix':
+	pendf_dir = os.getcwd()
+	pendfs = os.listdir(pendf_dir)
+	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
+		new_pendf_filename = f'{ZA}_{new_i}.pendf.xz'
+		old_pendf_filename = f'{ZA}_{old_i}.pendf.xz'
+
+		subprocess.run(f'mv {pendf_dir}/{old_pendf_filename} {pendf_dir}/{new_pendf_filename}', shell=True)
+
