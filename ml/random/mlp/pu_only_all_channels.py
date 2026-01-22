@@ -115,8 +115,8 @@ training_column_stds = []
 for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
 	scaled_column = zscore(column)
 
-	column_mean = np.mean(scaled_column)
-	column_std = np.std(scaled_column)
+	column_mean = np.mean(column)
+	column_std = np.std(column)
 	training_column_means.append(column_mean)
 	training_column_stds.append(column_std)
 	scaled_columns_xtrain.append(scaled_column)
