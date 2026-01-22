@@ -144,8 +144,8 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		keff_test.append(keff_value_test)
 
 XS_test = np.array(XS_test)
-keff_mean = np.mean(keff_test)
-keff_std = np.std(keff_test)
+# keff_mean = np.mean(keff_test)
+# keff_std = np.std(keff_test)
 y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
 
 scaling_matrix_xtest = XS_test.transpose()
@@ -236,7 +236,7 @@ rescaled_predictions = []
 predictions_list = predictions.tolist()
 
 for pred in predictions_list:
-	descaled_p = pred * keff_std + keff_mean
+	descaled_p = pred * train_labels_std + train_labels_mean
 	rescaled_predictions.append(float(descaled_p))
 
 errors = []
