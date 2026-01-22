@@ -177,28 +177,28 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 
-model =keras.Sequential()
-model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(475, activation='relu'))
-model.add(keras.layers.Dense(375, activation='relu'))
-model.add(keras.layers.Dense(300, activation='relu'))
-model.add(keras.layers.Dense(270, activation='relu'))
-model.add(keras.layers.Dense(140, activation='relu'))
-model.add(keras.layers.Dense(120, activation='relu'))
-model.add(keras.layers.Dense(1, activation='linear'))
-model.compile(loss='MSE', optimizer='adam')
-
-
 # model =keras.Sequential()
-# model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(950, activation='relu'))
-# model.add(keras.layers.Dense(750, activation='relu'))
-# model.add(keras.layers.Dense(600, activation='relu'))
-# model.add(keras.layers.Dense(540, activation='relu'))
-# model.add(keras.layers.Dense(280, activation='relu'))
-# model.add(keras.layers.Dense(110, activation='relu'))
+# model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+# model.add(keras.layers.Dense(475, activation='relu'))
+# model.add(keras.layers.Dense(375, activation='relu'))
+# model.add(keras.layers.Dense(300, activation='relu'))
+# model.add(keras.layers.Dense(270, activation='relu'))
+# model.add(keras.layers.Dense(140, activation='relu'))
+# model.add(keras.layers.Dense(120, activation='relu'))
 # model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MeanSquaredError', optimizer='adam')
+# model.compile(loss='MSE', optimizer='adam')
+
+
+model =keras.Sequential()
+model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(900, activation='relu'))
+model.add(keras.layers.Dense(750, activation='relu'))
+model.add(keras.layers.Dense(600, activation='relu'))
+model.add(keras.layers.Dense(540, activation='relu'))
+model.add(keras.layers.Dense(280, activation='relu'))
+model.add(keras.layers.Dense(110, activation='relu'))
+model.add(keras.layers.Dense(1, activation='linear'))
+model.compile(loss='MeanSquaredError', optimizer='adam')
 
 
 # model =keras.Sequential()
