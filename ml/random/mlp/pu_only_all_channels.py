@@ -69,15 +69,16 @@ def fetch_data(datafile):
 	pu0_mt4xs = temp_df['94240_MT4_XS'].values.tolist()
 	pu1_mt4xs = temp_df['94241_MT4_XS'].values.tolist()
 
-	pu9_mt16xs = temp_df['94239_MT16_XS'].values.tolist()
-	pu0_mt16xs = temp_df['94240_MT16_XS'].values.tolist()
-	pu1_mt16xs = temp_df['94241_MT16_XS'].values.tolist()
+	# pu9_mt16xs = temp_df['94239_MT16_XS'].values.tolist()
+	# pu0_mt16xs = temp_df['94240_MT16_XS'].values.tolist()
+	# pu1_mt16xs = temp_df['94241_MT16_XS'].values.tolist()
 
 	pu9_mt102xs = temp_df['94239_MT102_XS'].values.tolist()
 	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
 	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
 
-	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	xsobject = pu9_mt2xs + pu9_mt4xs +  pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt18xs + pu1_mt102xs
+	# xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
 
 	XS_obj = xsobject
 
@@ -270,3 +271,13 @@ if save_histogram == 'y':
 	plt.ylabel('Count')
 	plt.savefig('absolute_errors.png')
 	plt.show()
+
+
+# plt.figure()
+# plt.plot(keff_test, errors, 'x')
+# plt.grid()
+# plt.title('Distribution of errors')
+# plt.xlabel('True k_eff')
+# plt.ylabel('Error / pcm')
+# plt.savefig('errors.png')
+# plt.show()
