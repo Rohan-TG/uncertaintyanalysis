@@ -100,6 +100,9 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 XS_train = np.array(XS_train)
 y_train = zscore(keff_train)
 
+train_labels_mean = np.mean(y_train)
+train_labels_std = np.std(y_train)
+
 
 scaling_matrix_xtrain = XS_train.transpose()
 
@@ -143,7 +146,7 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 XS_test = np.array(XS_test)
 keff_mean = np.mean(keff_test)
 keff_std = np.std(keff_test)
-y_test = zscore(keff_test)
+y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
 
 scaling_matrix_xtest = XS_test.transpose()
 
@@ -177,28 +180,28 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(475, activation='relu'))
-# model.add(keras.layers.Dense(375, activation='relu'))
-# model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(270, activation='relu'))
-# model.add(keras.layers.Dense(140, activation='relu'))
-# model.add(keras.layers.Dense(120, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MSE', optimizer='adam')
-
-
 model =keras.Sequential()
-model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(900, activation='relu'))
-model.add(keras.layers.Dense(750, activation='relu'))
-model.add(keras.layers.Dense(600, activation='relu'))
-model.add(keras.layers.Dense(540, activation='relu'))
-model.add(keras.layers.Dense(280, activation='relu'))
-model.add(keras.layers.Dense(110, activation='relu'))
+model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(475, activation='relu'))
+model.add(keras.layers.Dense(375, activation='relu'))
+model.add(keras.layers.Dense(300, activation='relu'))
+model.add(keras.layers.Dense(270, activation='relu'))
+model.add(keras.layers.Dense(140, activation='relu'))
+model.add(keras.layers.Dense(120, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
-model.compile(loss='MeanSquaredError', optimizer='adam')
+model.compile(loss='MSE', optimizer='adam')
+
+
+# model =keras.Sequential()
+# model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+# model.add(keras.layers.Dense(900, activation='relu'))
+# model.add(keras.layers.Dense(750, activation='relu'))
+# model.add(keras.layers.Dense(600, activation='relu'))
+# model.add(keras.layers.Dense(540, activation='relu'))
+# model.add(keras.layers.Dense(280, activation='relu'))
+# model.add(keras.layers.Dense(110, activation='relu'))
+# model.add(keras.layers.Dense(1, activation='linear'))
+# model.compile(loss='MeanSquaredError', optimizer='adam')
 
 
 # model =keras.Sequential()
