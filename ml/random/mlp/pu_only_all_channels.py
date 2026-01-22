@@ -272,7 +272,7 @@ if save_histogram == 'y':
 	plt.title('Distribution of absolute errors')
 	plt.xlabel('Absolute error / pcm')
 	plt.ylabel('Count')
-	plt.savefig('absolute_errors.png')
+	plt.savefig('absolute_errors_corrected_scaling.png')
 	plt.show()
 
 
