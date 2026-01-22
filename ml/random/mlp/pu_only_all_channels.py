@@ -173,7 +173,7 @@ X_train = np.nan_to_num(X_train, nan=0.0)
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=20,
+										 patience=30,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
