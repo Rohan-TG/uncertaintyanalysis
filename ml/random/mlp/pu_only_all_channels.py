@@ -158,11 +158,13 @@ scaled_columns_xtest = np.array(scaled_columns_xtest)
 X_test = scaled_columns_xtest.transpose()
 
 
-test_mask = ~np.isnan(X_test).any(axis=0)
-X_test = X_test[:, test_mask]
+# test_mask = ~np.isnan(X_test).any(axis=0)
+# X_test = X_test[:, test_mask]
+X_test = np.nan_to_num(X_test, nan=0.0)
 
-train_mask = ~np.isnan(X_train).any(axis=0)
-X_train = X_train[:, train_mask]
+# train_mask = ~np.isnan(X_train).any(axis=0)
+# X_train = X_train[:, train_mask]
+X_train = np.nan_to_num(X_train, nan=0.0)
 
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
