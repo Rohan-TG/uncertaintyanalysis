@@ -100,8 +100,8 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 XS_train = np.array(XS_train)
 y_train = zscore(keff_train)
 
-train_labels_mean = np.mean(y_train)
-train_labels_std = np.std(y_train)
+train_labels_mean = np.mean(keff_train)
+train_labels_std = np.std(keff_train)
 
 
 scaling_matrix_xtrain = XS_train.transpose()
