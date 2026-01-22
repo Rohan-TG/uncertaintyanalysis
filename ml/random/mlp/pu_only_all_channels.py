@@ -109,10 +109,16 @@ print('Scaling training data...')
 le_bound_index = 1 # filters out NaNs
 
 
-
+training_column_means = []
+training_column_stds = []
 
 for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
 	scaled_column = zscore(column)
+
+	column_mean = np.mean(scaled_column)
+	column_std = np.std(scaled_column)
+	training_column_means.append(column_mean)
+	training_column_stds.append(column_std)
 	scaled_columns_xtrain.append(scaled_column)
 
 scaled_columns_xtrain = np.array(scaled_columns_xtrain)
@@ -142,8 +148,10 @@ scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
 print('Scaling test data...')
-for column in tqdm.tqdm(scaling_matrix_xtest[le_bound_index:-1], total=len(scaling_matrix_xtest[le_bound_index:-1])):
-	scaled_column = zscore(column)
+for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
+	# scaled_column = zscore(column)
+
+	scaled_column = (np.array(column) - c_mean) / c_std
 	scaled_columns_xtest.append(scaled_column)
 
 scaled_columns_xtest = np.array(scaled_columns_xtest)
@@ -159,7 +167,7 @@ X_train = X_train[:, train_mask]
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=30,
+										 patience=20,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
@@ -175,7 +183,7 @@ model.add(keras.layers.Dense(270, activation='relu'))
 model.add(keras.layers.Dense(140, activation='relu'))
 model.add(keras.layers.Dense(120, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
-model.compile(loss='MAE', optimizer='adam')
+model.compile(loss='MSE', optimizer='adam')
 
 
 # model =keras.Sequential()
