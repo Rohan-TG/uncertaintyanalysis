@@ -254,15 +254,19 @@ print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]
 print(f"Smallest absolute error: {min(absolute_errors)} pcm")
 acceptable_predictions = []
 borderline_predictions = []
+twenty_pcm_predictions = []
 for x in absolute_errors:
 	if x <= 5.0:
 		acceptable_predictions.append(x)
 	if x <= 10.0:
 		borderline_predictions.append(x)
+	if x <= 20.0:
+		twenty_pcm_predictions.append(x)
 
 
 print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
 
 save_histogram = input('Save histogram? (y): ')
 if save_histogram == 'y':
