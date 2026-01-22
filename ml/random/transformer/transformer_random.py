@@ -292,8 +292,6 @@ class RegressionTransformerFeatureRows(nn.Module):
         return out.squeeze(-1)
 
 
-
-
 class EarlyStopping:
     def __init__(self, patience=10, min_delta=0.0, mode="min", restore_best_weights=True):
         assert mode in ("min", "max")
@@ -332,80 +330,24 @@ class EarlyStopping:
         if self.restore_best_weights and self.best_state is not None:
             model.load_state_dict(self.best_state)
 
+def iter_minibatches(X, y, batch_size, shuffle=False, device=None):
+    """
+    Yields (X_batch, y_batch) with X_batch shape (B, F, T), y_batch shape (B,).
+    """
+    n = X.shape[0]
+    idx = torch.randperm(n) if shuffle else torch.arange(n)
 
+    for start in range(0, n, batch_size):
+        batch_idx = idx[start:start + batch_size]
+        Xb = X[batch_idx]
+        yb = y[batch_idx]
 
+        if device is not None:
+            Xb = Xb.to(device, non_blocking=True)
+            yb = yb.to(device, non_blocking=True)
 
+        yield Xb, yb
 
-# def evaluate_val_loss(model, device, criterion):
-#     model.eval()
-#     total_loss = 0.0
-#     n = 0
-#     with torch.no_grad():
-#         for batch in val_loader:
-#             # supports both (X,y) and (X,y,mask)
-#             if len(batch) == 2:
-#                 X, y = batch
-#                 mask = None
-#             else:
-#                 X, y, mask = batch
-#
-#             X = X.to(device)
-#             y = y.to(device).view(-1)
-#
-#             predictions = model(X, src_key_padding_mask=(mask.to(device) if mask is not None else None))
-#             val_loss = criterion(predictions, y)
-#
-#             bs = X.size(0)
-#             total_loss += val_loss.item() * bs
-#             n += bs
-#     return total_loss / max(n, 1)
-
-
-
-
-
-
-
-# train_loader = DataLoader(
-#     dataset=FixedLenDataset(X_train, y_train),
-#     batch_size=32,
-#     shuffle=True
-# )
 
 device = torch.device('cpu')
-model = RegressionTransformerFeatureRows(num_features=F, max_len=T).to(device)
 
-criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-# Implement early stopping class later...
-# early_stopper = EarlyStopping(patience=10, min_delta=1e-5, mode="min", restore_best_weights=True)
-
-num_epochs = 100
-
-for epoch in range(num_epochs):
-
-    model.train()
-    train_loss = 0.0
-    n = 0
-
-    for Xb, yb in train_loader:
-        Xb = Xb.to(device)
-        yb = yb.to(device)
-
-        optimizer.zero_grad()
-        epoch_predictions = model(Xb)  # (batch,)
-        loss = criterion(epoch_predictions, yb)
-        loss.backward()
-        optimizer.step()
-
-        bs = Xb.size(0)
-        train_loss += loss.item() * bs
-        n += bs
-
-    train_loss /= max(n, 1)
-
-    # ---- Validate ----
-    # val_loss = evaluate_val_loss(model, val_loader, device, criterion)
-
-    # print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f} | val MSE {val_loss:.6f}")
-	# print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f}")
