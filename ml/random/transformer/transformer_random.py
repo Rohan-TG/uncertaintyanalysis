@@ -3,6 +3,170 @@ import torch
 import math
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
+import os
+import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import matplotlib.pyplot as plt
+
+
+computer = os.uname().nodename
+if computer == 'fermiac':
+	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
+elif computer == 'oppie':
+	sys.path.append('/home/rnt26/uncertaintyanalysis/')
+
+import pandas as pd
+import random
+import numpy as np
+from scipy.stats import zscore
+import tqdm
+import time
+
+
+data_directory = input('Data directory: ')
+data_processes = int(input('Num. data processors: '))
+
+all_parquets = os.listdir(data_directory)
+
+training_fraction = float(input('Enter training data fraction: '))
+lower_energy_bound = float(input('Enter lower energy bound in eV: '))
+n_training_samples = int(training_fraction * len(all_parquets))
+
+
+
+training_files = []
+while len(training_files) < n_training_samples:
+	choice = random.choice(all_parquets)
+	if choice not in training_files:
+		training_files.append(choice)
+
+test_files = []
+for file in all_parquets:
+	if file not in training_files:
+		test_files.append(file)
+
+print('Fetching training data...')
+
+
+
+
+
+def fetch_data(datafile):
+
+	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
+
+	keff_value = float(temp_df['keff'].values[0])
+
+	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
+	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
+	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
+
+	pu9_mt2xs = temp_df['94239_MT2_XS'].values.tolist()
+	pu0_mt2xs = temp_df['94240_MT2_XS'].values.tolist()
+	pu1_mt2xs = temp_df['94241_MT2_XS'].values.tolist()
+
+	pu9_mt4xs = temp_df['94239_MT4_XS'].values.tolist()
+	pu0_mt4xs = temp_df['94240_MT4_XS'].values.tolist()
+	pu1_mt4xs = temp_df['94241_MT4_XS'].values.tolist()
+
+	pu9_mt16xs = temp_df['94239_MT16_XS'].values.tolist()
+	pu0_mt16xs = temp_df['94240_MT16_XS'].values.tolist()
+	pu1_mt16xs = temp_df['94241_MT16_XS'].values.tolist()
+
+	pu9_mt102xs = temp_df['94239_MT102_XS'].values.tolist()
+	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
+	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
+
+	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+
+	XS_obj = xsobject
+
+	return(XS_obj, keff_value)
+
+
+
+keff_train = [] # k_eff labels
+XS_train = []
+
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
+
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values, keff_value = future.result()
+		XS_train.append(xs_values)
+		keff_train.append(keff_value)
+
+XS_train = np.array(XS_train)
+
+keff_train_mean = np.mean(keff_train)
+keff_train_std = np.std(keff_train)
+
+y_train = zscore(keff_train)
+
+
+scaling_matrix_xtrain = XS_train.transpose()
+
+scaled_columns_xtrain = []
+print('Scaling training data...')
+
+
+le_bound_index = 1 # filters out NaNs
+
+
+training_column_means = []
+training_column_stds = []
+
+for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scaling_matrix_xtrain[le_bound_index:-1])):
+
+	column_mean = np.mean(column)
+	column_std = np.std(column)
+	training_column_means.append(column_mean)
+	training_column_stds.append(column_std)
+
+	scaled_column = zscore(column)
+	scaled_columns_xtrain.append(scaled_column)
+
+scaled_columns_xtrain = np.array(scaled_columns_xtrain)
+X_train = scaled_columns_xtrain.transpose()
+
+
+XS_test = []
+keff_test = []
+
+print('Fetching test data...')
+
+
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values_test, keff_value_test = future.result()
+		XS_test.append(xs_values_test)
+		keff_test.append(keff_value_test)
+
+XS_test = np.array(XS_test)
+y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
+
+scaling_matrix_xtest = XS_test.transpose()
+
+scaled_columns_xtest = []
+print('Scaling test data...')
+for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
+	scaled_column_test = (np.array(column) - c_mean) / c_std
+
+	scaled_columns_xtest.append(scaled_column_test)
+
+scaled_columns_xtest = np.array(scaled_columns_xtest)
+X_test = scaled_columns_xtest.transpose()
+
+
+test_mask = ~np.isnan(X_test).any(axis=0)
+X_test = X_test[:, test_mask]
+
+train_mask = ~np.isnan(X_train).any(axis=0)
+X_train = X_train[:, train_mask]
 
 class PositionalEncoding(nn.Module):
 	def __init__(self, d_model, max_len=5000):
@@ -140,3 +304,9 @@ class RegressionTransformerFeatureRows(nn.Module):
 
 		# Return shape (batch,) instead of (batch, 1)
 		return out.squeeze(-1)
+
+
+
+
+
+
