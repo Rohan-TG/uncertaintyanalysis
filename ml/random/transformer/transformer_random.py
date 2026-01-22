@@ -7,9 +7,9 @@ import torch
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
+import copy
 import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader, Dataset
-
+# from torch.utils.data import DataLoader, Dataset
 
 computer = os.uname().nodename
 if computer == 'fermiac':
@@ -24,7 +24,6 @@ from scipy.stats import zscore
 import tqdm
 import time
 
-
 data_directory = input('Data directory: ')
 data_processes = int(input('Num. data processors: '))
 
@@ -33,8 +32,6 @@ all_parquets = os.listdir(data_directory)
 training_fraction = float(input('Enter training data fraction: '))
 lower_energy_bound = float(input('Enter lower energy bound in eV: '))
 n_training_samples = int(training_fraction * len(all_parquets))
-
-
 
 training_files = []
 while len(training_files) < n_training_samples:
@@ -48,10 +45,6 @@ for file in all_parquets:
         test_files.append(file)
 
 print('Fetching training data...')
-
-
-
-
 
 def fetch_data(datafile):
 
@@ -86,8 +79,6 @@ def fetch_data(datafile):
 
     return(XS_obj, keff_value)
 
-
-
 keff_train = [] # k_eff labels
 XS_train = []
 
@@ -106,15 +97,12 @@ keff_train_std = np.std(keff_train)
 
 y_train = zscore(keff_train)
 
-
 scaling_matrix_xtrain = XS_train.transpose()
 
 scaled_columns_xtrain = []
 print('Scaling training data...')
 
-
 le_bound_index = 1 # filters out NaNs
-
 
 training_column_means = []
 training_column_stds = []
@@ -132,12 +120,10 @@ for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scal
 scaled_columns_xtrain = np.array(scaled_columns_xtrain)
 X_train = scaled_columns_xtrain.transpose()
 
-
 XS_test = []
 keff_test = []
 
 print('Fetching test data...')
-
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
     futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
@@ -162,12 +148,13 @@ for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-
 scaled_columns_xtest = np.array(scaled_columns_xtest)
 X_test = scaled_columns_xtest.transpose()
 
-
 test_mask = ~np.isnan(X_test).any(axis=0)
 X_test = X_test[:, test_mask]
 
 train_mask = ~np.isnan(X_train).any(axis=0)
 X_train = X_train[:, train_mask]
+
+T = X_test.shape[-1]
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
@@ -197,7 +184,6 @@ class PositionalEncoding(nn.Module):
 
         # Applies positional encoding to the input embeddings
         return x + self.positional_encoding[:, :sequence_length, :]
-
 
 class RegressionTransformerFeatureRows(nn.Module):
     def __init__(self,
@@ -305,61 +291,86 @@ class RegressionTransformerFeatureRows(nn.Module):
         # Return shape (batch,) instead of (batch, 1)
         return out.squeeze(-1)
 
-class FixedLenDataset(Dataset):
-    def __init__(self, X, y):
-        self.X = X
-        self.y = y
-
-    def __len__(self):
-        return self.X.size(0)
-
-    def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
 
 
 
+class EarlyStopping:
+    def __init__(self, patience=10, min_delta=0.0, mode="min", restore_best_weights=True):
+        assert mode in ("min", "max")
+        self.patience = patience
+        self.min_delta = min_delta
+        self.mode = mode
+        self.restore_best_weights = restore_best_weights
 
+        self.best_score = None
+        self.best_state = None
+        self.bad_epochs = 0
+        self.should_stop = False
 
+    def _improved(self, score, best):
+        if self.mode == "min":
+            return score < (best - self.min_delta)
+        else:
+            return score > (best + self.min_delta)
 
-def evaluate_val_loss(model, val_loader, device, criterion):
-    model.eval()
-    total_loss = 0.0
-    n = 0
-    with torch.no_grad():
-        for batch in val_loader:
-            # supports both (X,y) and (X,y,mask)
-            if len(batch) == 2:
-                X, y = batch
-                mask = None
-            else:
-                X, y, mask = batch
+    def step(self, score, model):
+        if self.best_score is None:
+            self.best_score = score
+            self.best_state = copy.deepcopy(model.state_dict())
+            return
 
-            X = X.to(device)
-            y = y.to(device).view(-1)
+        if self._improved(score, self.best_score):
+            self.best_score = score
+            self.best_state = copy.deepcopy(model.state_dict())
+            self.bad_epochs = 0
+        else:
+            self.bad_epochs += 1
+            if self.bad_epochs >= self.patience:
+                self.should_stop = True
 
-            preds = model(X, src_key_padding_mask=(mask.to(device) if mask is not None else None))
-            loss = criterion(preds, y)
-
-            bs = X.size(0)
-            total_loss += loss.item() * bs
-            n += bs
-    return total_loss / max(n, 1)
-
-
-
+    def restore(self, model):
+        if self.restore_best_weights and self.best_state is not None:
+            model.load_state_dict(self.best_state)
 
 
 
 
 
+# def evaluate_val_loss(model, device, criterion):
+#     model.eval()
+#     total_loss = 0.0
+#     n = 0
+#     with torch.no_grad():
+#         for batch in val_loader:
+#             # supports both (X,y) and (X,y,mask)
+#             if len(batch) == 2:
+#                 X, y = batch
+#                 mask = None
+#             else:
+#                 X, y, mask = batch
+#
+#             X = X.to(device)
+#             y = y.to(device).view(-1)
+#
+#             predictions = model(X, src_key_padding_mask=(mask.to(device) if mask is not None else None))
+#             val_loss = criterion(predictions, y)
+#
+#             bs = X.size(0)
+#             total_loss += val_loss.item() * bs
+#             n += bs
+#     return total_loss / max(n, 1)
 
 
 
-train_loader = DataLoader(
-    dataset=FixedLenDataset(X_train, y_train),
-    batch_size=32,
-    shuffle=True
-)
+
+
+
+
+# train_loader = DataLoader(
+#     dataset=FixedLenDataset(X_train, y_train),
+#     batch_size=32,
+#     shuffle=True
+# )
 
 device = torch.device('cpu')
 model = RegressionTransformerFeatureRows(num_features=F, max_len=T).to(device)
@@ -382,8 +393,8 @@ for epoch in range(num_epochs):
         yb = yb.to(device)
 
         optimizer.zero_grad()
-        preds = model(Xb)  # (batch,)
-        loss = criterion(preds, yb)
+        epoch_predictions = model(Xb)  # (batch,)
+        loss = criterion(epoch_predictions, yb)
         loss.backward()
         optimizer.step()
 
@@ -394,6 +405,7 @@ for epoch in range(num_epochs):
     train_loss /= max(n, 1)
 
     # ---- Validate ----
-    val_loss = evaluate_val_loss(model, val_loader, device, criterion)
+    # val_loss = evaluate_val_loss(model, val_loader, device, criterion)
 
-    print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f} | val MSE {val_loss:.6f}")
+    # print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f} | val MSE {val_loss:.6f}")
+	# print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f}")
