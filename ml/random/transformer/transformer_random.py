@@ -202,8 +202,6 @@ def process_data(XS_train, XS_val):
 
 X_train, X_val = process_data(XS_train, XS_val)
 
-T = X_val.shape[-1]
-
 
 # From here on we switch from numpy matrices to torch tensors
 
@@ -410,7 +408,7 @@ def iter_minibatches(X, y, batch_size, shuffle=False, device=None):
 
 device = torch.device('cpu')
 
-N_train, F = X_train.shape # F stands for features i.e. number of reaction channels (T stands for tokens, each token is an energy point)
+N_train, F, T = X_train.shape # F stands for features i.e. number of reaction channels (T stands for tokens, each token is an energy point)
 N_val = X_val.shape[0]
 
 # define model
