@@ -415,5 +415,51 @@ for epoch in range(1, max_epochs + 1):
         print(f"Early stopping. Best val MSE: {early.best_score:.6f}")
         break
 
+
+
+
+
+
 # Restore best weights after training
 early.restore(model)
+
+model.eval()  # switch to inference mode
+
+with torch.no_grad():  # improve compute cost disable gradient tracking
+    predictions = model(X_val.to(device))  # forward pass
+
+
+rescaled_predictions = []
+predictions_list = predictions.tolist()
+
+for pred in predictions_list:
+	descaled_p = pred * keff_train_std + keff_train_mean
+	rescaled_predictions.append(float(descaled_p))
+
+errors = []
+for predicted, true in zip(rescaled_predictions, keff_val):
+	errors.append((predicted - true) * 1e5)
+	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+sorted_errors = sorted(errors)
+absolute_errors = [abs(x) for x in sorted_errors]
+print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+
+print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
+
+print(f"Smallest absolute error: {min(absolute_errors)} pcm")
+acceptable_predictions = []
+borderline_predictions = []
+twenty_pcm_predictions = []
+for x in absolute_errors:
+	if x <= 5.0:
+		acceptable_predictions.append(x)
+	if x <= 10.0:
+		borderline_predictions.append(x)
+	if x <= 20.0:
+		twenty_pcm_predictions.append(x)
+
+
+print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
+print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
