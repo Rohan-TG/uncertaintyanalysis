@@ -52,10 +52,8 @@ print('\nFetching training data...')
 
 
 
-
-
 def fetch_data(datafile):
-
+	"""Retrieves data from the parquet file and returns it as a matrix"""
 	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
@@ -407,7 +405,6 @@ def iter_minibatches(X, y, batch_size, shuffle=False, device=None):
 
 		yield Xb, yb
 
-
 device = torch.device('cpu')
 
 N_train, F, T = X_train.shape # F stands for features i.e. number of reaction channels (T stands for tokens, each token is an energy point)
@@ -427,13 +424,10 @@ early = EarlyStopping(patience=10, min_delta=1e-5, mode="min", restore_best_weig
 batch_size = 32
 max_epochs = 100
 
-
 print('\nBeginning training...')
 
 for epoch in tqdm.tqdm(range(1, max_epochs + 1)):
-    # --------------------
-    # Train
-    # --------------------
+    # start training
     model.train()
     train_loss_sum = 0.0
     train_count = 0
@@ -479,11 +473,6 @@ for epoch in tqdm.tqdm(range(1, max_epochs + 1)):
         print(f"Early stopping. Best val MSE: {early.best_score:.6f}")
         break
 
-
-
-
-
-
 # Restore best weights after training
 early.restore(model)
 
@@ -491,7 +480,6 @@ model.eval()  # switch to inference mode
 
 with torch.no_grad():  # improve compute cost disable gradient tracking
     predictions = model(X_val.to(device))  # forward pass
-
 
 rescaled_predictions = []
 predictions_list = predictions.tolist()
@@ -522,7 +510,6 @@ for x in absolute_errors:
 		borderline_predictions.append(x)
 	if x <= 20.0:
 		twenty_pcm_predictions.append(x)
-
 
 print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
