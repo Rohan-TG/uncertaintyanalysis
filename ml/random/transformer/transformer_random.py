@@ -123,7 +123,7 @@ X_train = scaled_columns_xtrain.transpose()
 XS_val = []
 keff_val = []
 
-print('Fetching validation data...')
+print('\nFetching validation data...')
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
     futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
@@ -139,7 +139,7 @@ y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
 scaling_matrix_xtest = XS_val.transpose()
 
 scaled_columns_xtest = []
-print('Scaling test data...')
+print('\nScaling test data...')
 for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
 	scaled_column_val = (np.array(column) - c_mean) / c_std
 
@@ -155,6 +155,18 @@ train_mask = ~np.isnan(X_train).any(axis=0)
 X_train = X_train[:, train_mask]
 
 T = X_val.shape[-1]
+
+
+# From here on we switch from numpy matrices to torch tensors
+
+X_train = torch.from_numpy(X_train).float()
+y_train = torch.from_numpy(y_train).float()
+
+X_val = torch.from_numpy(X_val).float()
+y_val = torch.from_numpy(y_val).float()
+
+# Working with tensors now
+
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
