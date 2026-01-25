@@ -43,12 +43,12 @@ while len(training_files) < n_training_samples:
 	if choice not in training_files:
 		training_files.append(choice)
 
-test_files = []
+val_files = []
 for file in all_parquets:
 	if file not in training_files:
-		test_files.append(file)
+		val_files.append(file)
 
-print('Fetching training data...')
+print('\nFetching training data...')
 
 
 
@@ -113,11 +113,11 @@ y_train = zscore(keff_train)
 XS_val = []
 keff_val = []
 
-print('Fetching test data...')
+print('\nFetching validation data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+	futures = [executor.submit(fetch_data, val_file) for val_file in val_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		xs_values_val, keff_value_val = future.result()
@@ -128,7 +128,7 @@ XS_val = np.array(XS_val)
 y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
 
 
-print('Scaling training data...')
+print('\nScaling training and validation data...')
 
 
 # le_bound_index = 1 # filters out NaNs
