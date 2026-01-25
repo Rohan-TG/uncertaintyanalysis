@@ -120,41 +120,41 @@ for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1], total=len(scal
 scaled_columns_xtrain = np.array(scaled_columns_xtrain)
 X_train = scaled_columns_xtrain.transpose()
 
-XS_test = []
-keff_test = []
+XS_val = []
+keff_val = []
 
-print('Fetching test data...')
+print('Fetching validation data...')
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
     futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
 
     for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
         xs_values_test, keff_value_test = future.result()
-        XS_test.append(xs_values_test)
-        keff_test.append(keff_value_test)
+        XS_val.append(xs_values_test)
+        keff_val.append(keff_value_test)
 
-XS_test = np.array(XS_test)
-y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
+XS_val = np.array(XS_val)
+y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
 
-scaling_matrix_xtest = XS_test.transpose()
+scaling_matrix_xtest = XS_val.transpose()
 
 scaled_columns_xtest = []
 print('Scaling test data...')
 for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
-    scaled_column_test = (np.array(column) - c_mean) / c_std
+	scaled_column_val = (np.array(column) - c_mean) / c_std
 
-    scaled_columns_xtest.append(scaled_column_test)
+	scaled_columns_xtest.append(scaled_column_val)
 
 scaled_columns_xtest = np.array(scaled_columns_xtest)
-X_test = scaled_columns_xtest.transpose()
+X_val = scaled_columns_xtest.transpose()
 
-test_mask = ~np.isnan(X_test).any(axis=0)
-X_test = X_test[:, test_mask]
+test_mask = ~np.isnan(X_val).any(axis=0)
+X_val = X_val[:, test_mask]
 
 train_mask = ~np.isnan(X_train).any(axis=0)
 X_train = X_train[:, train_mask]
 
-T = X_test.shape[-1]
+T = X_val.shape[-1]
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
@@ -331,23 +331,89 @@ class EarlyStopping:
             model.load_state_dict(self.best_state)
 
 def iter_minibatches(X, y, batch_size, shuffle=False, device=None):
-    """
-    Yields (X_batch, y_batch) with X_batch shape (B, F, T), y_batch shape (B,).
-    """
-    n = X.shape[0]
-    idx = torch.randperm(n) if shuffle else torch.arange(n)
+	"""
+	Yields (X_batch, y_batch) with X_batch shape (B, F, T), y_batch shape (B,).
+	"""
+	n = X.shape[0]
+	idx = torch.randperm(n) if shuffle else torch.arange(n)
 
-    for start in range(0, n, batch_size):
-        batch_idx = idx[start:start + batch_size]
-        Xb = X[batch_idx]
-        yb = y[batch_idx]
+	for start in range(0, n, batch_size):
+		batch_idx = idx[start:start + batch_size]
+		Xb = X[batch_idx]
+		yb = y[batch_idx]
 
-        if device is not None:
-            Xb = Xb.to(device, non_blocking=True)
-            yb = yb.to(device, non_blocking=True)
+		if device is not None:
+			Xb = Xb.to(device, non_blocking=True)
+			yb = yb.to(device, non_blocking=True)
 
-        yield Xb, yb
+		yield Xb, yb
 
 
 device = torch.device('cpu')
 
+N_train, F = X_train.shape # F stands for features i.e. number of reaction channels (T stands for tokens, each token is an energy point)
+N_val = X_val.shape[0]
+
+# define model
+model = RegressionTransformerFeatureRows(num_features=F, max_len=T).to(device)
+
+# Loss/optimisation
+criterion = nn.MSELoss()
+optimiser = torch.optim.Adam(model.parameters(), lr=1e-4)
+
+early = EarlyStopping(patience=10, min_delta=1e-5, mode="min", restore_best_weights=True)
+
+batch_size = 32
+max_epochs = 100
+
+for epoch in range(1, max_epochs + 1):
+    # --------------------
+    # Train
+    # --------------------
+    model.train()
+    train_loss_sum = 0.0
+    train_count = 0
+
+    for Xb, yb in iter_minibatches(X_train, y_train, batch_size, shuffle=True, device=device):
+        optimiser.zero_grad(set_to_none=True)
+
+        preds = model(Xb)              # (B,)
+        loss = criterion(preds, yb)    # scalar
+
+        loss.backward()
+        optimiser.step()
+
+        train_loss_sum += loss.item() * Xb.size(0)
+        train_count += Xb.size(0)
+
+    train_loss = train_loss_sum / max(train_count, 1)
+
+    # --------------------
+    # Validate
+    # --------------------
+    model.eval()
+    val_loss_sum = 0.0
+    val_count = 0
+
+    with torch.no_grad():
+        for Xb, yb in iter_minibatches(X_val, y_val, batch_size=64, shuffle=False, device=device):
+            preds = model(Xb)
+            loss = criterion(preds, yb)
+
+            val_loss_sum += loss.item() * Xb.size(0)
+            val_count += Xb.size(0)
+
+    val_loss = val_loss_sum / max(val_count, 1)
+
+    print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f} | val MSE {val_loss:.6f}")
+
+    # --------------------
+    # Early stopping
+    # --------------------
+    early.step(val_loss, model)
+    if early.should_stop:
+        print(f"Early stopping. Best val MSE: {early.best_score:.6f}")
+        break
+
+# Restore best weights after training
+early.restore(model)
