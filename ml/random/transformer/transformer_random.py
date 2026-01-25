@@ -204,6 +204,7 @@ X_train, X_val = process_data(XS_train, XS_val)
 
 
 # From here on we switch from numpy matrices to torch tensors
+print('\nConverting arrays to tensors...')
 
 X_train = torch.from_numpy(X_train).float()
 y_train = torch.from_numpy(y_train).float()
@@ -212,6 +213,7 @@ X_val = torch.from_numpy(X_val).float()
 y_val = torch.from_numpy(y_val).float()
 
 # Working with tensors now
+print('\nDefining torch classes and functions...')
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
@@ -418,12 +420,17 @@ model = RegressionTransformerFeatureRows(num_features=F, max_len=T).to(device)
 criterion = nn.MSELoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=1e-4)
 
+print('\nDefining early stopping criteria...')
+
 early = EarlyStopping(patience=10, min_delta=1e-5, mode="min", restore_best_weights=True)
 
 batch_size = 32
 max_epochs = 100
 
-for epoch in range(1, max_epochs + 1):
+
+print('\nBeginning training...')
+
+for epoch in tqdm.tqdm(range(1, max_epochs + 1)):
     # --------------------
     # Train
     # --------------------
