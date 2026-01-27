@@ -23,7 +23,7 @@ import time
 
 
 data_directory = input('Data directory: ')
-data_processes = int(input('Num. data processors: '))
+data_processes = 5
 # data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/0-4999/xserg_data'
 
 all_parquets = os.listdir(data_directory)
