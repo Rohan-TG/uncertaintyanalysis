@@ -273,18 +273,29 @@ if save_histogram == 'y':
 	plt.figure()
 	plt.hist(sorted_errors, bins=30)
 	plt.grid()
-	plt.title('Distribution of absolute errors')
-	plt.xlabel('Absolute error / pcm')
+	plt.title('Distribution of errors')
+	plt.xlabel('Error / pcm')
 	plt.ylabel('Count')
-	plt.savefig('absolute_errors_corrected_scaling.png')
+	plt.savefig('absolute_errors_corrected_scaling.png', dpi = 300)
 	plt.show()
 
 
-# plt.figure()
-# plt.plot(keff_test, errors, 'x')
-# plt.grid()
-# plt.title('Distribution of errors')
-# plt.xlabel('True k_eff')
-# plt.ylabel('Error / pcm')
-# plt.savefig('errors.png')
-# plt.show()
+
+
+skew_positive = []
+skew_negative = []
+
+for x in errors:
+	if x >0:
+		skew_positive.append(x)
+	else:
+		skew_negative.append(x)
+
+plt.figure()
+plt.plot(keff_test, errors, 'x')
+plt.grid()
+plt.title('Distribution of errors')
+plt.xlabel('True k_eff')
+plt.ylabel('Error / pcm')
+plt.savefig('errors_as_function_of_keff.png', dpi = 300)
+plt.show()
