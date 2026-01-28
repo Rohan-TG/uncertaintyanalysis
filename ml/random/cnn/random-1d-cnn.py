@@ -290,3 +290,35 @@ for x in absolute_errors:
 print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
 print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+
+import matplotlib.pyplot as plt
+save_histogram = input('Save histogram? (y): ')
+if save_histogram == 'y':
+	plt.figure()
+	plt.hist(sorted_errors, bins=25)
+	plt.grid()
+	plt.title('Distribution of errors')
+	plt.xlabel('Error / pcm')
+	plt.ylabel('Count')
+	plt.savefig('asdfcnn.png', dpi=300)
+	plt.show()
+
+	plt.figure()
+	plt.plot(keff_test, errors, 'x')
+	plt.grid()
+	plt.title('Distribution of errors')
+	plt.xlabel('True k_eff')
+	plt.ylabel('Error / pcm')
+	plt.savefig('errors_as_function_of_keff.png', dpi=300)
+	plt.show()
+
+skew_positive = []
+skew_negative = []
+
+for x in errors:
+	if x >0:
+		skew_positive.append(x)
+	else:
+		skew_negative.append(x)
+
+
