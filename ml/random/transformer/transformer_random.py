@@ -13,9 +13,9 @@ import matplotlib.pyplot as plt
 
 computer = os.uname().nodename
 if computer == 'fermiac':
-    sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
+	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
 elif computer == 'oppie':
-    sys.path.append('/home/rnt26/uncertaintyanalysis/')
+	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 
 import pandas as pd
 import random
@@ -214,178 +214,178 @@ y_val = torch.from_numpy(y_val).float()
 print('\nDefining torch classes and functions...')
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_len=5000):
-        super().__init__()
+	def __init__(self, d_model, max_len=5000):
+		super().__init__()
 
-        positional_encoding = torch.zeros(max_len, d_model) # matrix of zeroes with dimensions (max_len, d_model)
+		positional_encoding = torch.zeros(max_len, d_model) # matrix of zeroes with dimensions (max_len, d_model)
 
-        position = torch.arange(0, max_len, dtype=torch.float32).unsqueeze(1) # indices for positions
+		position = torch.arange(0, max_len, dtype=torch.float32).unsqueeze(1) # indices for positions
 
-        divisor_term = torch.exp(torch.arange(0, d_model, 2, dtype=torch.float32) * -(math.log(10000.0) / d_model))
+		divisor_term = torch.exp(torch.arange(0, d_model, 2, dtype=torch.float32) * -(math.log(10000.0) / d_model))
 
-        positional_encoding[:, 0::2] = torch.sin(position * divisor_term) # apply sin encoding to even positions
+		positional_encoding[:, 0::2] = torch.sin(position * divisor_term) # apply sin encoding to even positions
 
-        positional_encoding[:, 1::2] = torch.cos(position * divisor_term) # apply cos encoding to odd positions
+		positional_encoding[:, 1::2] = torch.cos(position * divisor_term) # apply cos encoding to odd positions
 
-        positional_encoding = positional_encoding.unsqueeze(0)
+		positional_encoding = positional_encoding.unsqueeze(0)
 
-        self.register_buffer('positional_encoding', positional_encoding)
+		self.register_buffer('positional_encoding', positional_encoding)
 
 
-    def forward(self, x):
-        """
-         x: (batch, seq_len, d_model)
-        """
-        # Get current sequence length of the input
-        sequence_length = x.size(1)
+	def forward(self, x):
+		"""
+		 x: (batch, seq_len, d_model)
+		"""
+		# Get current sequence length of the input
+		sequence_length = x.size(1)
 
-        # Applies positional encoding to the input embeddings
-        return x + self.positional_encoding[:, :sequence_length, :]
+		# Applies positional encoding to the input embeddings
+		return x + self.positional_encoding[:, :sequence_length, :]
 
 class RegressionTransformerFeatureRows(nn.Module):
-    def __init__(self,
-                 num_features: int,
-                 d_model: int = 64,
-                 nhead: int = 4,
-                 num_layers: int = 2,
-                 dim_feedforward: int = 128,
-                 dropout: float = 0.1,
-                 max_len: int = 5000):
-        super().__init__()
+	def __init__(self,
+				 num_features: int,
+				 d_model: int = 64,
+				 nhead: int = 4,
+				 num_layers: int = 2,
+				 dim_feedforward: int = 128,
+				 dropout: float = 0.1,
+				 max_len: int = 5000):
+		super().__init__()
 
-        self.num_features = num_features
+		self.num_features = num_features
 
-        # model input of shape (batch, num_features, sequence_length)
-        self.input_proj = nn.Linear(num_features, d_model)
+		# model input of shape (batch, num_features, sequence_length)
+		self.input_proj = nn.Linear(num_features, d_model)
 
-        # Apply positional encoding to tokens
-        self.pos_encoder = PositionalEncoding(d_model, max_len=max_len)
+		# Apply positional encoding to tokens
+		self.pos_encoder = PositionalEncoding(d_model, max_len=max_len)
 
-        # single encoder layer with
-        # - multi-head self-attention
-        # - feedforward network
-        # - layer norm
-        # - residual connections
-        encoder_layer = nn.TransformerEncoderLayer( # Transformer encoder layer
-            d_model=d_model,
-            nhead=nhead,
-            dim_feedforward=dim_feedforward,
-            dropout=dropout,
-            batch_first=True,  # ensures input tensors are (batch, seq, d_model)
-        )
+		# single encoder layer with
+		# - multi-head self-attention
+		# - feedforward network
+		# - layer norm
+		# - residual connections
+		encoder_layer = nn.TransformerEncoderLayer( # Transformer encoder layer
+			d_model=d_model,
+			nhead=nhead,
+			dim_feedforward=dim_feedforward,
+			dropout=dropout,
+			batch_first=True,  # ensures input tensors are (batch, seq, d_model)
+		)
 
-        # Stack multiple encoder layers into a full Transformer encoder
-        self.transformer_encoder = nn.TransformerEncoder(
-            encoder_layer,
-            num_layers=num_layers,
-        )
+		# Stack multiple encoder layers into a full Transformer encoder
+		self.transformer_encoder = nn.TransformerEncoder(
+			encoder_layer,
+			num_layers=num_layers,
+		)
 
-        # Stack multiple encoder layers into a full Transformer encoder.
-        self.transformer_encoder = nn.TransformerEncoder(
-            encoder_layer,
-            num_layers=num_layers,
-        )
+		# Stack multiple encoder layers into a full Transformer encoder.
+		self.transformer_encoder = nn.TransformerEncoder(
+			encoder_layer,
+			num_layers=num_layers,
+		)
 
-        # regression head produces a single scalar (k_eff) output
-        # after encoding, the sequence is pooled into a single vector of size d_model
-        # sequential vanilla mlp defined below does the last bit of calculation to output a scalar value
-        self.regression_head = nn.Sequential(
-            nn.Linear(d_model, d_model),
-            nn.ReLU(),
-            nn.Linear(d_model, 1),
-        )
+		# regression head produces a single scalar (k_eff) output
+		# after encoding, the sequence is pooled into a single vector of size d_model
+		# sequential vanilla mlp defined below does the last bit of calculation to output a scalar value
+		self.regression_head = nn.Sequential(
+			nn.Linear(d_model, d_model),
+			nn.ReLU(),
+			nn.Linear(d_model, 1),
+		)
 
-    def forward(self, x: torch.Tensor, src_key_padding_mask=None) -> torch.Tensor:
-        """
-        x: (batch, num_features, seq_len)
-        src_key_padding_mask: (batch, seq_len) with True where padding exists (optional)
-        """
+	def forward(self, x: torch.Tensor, src_key_padding_mask=None) -> torch.Tensor:
+		"""
+		x: (batch, num_features, seq_len)
+		src_key_padding_mask: (batch, seq_len) with True where padding exists (optional)
+		"""
 
-        # re orient input to make columns/tokens
-        #
-        # rows = features and columns = tokens, so we transpose:
-        #
-        #   Before: (batch, num_features, seq_len)
-        #   After:  (batch, seq_len, num_features)
-        #
-        x = x.transpose(1, 2)
+		# re orient input to make columns/tokens
+		#
+		# rows = features and columns = tokens, so we transpose:
+		#
+		#   Before: (batch, num_features, seq_len)
+		#   After:  (batch, seq_len, num_features)
+		#
+		x = x.transpose(1, 2)
 
-        # linear projection: embed tokens into d_model-dimensional space
-        # Every token now becomes a d_model-dimensional embedding
-        x = self.input_proj(x)  # (batch, seq_len, d_model)
+		# linear projection: embed tokens into d_model-dimensional space
+		# Every token now becomes a d_model-dimensional embedding
+		x = self.input_proj(x)  # (batch, seq_len, d_model)
 
-        # add positional encoding
-        x = self.pos_encoder(x)
+		# add positional encoding
+		x = self.pos_encoder(x)
 
-        # Transformer encoding including
-        x = self.transformer_encoder(
-            x,
-            src_key_padding_mask=src_key_padding_mask # ignore padded tokens
-        )  # (batch, seq_len, d_model)
+		# Transformer encoding including
+		x = self.transformer_encoder(
+			x,
+			src_key_padding_mask=src_key_padding_mask # ignore padded tokens
+		)  # (batch, seq_len, d_model)
 
-        # mask-aware mean pooling (if padding is used) or simple mean pooling (no padding)
+		# mask-aware mean pooling (if padding is used) or simple mean pooling (no padding)
 
-        if src_key_padding_mask is not None: # pool sequence into single vector for regression head
-            # Mask: True = padded token, False = real token
-            mask = ~src_key_padding_mask  # invert: True = valid token
-            mask = mask.unsqueeze(-1)  # (batch, seq_len, 1)
+		if src_key_padding_mask is not None: # pool sequence into single vector for regression head
+			# Mask: True = padded token, False = real token
+			mask = ~src_key_padding_mask  # invert: True = valid token
+			mask = mask.unsqueeze(-1)  # (batch, seq_len, 1)
 
-            # Zero out padded token embeddings
-            x = x * mask
+			# Zero out padded token embeddings
+			x = x * mask
 
-            # Sum over valid tokens only
-            summed = x.sum(dim=1)  # (batch, d_model)
-            counts = mask.sum(dim=1).clamp(min=1)
-            pooled = summed / counts
-        else:
-            # Simple average over all tokens
-            pooled = x.mean(dim=1)  # (batch, d_model)
+			# Sum over valid tokens only
+			summed = x.sum(dim=1)  # (batch, d_model)
+			counts = mask.sum(dim=1).clamp(min=1)
+			pooled = summed / counts
+		else:
+			# Simple average over all tokens
+			pooled = x.mean(dim=1)  # (batch, d_model)
 
-        # regress to single scalar keff value
-        # mlp regression head below
-        out = self.regression_head(pooled)  # (batch, 1)
+		# regress to single scalar keff value
+		# mlp regression head below
+		out = self.regression_head(pooled)  # (batch, 1)
 
-        # Return shape (batch,) instead of (batch, 1)
-        return out.squeeze(-1)
+		# Return shape (batch,) instead of (batch, 1)
+		return out.squeeze(-1)
 
 
 class EarlyStopping:
-    def __init__(self, patience=10, min_delta=0.0, mode="min", restore_best_weights=True):
-        assert mode in ("min", "max")
-        self.patience = patience
-        self.min_delta = min_delta
-        self.mode = mode
-        self.restore_best_weights = restore_best_weights
+	def __init__(self, patience=10, min_delta=0.0, mode="min", restore_best_weights=True):
+		assert mode in ("min", "max")
+		self.patience = patience
+		self.min_delta = min_delta
+		self.mode = mode
+		self.restore_best_weights = restore_best_weights
 
-        self.best_score = None
-        self.best_state = None
-        self.bad_epochs = 0
-        self.should_stop = False
+		self.best_score = None
+		self.best_state = None
+		self.bad_epochs = 0
+		self.should_stop = False
 
-    def _improved(self, score, best):
-        if self.mode == "min":
-            return score < (best - self.min_delta)
-        else:
-            return score > (best + self.min_delta)
+	def _improved(self, score, best):
+		if self.mode == "min":
+			return score < (best - self.min_delta)
+		else:
+			return score > (best + self.min_delta)
 
-    def step(self, score, model):
-        if self.best_score is None:
-            self.best_score = score
-            self.best_state = copy.deepcopy(model.state_dict())
-            return
+	def step(self, score, model):
+		if self.best_score is None:
+			self.best_score = score
+			self.best_state = copy.deepcopy(model.state_dict())
+			return
 
-        if self._improved(score, self.best_score):
-            self.best_score = score
-            self.best_state = copy.deepcopy(model.state_dict())
-            self.bad_epochs = 0
-        else:
-            self.bad_epochs += 1
-            if self.bad_epochs >= self.patience:
-                self.should_stop = True
+		if self._improved(score, self.best_score):
+			self.best_score = score
+			self.best_state = copy.deepcopy(model.state_dict())
+			self.bad_epochs = 0
+		else:
+			self.bad_epochs += 1
+			if self.bad_epochs >= self.patience:
+				self.should_stop = True
 
-    def restore(self, model):
-        if self.restore_best_weights and self.best_state is not None:
-            model.load_state_dict(self.best_state)
+	def restore(self, model):
+		if self.restore_best_weights and self.best_state is not None:
+			model.load_state_dict(self.best_state)
 
 def iter_minibatches(X, y, batch_size, shuffle=False, device=None):
 	"""
@@ -427,59 +427,73 @@ max_epochs = 100
 print('\nBeginning training...')
 
 for epoch in tqdm.tqdm(range(1, max_epochs + 1)):
-    # start training
-    model.train()
-    train_loss_sum = 0.0
-    train_count = 0
+	# start training
+	model.train()
+	train_loss_sum = 0.0
+	train_count = 0
 
-    for Xb, yb in iter_minibatches(X_train, y_train, batch_size, shuffle=True, device=device):
-        optimiser.zero_grad(set_to_none=True)
+	for Xb, yb in iter_minibatches(X_train, y_train, batch_size, shuffle=True, device=device):
+		optimiser.zero_grad(set_to_none=True)
 
-        preds = model(Xb)              # (B,)
-        loss = criterion(preds, yb)    # scalar
+		preds = model(Xb)              # (B,)
+		loss = criterion(preds, yb)    # scalar
 
-        loss.backward()
-        optimiser.step()
+		loss.backward()
+		optimiser.step()
 
-        train_loss_sum += loss.item() * Xb.size(0)
-        train_count += Xb.size(0)
+		train_loss_sum += loss.item() * Xb.size(0)
+		train_count += Xb.size(0)
 
-    train_loss = train_loss_sum / max(train_count, 1)
+	train_loss = train_loss_sum / max(train_count, 1)
 
-    # --------------------
-    # Validate
-    # --------------------
-    model.eval()
-    val_loss_sum = 0.0
-    val_count = 0
+	# --------------------
+	# Validate
+	# --------------------
+	model.eval()
+	val_loss_sum = 0.0
+	val_count = 0
 
-    with torch.no_grad():
-        for Xb, yb in iter_minibatches(X_val, y_val, batch_size=64, shuffle=False, device=device):
-            preds = model(Xb)
-            loss = criterion(preds, yb)
+	with torch.no_grad():
+		for Xb, yb in iter_minibatches(X_val, y_val, batch_size=64, shuffle=False, device=device):
+			preds = model(Xb)
+			loss = criterion(preds, yb)
 
-            val_loss_sum += loss.item() * Xb.size(0)
-            val_count += Xb.size(0)
+			val_loss_sum += loss.item() * Xb.size(0)
+			val_count += Xb.size(0)
 
-    val_loss = val_loss_sum / max(val_count, 1)
+	val_loss = val_loss_sum / max(val_count, 1)
 
-    print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f} | val MSE {val_loss:.6f}")
+	print(f"Epoch {epoch:03d} | train MSE {train_loss:.6f} | val MSE {val_loss:.6f}")
 
-    # --------------------
-    # Early stopping
-    # --------------------
-    early.step(val_loss, model)
-    if early.should_stop:
-        print(f"Early stopping. Best val MSE: {early.best_score:.6f}")
-        break
+	# --------------------
+	# Early stopping
+	# --------------------
+	early.step(val_loss, model)
+	if early.should_stop:
+		print(f"Early stopping. Best val MSE: {early.best_score:.6f}")
+		break
 
 # Restore best weights after training
 early.restore(model)
 
+
+
+
+
+def timed_eval(model, inputs):
+	start = time.perf_counter()
+	with torch.no_grad():
+		out = model(inputs)
+	end = time.perf_counter()
+	return out, end - start
+
+
 model.eval()  # switch to inference mode
 
 with torch.no_grad():  # improve compute cost disable gradient tracking
-    predictions = model(X_val.to(device))  # forward pass
+	predictions = model(X_val.to(device))  # forward pass
+
+out, timing = timed_eval(model, X_val)
 
 rescaled_predictions = []
 predictions_list = predictions.tolist()
