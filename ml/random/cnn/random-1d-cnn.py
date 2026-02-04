@@ -229,8 +229,8 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 model = keras.Sequential()
 model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
 model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
-model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
-model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
+# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
+# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
 model.add(keras.layers.Flatten())
 model.add(keras.layers.Dense(500, activation='relu'))
 model.add(keras.layers.Dense(300, activation='relu'))
@@ -322,5 +322,5 @@ for x in errors:
 	else:
 		skew_negative.append(x)
 
-print(f'skew_positive: {skew_positive} / {len(errors)}')
-print(f'skew_negative: {skew_negative} / {len(errors)}')
+print(f'skew_positive: {len(skew_positive)} / {len(errors)}')
+print(f'skew_negative: {len(skew_negative)} / {len(errors)}')
