@@ -147,8 +147,8 @@ def pchip_initialiser():
 	truncated_erg_mt18_239 = []
 	truncated_xs_mt18_239 = []
 
-	fast_energy_mt18_239 = [erg for erg in fission_erg_239 if erg >= interpolation_energy_bound]
-	fast_xs_mt18_239 = [xs for xs, erg in zip(fission_xs_239, fission_erg_239) if erg >= interpolation_energy_bound]
+	# fast_energy_mt18_239 = [erg for erg in fission_erg_239 if erg >= interpolation_energy_bound]
+	# fast_xs_mt18_239 = [xs for xs, erg in zip(fission_xs_239, fission_erg_239) if erg >= interpolation_energy_bound]
 
 	for erg, xs in zip(fission_erg_239, fission_xs_239):
 		if erg <= interpolation_energy_bound:
@@ -158,7 +158,7 @@ def pchip_initialiser():
 	kept_idx, thinned_erg, thinned_xs = thin_relative_error_logx(x=truncated_erg_mt18_239,
 																 y=truncated_xs_mt18_239,
 																 rel_tol=relative_tolerance)
-	return(thinned_erg)
+	return(thinned_erg) #
 
 interpolation_energies = pchip_initialiser()
 
@@ -204,16 +204,8 @@ def parquet_maker(index_combination):
 
 	# Form energy grid using PCHIP function
 
-	# truncated_erg_mt18_239 = []
-	# truncated_xs_mt18_239 = []
-
 	fast_energy_mt18_239 = [erg for erg in fission_erg_239 if erg >= interpolation_energy_bound]
 	fast_xs_mt18_239 = [xs for xs, erg in zip(fission_xs_239, fission_erg_239) if erg >= interpolation_energy_bound]
-
-	# for erg, xs in zip(fission_erg_239, fission_xs_239):
-	# 	if erg <= interpolation_energy_bound:
-	# 		truncated_erg_mt18_239.append(erg)
-	# 		truncated_xs_mt18_239.append(xs)
 
 
 
@@ -261,11 +253,11 @@ def parquet_maker(index_combination):
 
 
 
-	full_thinned_erg = interpolation_energies + fast_energy_mt18_239
+	full_thinned_erg = interpolation_energies + fast_energy_mt18_239 # full energy grid after applying PCHIP
 
-	thinned_xs = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
+	full_thinned_xs = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
 
-	full_thinned_xs = thinned_xs + fast_energy_mt18_239
+	# full_thinned_xs = thinned_xs + fast_energy_mt18_239
 
 	# truncated_fission_xs_239 = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
 
