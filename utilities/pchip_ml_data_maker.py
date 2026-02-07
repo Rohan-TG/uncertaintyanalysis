@@ -17,7 +17,7 @@ processes = int(input("Num. processes: "))
 outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
-# lower_energy_bound = float(input("Lower energy bound: "))
+interpolation_energy_bound = float(input("Interpolation bound: "))
 relative_tolerance = float(input("Reconstruction tolerance: "))
 
 
@@ -83,7 +83,7 @@ pu241_pendf_names = os.listdir(pu241_pendf_directory)
 
 print('\nDefining PCHIP function...')
 
-def thin_relative_error_logx(x, y, rel_tol=relative_tolerance, y_floor=None, max_points=None):
+def thin_relative_error_logx(x, y, rel_tol=0.999, y_floor=None, max_points=None):
 	x = np.asarray(x)
 	y = np.asarray(y)
 	idx = np.argsort(x)
@@ -137,6 +137,32 @@ def thin_relative_error_logx(x, y, rel_tol=relative_tolerance, y_floor=None, max
 	return kept_idx, x[kept_idx_sorted], y[kept_idx_sorted]
 
 
+def pchip_initialiser():
+
+	f239 = open(f'{pu239_pendf_directory}/{pu239_pendf_names[0]}', 'r')
+	lines_239 = f239.readlines()
+	fission_section_239 = ENDF6.find_section(lines_239, MF=3, MT=Reactions.fission)
+	fission_erg_239, fission_xs_239 = ENDF6.read_table(fission_section_239)
+
+	truncated_erg_mt18_239 = []
+	truncated_xs_mt18_239 = []
+
+	fast_energy_mt18_239 = [erg for erg in fission_erg_239 if erg >= interpolation_energy_bound]
+	fast_xs_mt18_239 = [xs for xs, erg in zip(fission_xs_239, fission_erg_239) if erg >= interpolation_energy_bound]
+
+	for erg, xs in zip(fission_erg_239, fission_xs_239):
+		if erg <= interpolation_energy_bound:
+			truncated_erg_mt18_239.append(erg)
+			truncated_xs_mt18_239.append(xs)
+
+	kept_idx, thinned_erg, thinned_xs = thin_relative_error_logx(x=truncated_erg_mt18_239,
+																 y=truncated_xs_mt18_239,
+																 rel_tol=relative_tolerance)
+	return(thinned_erg)
+
+interpolation_energies = pchip_initialiser()
+
+
 print('\nReading PENDFs and forming dataframes...')
 
 def parquet_maker(index_combination):
@@ -176,7 +202,18 @@ def parquet_maker(index_combination):
 	capture_erg_239, capture_xs_239 = ENDF6.read_table(capture_section_239)
 
 
+	# Form energy grid using PCHIP function
 
+	# truncated_erg_mt18_239 = []
+	# truncated_xs_mt18_239 = []
+
+	fast_energy_mt18_239 = [erg for erg in fission_erg_239 if erg >= interpolation_energy_bound]
+	fast_xs_mt18_239 = [xs for xs, erg in zip(fission_xs_239, fission_erg_239) if erg >= interpolation_energy_bound]
+
+	# for erg, xs in zip(fission_erg_239, fission_xs_239):
+	# 	if erg <= interpolation_energy_bound:
+	# 		truncated_erg_mt18_239.append(erg)
+	# 		truncated_xs_mt18_239.append(xs)
 
 
 
@@ -224,53 +261,47 @@ def parquet_maker(index_combination):
 
 
 
-	# Interpolation calcs
-	if n_points == 'x':
-		truncated_fission_erg_239 = []
-	else:
-		truncated_fission_erg_239 = np.logspace(np.log10(fission_erg_239[0]), np.log10(lower_energy_bound), int(n_points)) # This is x_coarse
-		truncated_fission_erg_239 = truncated_fission_erg_239.tolist()
+	full_thinned_erg = interpolation_energies + fast_energy_mt18_239
+
+	thinned_xs = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
+
+	full_thinned_xs = thinned_xs + fast_energy_mt18_239
+
+	# truncated_fission_xs_239 = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
 
 
-	for erg in fission_erg_239:
-		if erg >= lower_energy_bound:
-			truncated_fission_erg_239.append(erg)
-
-	truncated_fission_xs_239 = np.interp(truncated_fission_erg_239, fission_erg_239, fission_xs_239)
-
-
-	capture_to_fission_239 = np.interp(truncated_fission_erg_239, capture_erg_239, capture_xs_239)
-	n2n_to_fission_239 = np.interp(truncated_fission_erg_239, n2n_erg_239, n2n_xs_239)
-	inelastic_to_fission_239 = np.interp(truncated_fission_erg_239, inelastic_erg_239, inelastic_xs_239)
-	elastic_to_fission_239 = np.interp(truncated_fission_erg_239, elastic_erg_239, elastic_xs_239)
+	capture_to_fission_239 = np.interp(full_thinned_erg, capture_erg_239, capture_xs_239)
+	n2n_to_fission_239 = np.interp(full_thinned_erg, n2n_erg_239, n2n_xs_239)
+	inelastic_to_fission_239 = np.interp(full_thinned_erg, inelastic_erg_239, inelastic_xs_239)
+	elastic_to_fission_239 = np.interp(full_thinned_erg, elastic_erg_239, elastic_xs_239)
 
 
 
 
-	capture_to_fission_240 = np.interp(truncated_fission_erg_239, capture_erg_240, capture_xs_240)
-	n2n_to_fission_240 = np.interp(truncated_fission_erg_239, n2n_erg_240, n2n_xs_240)
-	inelastic_to_fission_240 = np.interp(truncated_fission_erg_239, inelastic_erg_240, inelastic_xs_240)
-	elastic_to_fission_240 = np.interp(truncated_fission_erg_239, elastic_erg_240, elastic_xs_240)
-	fission_to_fission_240 = np.interp(truncated_fission_erg_239, fission_erg_240, fission_xs_240)
+	capture_to_fission_240 = np.interp(full_thinned_erg, capture_erg_240, capture_xs_240)
+	n2n_to_fission_240 = np.interp(full_thinned_erg, n2n_erg_240, n2n_xs_240)
+	inelastic_to_fission_240 = np.interp(full_thinned_erg, inelastic_erg_240, inelastic_xs_240)
+	elastic_to_fission_240 = np.interp(full_thinned_erg, elastic_erg_240, elastic_xs_240)
+	fission_to_fission_240 = np.interp(full_thinned_erg, fission_erg_240, fission_xs_240)
 
 
-	capture_to_fission_241 = np.interp(truncated_fission_erg_239, capture_erg_241, capture_xs_241)
-	n2n_to_fission_241 = np.interp(truncated_fission_erg_239, n2n_erg_241, n2n_xs_241)
-	inelastic_to_fission_241 = np.interp(truncated_fission_erg_239, inelastic_erg_241, inelastic_xs_241)
-	elastic_to_fission_241 = np.interp(truncated_fission_erg_239, elastic_erg_241, elastic_xs_241)
-	fission_to_fission_241 = np.interp(truncated_fission_erg_239, fission_erg_241, fission_xs_241)
+	capture_to_fission_241 = np.interp(full_thinned_erg, capture_erg_241, capture_xs_241)
+	n2n_to_fission_241 = np.interp(full_thinned_erg, n2n_erg_241, n2n_xs_241)
+	inelastic_to_fission_241 = np.interp(full_thinned_erg, inelastic_erg_241, inelastic_xs_241)
+	elastic_to_fission_241 = np.interp(full_thinned_erg, elastic_erg_241, elastic_xs_241)
+	fission_to_fission_241 = np.interp(full_thinned_erg, fission_erg_241, fission_xs_241)
 
 	# extract keff data
-	keff_list = [reduced_keff_df['keff'].values[0] for i in truncated_fission_erg_239]
-	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in truncated_fission_erg_239]
+	keff_list = [reduced_keff_df['keff'].values[0] for i in full_thinned_erg]
+	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in full_thinned_erg]
 
 
 
-	df = pd.DataFrame({'ERG': truncated_fission_erg_239,
+	df = pd.DataFrame({'ERG': full_thinned_erg,
 					   '94239_MT2_XS': elastic_to_fission_239,
 					   '94239_MT4_XS': inelastic_to_fission_239,
 					   '94239_MT16_XS': n2n_to_fission_239,
-					   '94239_MT18_XS': truncated_fission_xs_239, # bug
+					   '94239_MT18_XS': full_thinned_xs, # bug
 					   '94239_MT102_XS': capture_to_fission_239,
 					   '94240_MT2_XS': elastic_to_fission_240,
 					   '94240_MT4_XS': inelastic_to_fission_240,
@@ -286,7 +317,7 @@ def parquet_maker(index_combination):
 					   'keff_err': keff_err_list,
 					   })
 
-	df.to_parquet(f'{parquet_directory}/Random_all_channels_Pu-239_{pu239_index}_Pu-240_{pu240_index}_Pu-241_{pu241_index}.parquet',
+	df.to_parquet(f'{parquet_directory}/Thinned_energy_random_Pu-239_{pu239_index}_Pu-240_{pu240_index}_Pu-241_{pu241_index}.parquet',
 				  engine='pyarrow')
 
 
