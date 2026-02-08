@@ -167,7 +167,6 @@ print('\nReading PENDFs and forming dataframes...')
 def parquet_maker(index_combination):
 	"""Filename should be the name of the PENDF we're reading from"""
 
-
 	pu239_index = index_combination[0]
 	pu240_index = index_combination[1]
 	pu241_index = index_combination[2]
@@ -252,7 +251,7 @@ def parquet_maker(index_combination):
 
 
 
-	full_thinned_erg = interpolation_energies + fast_energy_mt18_239 # full energy grid after applying PCHIP
+	full_thinned_erg = list(interpolation_energies) + list(fast_energy_mt18_239) # full energy grid after applying PCHIP
 
 	full_thinned_xs = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
 
