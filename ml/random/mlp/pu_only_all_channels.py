@@ -44,7 +44,7 @@ for file in all_parquets:
 	if file not in training_files:
 		test_files.append(file)
 
-print('Fetching training data...')
+print('\nFetching training data...')
 
 
 
@@ -107,7 +107,7 @@ train_labels_std = np.std(keff_train)
 scaling_matrix_xtrain = XS_train.transpose()
 
 scaled_columns_xtrain = []
-print('Scaling training data...')
+print('\nScaling training data...')
 
 
 le_bound_index = 1 # filters out NaNs
@@ -132,7 +132,7 @@ X_train = scaled_columns_xtrain.transpose()
 XS_test = []
 keff_test = []
 
-print('Fetching test data...')
+print('\nFetching test data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
@@ -151,7 +151,7 @@ y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
 scaling_matrix_xtest = XS_test.transpose()
 
 scaled_columns_xtest = []
-print('Scaling test data...')
+print('\nScaling test data...')
 for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
 	# scaled_column = zscore(column)
 
@@ -229,7 +229,7 @@ history = model.fit(X_train,
 					verbose=1)
 
 train_end = time.time()
-print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
 
@@ -248,7 +248,7 @@ for predicted, true in zip(rescaled_predictions, keff_test):
 
 sorted_errors = sorted(errors)
 absolute_errors = [abs(x) for x in sorted_errors]
-print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+print(f'\nAverage absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
 
 print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
 
