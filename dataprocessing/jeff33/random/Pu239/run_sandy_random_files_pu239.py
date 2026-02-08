@@ -11,7 +11,7 @@ elif computer == 'oppie':
 from groupEnergies import Pu239
 
 
-lib_name = "ENDFB_80"
+lib_name = "JEFF_33"
 nucl = Pu239.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
@@ -20,7 +20,7 @@ endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 # pendf = endf6.get_pendf(err=0.0001)
 
 
-num_samples = 1000  # number of samples
+num_samples = 100  # number of samples
 processes = 5
 
 
