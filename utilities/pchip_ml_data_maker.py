@@ -18,8 +18,9 @@ outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
 interpolation_energy_bound = float(input("Interpolation bound: "))
-relative_tolerance = float(input("Reconstruction tolerance: "))
-
+relative_tolerance = float(input("Reconstruction tolerance (x for default): "))
+if relative_tolerance == 'x':
+	relative_tolerance = 0.999
 
 pu239_pendf_directory = input("Pu-239 PENDF directory: ")
 pu240_pendf_directory = input("Pu-240 PENDF directory: ")
