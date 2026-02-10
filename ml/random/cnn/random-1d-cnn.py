@@ -103,8 +103,8 @@ keff_train_mean = np.mean(keff_train)
 keff_train_std = np.std(keff_train)
 y_train = zscore(keff_train)
 
-XS_test = []
-keff_test = []
+XS_val = []
+keff_val = []
 
 print('Fetching test data...')
 
@@ -113,12 +113,12 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values_test, keff_value_test = future.result()
-		XS_test.append(xs_values_test)
-		keff_test.append(keff_value_test)
+		xs_values_val, keff_value_val = future.result()
+		XS_val.append(xs_values_val)
+		keff_val.append(keff_value_val)
 
-XS_test = np.array(XS_test)
-y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
+XS_val = np.array(XS_val)
+y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
 
 
 print('Scaling training data...')
@@ -126,14 +126,14 @@ print('Scaling training data...')
 
 # le_bound_index = 1 # filters out NaNs
 
-def process_data(XS_train, XS_test):
+def process_data(XS_train, XS_val):
 
 
 	channel_matrix_train = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
-	channel_matrix_test = [[] for i in range(len(XS_test[0]))]
+	channel_matrix_val = [[] for i in range(len(XS_val[0]))]
 	# Pu-239 (n,el)
 	scaled_channel_matrix_train = []
-	scaled_channel_matrix_test = []
+	scaled_channel_matrix_val = []
 
 	for matrix in tqdm.tqdm(XS_train, total =len(XS_train)):
 		# Each matrix has shape (num channels, points per channel)
@@ -142,18 +142,18 @@ def process_data(XS_train, XS_test):
 
 		# channel_matrix now has shape (num channels, num samples, points per channel)
 		# Each element of channel matrix has shape (num samples, points per channel)
-	for matrix in tqdm.tqdm(XS_test, total =len(XS_test)):
+	for matrix in tqdm.tqdm(XS_val, total =len(XS_val)):
 		for channel_index, channel in enumerate(matrix):
-			channel_matrix_test[channel_index].append(channel)
+			channel_matrix_val[channel_index].append(channel)
 
 	#################################################################################################################################################################
-	for channel_data_train, channel_data_test in zip(channel_matrix_train, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
+	for channel_data_train, channel_data_val in zip(channel_matrix_train, channel_matrix_val): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
 		transposed_matrix_train = np.transpose(channel_data_train) # shape (energy points per sample, num samples)
-		transposed_matrix_test = np.transpose(channel_data_test)
+		transposed_matrix_val = np.transpose(channel_data_val)
 
 		transposed_scaled_channel_train = []
-		transposed_scaled_channel_test = []
-		for energy_point_train, energy_point_test in zip(transposed_matrix_train[:-1], transposed_matrix_test[:-1]): # each point on the unionised energy grid
+		transposed_scaled_channel_val = []
+		for energy_point_train, energy_point_val in zip(transposed_matrix_train[:-1], transposed_matrix_val[:-1]): # each point on the unionised energy grid
 
 			train_mean = np.mean(energy_point_train)
 			train_std = np.std(energy_point_train)
@@ -161,62 +161,45 @@ def process_data(XS_train, XS_test):
 			scaled_point_train = zscore(energy_point_train)
 			transposed_scaled_channel_train.append(scaled_point_train)
 
-			scaled_point_test = (np.array(energy_point_test) - train_mean) / train_std
-			transposed_scaled_channel_test.append(scaled_point_test)
+			scaled_point_val = (np.array(energy_point_val) - train_mean) / train_std
+			transposed_scaled_channel_val.append(scaled_point_val)
 
 		scaled_channel_train = np.array(transposed_scaled_channel_train)
 		scaled_channel_train = scaled_channel_train.transpose()
 		scaled_channel_matrix_train.append(scaled_channel_train)
 
-		scaled_channel_test = np.array(transposed_scaled_channel_test)
-		scaled_channel_test = scaled_channel_test.transpose()
-		scaled_channel_matrix_test.append(scaled_channel_test)
+		scaled_channel_val = np.array(transposed_scaled_channel_val)
+		scaled_channel_val = scaled_channel_val.transpose()
+		scaled_channel_matrix_val.append(scaled_channel_val)
 
 	###################################################################################################################################################################
 	# print('Forming scaled training data...')
 	X_matrix_train = [[] for i in range(XS_train.shape[0])] # number of samples
-	X_matrix_test = [[] for i in range(XS_test.shape[0])]
+	X_matrix_val = [[] for i in range(XS_val.shape[0])]
 
 	for scaled_observable in scaled_channel_matrix_train:
 		for sample_index, channel_sample in enumerate(scaled_observable):
 			X_matrix_train[sample_index].append(channel_sample)
 
-	for scaled_observable in scaled_channel_matrix_test:
+	for scaled_observable in scaled_channel_matrix_val:
 		for sample_index, channel_sample in enumerate(scaled_observable):
-			X_matrix_test[sample_index].append(channel_sample)
+			X_matrix_val[sample_index].append(channel_sample)
 
 	X_matrix_train = np.array(X_matrix_train)
 	X_matrix_train[np.isnan(X_matrix_train)] = 0
 
-	X_matrix_test = np.array(X_matrix_test)
-	X_matrix_test[np.isnan(X_matrix_test)] = 0 # changes nans to 0
+	X_matrix_val = np.array(X_matrix_val)
+	X_matrix_val[np.isnan(X_matrix_val)] = 0 # changes nans to 0
 
-	return X_matrix_train, X_matrix_test
+	return X_matrix_train, X_matrix_val
 
-X_train, X_test = process_data(XS_train, XS_test)
-
-
+X_train, X_val = process_data(XS_train, XS_val)
 
 
-# scaling_matrix_xtest = XS_test.transpose()
-#
-# scaled_columns_xtest = []
-# print('Scaling test data...')
-# for column in tqdm.tqdm(scaling_matrix_xtest[le_bound_index:-1], total=len(scaling_matrix_xtest[le_bound_index:-1])):
-# 	scaled_column = zscore(column)
-# 	scaled_columns_xtest.append(scaled_column)
-#
-# scaled_columns_xtest = np.array(scaled_columns_xtest)
-# X_test = scaled_columns_xtest.transpose()
-#
-#
-# test_mask = ~np.isnan(X_test).any(axis=0)
-# X_test = X_test[:, test_mask]
-#
-# train_mask = ~np.isnan(X_train).any(axis=0)
-# X_train = X_train[:, train_mask]
-#
-#
+
+
+
+
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
 										 patience=50,
@@ -263,12 +246,12 @@ history = model.fit(X_train,
 					epochs=1000,
 					batch_size=32,
 					callbacks=callback,
-					validation_data=(X_test, y_test),
+					validation_data=(X_val, y_val),
 					verbose=1)
 
 train_end = time.time()
 print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-predictions = model.predict(X_test)
+predictions = model.predict(X_val)
 predictions = predictions.ravel()
 
 
@@ -280,7 +263,7 @@ for pred in predictions_list:
 	rescaled_predictions.append(float(descaled_p))
 
 errors = []
-for predicted, true in zip(rescaled_predictions, keff_test):
+for predicted, true in zip(rescaled_predictions, keff_val):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
@@ -321,7 +304,7 @@ if save_histogram == 'y':
 	plt.show()
 
 	plt.figure()
-	plt.plot(keff_test, errors, 'x')
+	plt.plot(keff_val, errors, 'x')
 	plt.grid()
 	plt.title('Distribution of errors')
 	plt.xlabel('True k_eff')
