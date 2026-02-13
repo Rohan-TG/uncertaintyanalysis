@@ -13,7 +13,9 @@ import numpy as np
 processes = int(input("Processes: "))
 outputs_directory = input("SCONE output directory: ")
 output_files = os.listdir(outputs_directory)
-destination_directory = input('Destination dir.: ')
+destination_directory = input('Destination dir. (. for here): ')
+if destination_directory == '.':
+	destination_directory = os.getcwd()
 
 
 for file in tqdm(output_files, total=len(output_files)):
