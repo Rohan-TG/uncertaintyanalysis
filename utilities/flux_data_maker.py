@@ -18,6 +18,12 @@ destination_directory = input('Destination dir.: ')
 
 for file in tqdm(output_files, total=len(output_files)):
 	with open(f'{outputs_directory}/{file}', 'r') as f:
+		Pu239_file_index = int(file.split('.m')[0].split('_')[1])
+
+		Pu240_file_index = int(file.split('.m')[0].split('_')[3])
+
+		Pu241_file_index = int(file.split('.m')[0].split('_')[5])
+
 		lines = f.readlines()
 		active_flux_EnergyBounds = lines[16]
 		active_flux_EnergyBounds = active_flux_EnergyBounds.split('[')
@@ -33,5 +39,15 @@ for file in tqdm(output_files, total=len(output_files)):
 		afR = [float(i) for i in active_flux_Res]
 
 		active_flux_Res = np.array(afR, dtype=float).reshape((2, 1, 300), order='F')
+
+		keffline = lines[12]
+
+		keff_value_string = keffline[15:26]
+		keff_value_float = float(keff_value_string.replace('E', 'e'))
+
+		keff_error = keffline[27:38]
+		keff_error_float = float(keff_error.replace('E', 'e'))
+
+	break
 
 		# df = pd.DataFrame({''})
