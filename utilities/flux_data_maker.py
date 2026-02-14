@@ -10,7 +10,6 @@ from tqdm import tqdm
 import numpy as np
 
 
-processes = int(input("Processes: "))
 outputs_directory = input("SCONE output directory: ")
 output_files = os.listdir(outputs_directory)
 destination_directory = input('Destination dir. (. for here): ')
