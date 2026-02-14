@@ -50,6 +50,13 @@ for file in tqdm(output_files, total=len(output_files)):
 		keff_error = keffline[27:38]
 		keff_error_float = float(keff_error.replace('E', 'e'))
 
-	break
+		raw_flux = active_flux_Res[0][0]
+		flux_error = active_flux_Res[1][0]
 
-		# df = pd.DataFrame({''})
+		df = pd.DataFrame({'flux': raw_flux,
+						   'flux_errror': flux_error,
+						   'low_erg_bounds': energy_bounds[0],
+						   'high_erg_bounds': energy_bounds[1],})
+
+		filename = f'Flux_data_Pu-239_{Pu239_file_index}_Pu-240_{Pu240_file_index}_Pu-241_{Pu241_file_index}'
+		df.to_parquet(f'{destination_directory}/{filename}.parquet')
