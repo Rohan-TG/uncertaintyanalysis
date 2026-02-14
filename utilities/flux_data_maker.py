@@ -55,8 +55,8 @@ for file in tqdm(output_files, total=len(output_files)):
 
 		df = pd.DataFrame({'flux': raw_flux,
 						   'flux_errror': flux_error,
-						   'low_erg_bounds': energy_bounds[0],
-						   'high_erg_bounds': energy_bounds[1],})
+						   'low_erg_bounds': energy_bounds[0][0],
+						   'high_erg_bounds': energy_bounds[1][0],})
 
 		filename = f'Flux_data_Pu-239_{Pu239_file_index}_Pu-240_{Pu240_file_index}_Pu-241_{Pu241_file_index}'
 		df.to_parquet(f'{destination_directory}/{filename}.parquet')
