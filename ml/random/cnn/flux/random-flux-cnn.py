@@ -118,34 +118,39 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		flux_train.append(flux_values)
 
 XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per channel)
-flux_train = np.array(flux_train)
+flux_train = np.array(flux_train) # matrix
 
 
-def scale_flux(flux_array, train_mode, means = None, stds = None):
+def scale_flux(flux_array, train_mode = False, means = None, stds = None):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
 
 	normalised_flux_array = []
 	for flux_set in flux_array:
+		area = np.sum(flux_set)
+		norm_flux_vector = np.array(flux_set) / area
+		normalised_flux_array.append(norm_flux_vector)
 
+	normalised_flux_array = np.array(normalised_flux_array)
 
-	transposed_flux_array = flux_array.transpose()
-	if train_mode:
-		scaling_columns = []
-		scaling_column_means = []
-		scaling_column_stds = []
-		for energy_column in transposed_flux_array:
-			scaling_columns.append(zscore(energy_column))
-			scaling_column_means.append(np.mean(energy_column))
-			scaling_column_stds.append(np.std(energy_column))
-
-		return scaling_columns, scaling_column_means, scaling_column_stds
-	else:
-		scaling_columns = []
-		scaling_column_means = []
-		scaling_column_stds = []
-		for energy_column, mean, std in zip(transposed_flux_array, means, stds):
-			scaling_columns.append((np.array(energy_column) - mean) / std)
-		return scaling_columns
+	# transposed_flux_array = normalised_flux_array.transpose()
+	# if train_mode:
+	# 	scaling_columns = []
+	# 	scaling_column_means = []
+	# 	scaling_column_stds = []
+	# 	for energy_column in transposed_flux_array:
+	# 		scaling_columns.append(zscore(energy_column))
+	# 		scaling_column_means.append(np.mean(energy_column))
+	# 		scaling_column_stds.append(np.std(energy_column))
+	#
+	# 	return scaling_columns, scaling_column_means, scaling_column_stds
+	# else:
+	# 	scaling_columns = []
+	# 	scaling_column_means = []
+	# 	scaling_column_stds = []
+	# 	for energy_column, mean, std in zip(transposed_flux_array, means, stds):
+	# 		scaling_columns.append((np.array(energy_column) - mean) / std)
+	# 	return scaling_columns
+	return normalised_flux_array
 
 y_train, scaling_means_train, scaling_stds_train = scale_flux(flux_train, train_mode=True)
 
@@ -172,17 +177,17 @@ if test_data_directory != 'x':
 	test_files = os.listdir(test_data_directory)
 
 	XS_test = []
-	keff_test = []
+	flux_test = []
 	with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		futures_test = [executor.submit(fetch_data, test_file) for test_file in test_files]
 
 		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
-			xs_values_test, keff_value_test = future_test.result()
+			xs_values_test, flux_value_test = future_test.result()
 			XS_test.append(xs_values_test)
-			keff_test.append(keff_value_test)
+			flux_test.append(flux_value_test)
 
 	XS_test = np.array(XS_test)
-	y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
+	y_test = scale_flux(flux_test)
 
 
 print('Scaling training data...')
