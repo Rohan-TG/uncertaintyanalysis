@@ -14,7 +14,7 @@ import random
 import numpy as np
 from scipy.stats import zscore
 import tqdm
-import keras
+# import keras
 import time
 import matplotlib.pyplot as plt
 
@@ -152,7 +152,7 @@ def scale_flux(flux_array, train_mode = False, means = None, stds = None):
 	# 	return scaling_columns
 	return normalised_flux_array
 
-y_train, scaling_means_train, scaling_stds_train = scale_flux(flux_train, train_mode=True)
+y_train = scale_flux(flux_train, train_mode=True)
 
 XS_val = []
 flux_val = []
