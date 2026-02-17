@@ -335,4 +335,8 @@ history = model.fit(X_train,
 train_end = time.time()
 print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 predictions = model.predict(X_val)
-# predictions = predictions.ravel()
+
+from sklearn.metrics import r2_score
+for p_set, true_set in zip(predictions, y_val):
+	ratios = np.array(p_set) / np.array(true_set)
+	print(f'Mean: {np.mean(ratios)} Max: {max(ratios)} Min: {min(ratios)} R2: {r2_score(ratios, true_set)}')
