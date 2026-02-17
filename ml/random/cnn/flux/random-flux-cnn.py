@@ -337,6 +337,6 @@ print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstar
 predictions = model.predict(X_val)
 
 from sklearn.metrics import r2_score
-for p_set, true_set in zip(predictions, y_val):
+for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	ratios = np.array(p_set) / np.array(true_set)
-	print(f'Mean: {np.mean(ratios)} Max: {max(ratios)} Min: {min(ratios)} R2: {r2_score(ratios, true_set)}')
+	print(f'{idx} - Mean: {np.mean(ratios)} Max: {max(ratios)} Min: {min(ratios)} R2: {r2_score(p_set, true_set)}')
