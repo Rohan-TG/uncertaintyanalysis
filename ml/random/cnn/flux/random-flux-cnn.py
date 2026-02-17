@@ -340,7 +340,7 @@ r2s = []
 for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	ratios = np.array(p_set) / np.array(true_set)
 	pct_deviation = (ratios - 1.0) * 100
-	print(f'{idx} - Mean: {np.mean(ratios)} Max: {max(ratios)} Min: {min(ratios)} R2: {r2_score(p_set, true_set)}')
+	print(f'{idx} - Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(p_set, true_set):0.5f}')
 	r2s.append(r2_score(p_set, true_set))
 
-print(f'Mean R2: {np.mean(r2s)}')
+print(f'Mean R2: {np.mean(r2s):0.5f}')
