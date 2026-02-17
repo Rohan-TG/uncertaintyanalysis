@@ -14,7 +14,7 @@ import random
 import numpy as np
 from scipy.stats import zscore
 import tqdm
-# import keras
+import keras
 import time
 import matplotlib.pyplot as plt
 
@@ -296,43 +296,43 @@ if test_data_directory == 'x':
 X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test)
 
 
-#
-# callback = keras.callbacks.EarlyStopping(monitor='val_loss',
-# 										 # min_delta=0.005,
-# 										 patience=50,
-# 										 mode='min',
-# 										 start_from_epoch=3,
-# 										 restore_best_weights=True)
+
+callback = keras.callbacks.EarlyStopping(monitor='val_loss',
+										 # min_delta=0.005,
+										 patience=50,
+										 mode='min',
+										 start_from_epoch=3,
+										 restore_best_weights=True)
 
 
 
 
-# model = keras.Sequential()
-# model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
-# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
-# model.add(keras.layers.Flatten())
-# model.add(keras.layers.Dense(900, activation='relu'))
-# model.add(keras.layers.Dense(750, activation='relu'))
-# model.add(keras.layers.Dense(550, activation='relu'))
+model = keras.Sequential()
+model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
+model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
+model.add(keras.layers.Flatten())
+model.add(keras.layers.Dense(900, activation='relu'))
+model.add(keras.layers.Dense(750, activation='relu'))
+model.add(keras.layers.Dense(550, activation='relu'))
 # model.add(keras.layers.Dense(400, activation='relu'))
-# model.add(keras.layers.Dense(300, activation='relu'))
+model.add(keras.layers.Dense(300, activation='relu'))
 # model.add(keras.layers.Dense(200, activation='relu'))
 # model.add(keras.layers.Dense(100, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MeanSquaredError', optimizer='adam')
-#
-#
-# import datetime
-# trainstart = time.time()
-# history = model.fit(X_train,
-# 					y_train,
-# 					epochs=1000,
-# 					batch_size=32,
-# 					callbacks=callback,
-# 					validation_data=(X_val, y_val),
-# 					verbose=1)
-#
-# train_end = time.time()
-# print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-# predictions = model.predict(X_val)
+model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
+model.compile(loss='MeanSquaredError', optimizer='adam')
+
+
+import datetime
+trainstart = time.time()
+history = model.fit(X_train,
+					y_train,
+					epochs=1000,
+					batch_size=32,
+					callbacks=callback,
+					validation_data=(X_val, y_val),
+					verbose=1)
+
+train_end = time.time()
+print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+predictions = model.predict(X_val)
 # predictions = predictions.ravel()
