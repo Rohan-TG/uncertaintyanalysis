@@ -168,6 +168,7 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 XS_val = np.array(XS_val)
 
 y_val = scale_flux(flux_val, train_mode=False, means=scaling_means, stds=scaling_stds)
+y_val = np.array(y_val)
 
 
 if test_data_directory != 'x':
