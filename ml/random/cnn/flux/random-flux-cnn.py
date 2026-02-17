@@ -132,27 +132,25 @@ def scale_flux(flux_array, train_mode = False, means = None, stds = None):
 
 	normalised_flux_array = np.array(normalised_flux_array)
 
-	# transposed_flux_array = normalised_flux_array.transpose()
-	# if train_mode:
-	# 	scaling_columns = []
-	# 	scaling_column_means = []
-	# 	scaling_column_stds = []
-	# 	for energy_column in transposed_flux_array:
-	# 		scaling_columns.append(zscore(energy_column))
-	# 		scaling_column_means.append(np.mean(energy_column))
-	# 		scaling_column_stds.append(np.std(energy_column))
-	#
-	# 	return scaling_columns, scaling_column_means, scaling_column_stds
-	# else:
-	# 	scaling_columns = []
-	# 	scaling_column_means = []
-	# 	scaling_column_stds = []
-	# 	for energy_column, mean, std in zip(transposed_flux_array, means, stds):
-	# 		scaling_columns.append((np.array(energy_column) - mean) / std)
-	# 	return scaling_columns
-	return normalised_flux_array
+	transposed_flux_array = normalised_flux_array.transpose()
+	if train_mode:
+		scaling_columns = []
+		scaling_column_means = []
+		scaling_column_stds = []
+		for energy_column in transposed_flux_array:
+			scaling_columns.append(zscore(energy_column))
+			scaling_column_means.append(np.mean(energy_column))
+			scaling_column_stds.append(np.std(energy_column))
 
-y_train = scale_flux(flux_train, train_mode=True)
+		return scaling_columns, scaling_column_means, scaling_column_stds
+	else:
+		scaling_columns = []
+		for energy_column, mean, std in zip(transposed_flux_array, means, stds):
+			scaling_columns.append((np.array(energy_column) - mean) / std)
+		return scaling_columns
+	# return normalised_flux_array
+
+y_train, scaling_means, scaling_stds = scale_flux(flux_train, train_mode=True)
 
 XS_val = []
 flux_val = []
@@ -169,7 +167,7 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 
 XS_val = np.array(XS_val)
 
-y_val = scale_flux(flux_val, train_mode=False)
+y_val = scale_flux(flux_val, train_mode=False, means=scaling_means, stds=scaling_stds)
 
 
 if test_data_directory != 'x':
@@ -187,7 +185,7 @@ if test_data_directory != 'x':
 			flux_test.append(flux_value_test)
 
 	XS_test = np.array(XS_test)
-	y_test = scale_flux(flux_test)
+	y_test = scale_flux(flux_test, train_mode=False, means=scaling_means, stds=scaling_stds)
 
 
 print('Scaling training data...')
