@@ -142,7 +142,7 @@ def scale_flux(flux_array, train_mode = False, means = None, stds = None):
 			scaling_column_means.append(np.mean(energy_column))
 			scaling_column_stds.append(np.std(energy_column))
 
-		return scaling_columns, scaling_column_means, scaling_column_stds
+		return np.array(scaling_columns), scaling_column_means, scaling_column_stds
 	else:
 		scaling_columns = []
 		for energy_column, mean, std in zip(transposed_flux_array, means, stds):
