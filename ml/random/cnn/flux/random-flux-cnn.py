@@ -313,11 +313,10 @@ model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activat
 model.add(keras.layers.Flatten())
 model.add(keras.layers.Dense(900, activation='relu'))
 model.add(keras.layers.Dense(750, activation='relu'))
+# model.add(keras.layers.Dense(650, activation='relu'))
 model.add(keras.layers.Dense(550, activation='relu'))
 # model.add(keras.layers.Dense(400, activation='relu'))
 model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(200, activation='relu'))
-# model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
@@ -337,6 +336,11 @@ print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstar
 predictions = model.predict(X_val)
 
 from sklearn.metrics import r2_score
+r2s = []
 for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	ratios = np.array(p_set) / np.array(true_set)
+	pct_deviation = (ratios - 1.0) * 100
 	print(f'{idx} - Mean: {np.mean(ratios)} Max: {max(ratios)} Min: {min(ratios)} R2: {r2_score(p_set, true_set)}')
+	r2s.append(r2_score(p_set, true_set))
+
+print(f'Mean R2: {np.mean(r2s)}')
