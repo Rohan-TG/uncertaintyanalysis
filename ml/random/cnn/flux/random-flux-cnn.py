@@ -357,6 +357,7 @@ r2s = []
 
 rescaled_full_p = []
 rescaled_y_val = []
+pct_list = []
 for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
 	rescaled_full_p.append(rescaled_predictions)
@@ -366,6 +367,7 @@ for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 
 	ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
 	pct_deviation = (ratios - 1.0) * 100
+	pct_list.append(pct_deviation)
 	print(f'{idx} - Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
 	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
@@ -381,3 +383,10 @@ def plot_index(idx):
 	plt.legend()
 	plt.grid()
 	plt.savefig(f'{idx}.png')
+
+	plt.figure()
+	plt.plot(pct_list[idx])
+	plt.xlabel('Point')
+	plt.ylabel('% Deviation')
+	plt.grid()
+	plt.savefig(f'{idx}_val_pct_error.png')
