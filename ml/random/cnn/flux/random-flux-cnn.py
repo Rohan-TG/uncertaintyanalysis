@@ -367,17 +367,17 @@ for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
 	pct_deviation = (ratios - 1.0) * 100
 	print(f'{idx} - Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
-	r2s.append(r2_score(p_set, true_set))
+	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
 print(f'Mean R2: {np.mean(r2s):0.5f}')
 
 
 
-def plot_index(index):
+def plot_index(idx):
 
 	plt.figure()
-	plt.plot(rescaled_predictions[index], label='Prediction')
-	plt.plot(rescaled_true_set[index], label='True')
+	plt.plot(rescaled_full_p[idx], label='Prediction')
+	plt.plot(rescaled_y_val[idx], label='True')
 	plt.legend()
 	plt.grid()
-	plt.savefig(f'{index}.png')
+	plt.savefig(f'{idx}.png')
