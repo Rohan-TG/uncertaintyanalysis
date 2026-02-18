@@ -158,6 +158,16 @@ def scale_flux(flux_array, train_mode = False, means = None, stds = None):
 		return scaled_flux_array
 	# return normalised_flux_array
 
+def descaler(scaled_flux_array, means, stds):
+	transposed_flux_array = scaled_flux_array.transpose()
+	rescaled_flux_array = []
+	for energy_column, mean, std in zip(transposed_flux_array, means, stds):
+		rescaled_flux_array.append(energy_column * std + mean)
+
+	rescaled_flux_array = np.array(rescaled_flux_array)
+	rescaled_flux_array = rescaled_flux_array.transpose()
+	return rescaled_flux_array
+
 y_train, scaling_means, scaling_stds = scale_flux(flux_train, train_mode=True)
 
 XS_val = []
@@ -344,10 +354,30 @@ predictions = model.predict(X_val)
 
 from sklearn.metrics import r2_score
 r2s = []
+
+rescaled_full_p = []
+rescaled_y_val = []
 for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
-	ratios = np.array(p_set) / np.array(true_set)
+	rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
+	rescaled_full_p.append(rescaled_predictions)
+
+	rescaled_true_set = descaler(true_set, means=scaling_means, stds=scaling_stds)
+	rescaled_y_val.append(rescaled_true_set)
+
+	ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
 	pct_deviation = (ratios - 1.0) * 100
-	print(f'{idx} - Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(p_set, true_set):0.5f}')
+	print(f'{idx} - Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
 	r2s.append(r2_score(p_set, true_set))
 
 print(f'Mean R2: {np.mean(r2s):0.5f}')
+
+
+
+def plot_index(index):
+
+	plt.figure()
+	plt.plot(rescaled_predictions[index], label='Prediction')
+	plt.plot(rescaled_true_set[index], label='True')
+	plt.legend()
+	plt.grid()
+	plt.savefig(f'{index}.png')
