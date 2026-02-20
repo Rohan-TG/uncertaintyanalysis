@@ -130,10 +130,11 @@ def interpolate_to_default_grid(XS_matrix):
 	default_df = pd.read_parquet(f'{data_directory}/{all_parquets[0]}')
 	default_grid = default_df['ERG'].values
 
-	native_grid = XS_matrix['ERG'].values
+	native_df = pd.read_parquet(f'{test_data_directory}/{test_files[0]}')
+	native_grid = native_df['ERG'].values
 
 	thinned_XS_matrix = []
-	for sample in XS_matrix:
+	for sample in tqdm.tqdm(XS_matrix, total=len(XS_matrix)):
 		transposed_sample = sample.transpose()
 		interpolated_transposed_sample = []
 		for channel_xs in transposed_sample:
@@ -151,7 +152,7 @@ def interpolate_to_default_grid(XS_matrix):
 
 
 if test_data_directory != 'x':
-	print('Processing test data...')
+	print('Fetching test data...')
 	test_files = os.listdir(test_data_directory)
 
 	XS_test = []
@@ -164,12 +165,13 @@ if test_data_directory != 'x':
 			XS_test.append(xs_values_test)
 			keff_test.append(keff_value_test)
 
+	print('Processing test data...')
 	temp_XS_test = np.array(XS_test)
 	XS_test = interpolate_to_default_grid(temp_XS_test)
 	y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
 
 
-print('Scaling training data...')
+print('Scaling all data...')
 
 
 # le_bound_index = 1 # filters out NaNs
@@ -330,7 +332,7 @@ history = model.fit(X_train,
 
 train_end = time.time()
 print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-predictions = model.predict(X_val)
+predictions = model.predict(X_test)
 predictions = predictions.ravel()
 
 
@@ -342,7 +344,7 @@ for pred in predictions_list:
 	rescaled_predictions.append(float(descaled_p))
 
 errors = []
-for predicted, true in zip(rescaled_predictions, keff_val):
+for predicted, true in zip(rescaled_predictions, keff_test):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
