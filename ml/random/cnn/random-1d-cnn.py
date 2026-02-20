@@ -125,9 +125,33 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 XS_val = np.array(XS_val)
 y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
 
+def interpolate_to_default_grid(XS_matrix):
+	"""Interpolates any XS_matrix data to the PCHIP-sampled Pu-239 MT=18 grid"""
+	default_df = pd.read_parquet(f'{data_directory}/{all_parquets[0]}')
+	default_grid = default_df['ERG'].values
+
+	native_grid = XS_matrix['ERG'].values
+
+	thinned_XS_matrix = []
+	for sample in XS_matrix:
+		transposed_sample = sample.transpose()
+		interpolated_transposed_sample = []
+		for channel_xs in transposed_sample:
+			thinned_xs = np.interp(default_grid, native_grid, channel_xs)
+			interpolated_transposed_sample.append(thinned_xs)
+		interpolated_sample = np.array(interpolated_transposed_sample)
+		interpolated_sample = interpolated_sample.transpose()
+
+		thinned_XS_matrix.append(interpolated_sample)
+
+	thinned_XS_matrix = np.array(thinned_XS_matrix)
+
+	return thinned_XS_matrix
+
+
 
 if test_data_directory != 'x':
-	print('Fetching test data...')
+	print('Processing test data...')
 	test_files = os.listdir(test_data_directory)
 
 	XS_test = []
@@ -140,7 +164,8 @@ if test_data_directory != 'x':
 			XS_test.append(xs_values_test)
 			keff_test.append(keff_value_test)
 
-	XS_test = np.array(XS_test)
+	temp_XS_test = np.array(XS_test)
+	XS_test = interpolate_to_default_grid(temp_XS_test)
 	y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
 
 
