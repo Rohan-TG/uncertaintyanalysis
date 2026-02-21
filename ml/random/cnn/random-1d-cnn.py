@@ -22,7 +22,11 @@ import time
 
 data_directory = input('Data directory: ')
 test_data_directory = input('Test data directory (x for set to val): ')
-
+scale_separately = input('Scale test with separate statistics? (y): ')
+if scale_separately == 'y':
+	scale_separately = True
+else:
+	scale_separately = False
 
 data_processes = int(input('Num. data processors: '))
 
@@ -177,8 +181,7 @@ print('Scaling all data...')
 
 # le_bound_index = 1 # filters out NaNs
 
-def process_data(XS_train, XS_val, XS_test):
-
+def process_data(XS_train, XS_val, XS_test, scale_separately = False):
 
 	channel_matrix_train = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
 	channel_matrix_val = [[] for i in range(len(XS_val[0]))]
@@ -207,39 +210,80 @@ def process_data(XS_train, XS_val, XS_test):
 			channel_matrix_test[channel_index].append(channel)
 
 	#################################################################################################################################################################
-	for channel_data_train, channel_data_val, channel_data_test in zip(channel_matrix_train, channel_matrix_val, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
-		transposed_matrix_train = np.transpose(channel_data_train) # shape (energy points per sample, num samples)
-		transposed_matrix_val = np.transpose(channel_data_val)
-		transposed_matrix_test = np.transpose(channel_data_test)
+	if not scale_separately:
+		for channel_data_train, channel_data_val, channel_data_test in zip(channel_matrix_train, channel_matrix_val, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
+			transposed_matrix_train = np.transpose(channel_data_train) # shape (energy points per sample, num samples)
+			transposed_matrix_val = np.transpose(channel_data_val)
+			transposed_matrix_test = np.transpose(channel_data_test)
 
-		transposed_scaled_channel_train = []
-		transposed_scaled_channel_val = []
-		transposed_scaled_channel_test = []
-		for energy_point_train, energy_point_val, energy_point_test in zip(transposed_matrix_train[:-1], transposed_matrix_val[:-1], transposed_matrix_test[:-1]): # each point on the unionised energy grid
+			transposed_scaled_channel_train = []
+			transposed_scaled_channel_val = []
+			transposed_scaled_channel_test = []
+			for energy_point_train, energy_point_val, energy_point_test in zip(transposed_matrix_train[:-1], transposed_matrix_val[:-1], transposed_matrix_test[:-1]): # each point on the unionised energy grid
 
-			train_mean = np.mean(energy_point_train)
-			train_std = np.std(energy_point_train)
+				train_mean = np.mean(energy_point_train)
+				train_std = np.std(energy_point_train)
 
-			scaled_point_train = zscore(energy_point_train)
-			transposed_scaled_channel_train.append(scaled_point_train)
+				scaled_point_train = zscore(energy_point_train)
+				transposed_scaled_channel_train.append(scaled_point_train)
 
-			scaled_point_val = (np.array(energy_point_val) - train_mean) / train_std
-			transposed_scaled_channel_val.append(scaled_point_val)
+				scaled_point_val = (np.array(energy_point_val) - train_mean) / train_std
+				transposed_scaled_channel_val.append(scaled_point_val)
 
-			scaled_point_test = (np.array(energy_point_test) - train_mean) / train_std
-			transposed_scaled_channel_test.append(scaled_point_test)
+				scaled_point_test = (np.array(energy_point_test) - train_mean) / train_std
+				transposed_scaled_channel_test.append(scaled_point_test)
 
-		scaled_channel_train = np.array(transposed_scaled_channel_train)
-		scaled_channel_train = scaled_channel_train.transpose()
-		scaled_channel_matrix_train.append(scaled_channel_train)
+			scaled_channel_train = np.array(transposed_scaled_channel_train)
+			scaled_channel_train = scaled_channel_train.transpose()
+			scaled_channel_matrix_train.append(scaled_channel_train)
 
-		scaled_channel_val = np.array(transposed_scaled_channel_val)
-		scaled_channel_val = scaled_channel_val.transpose()
-		scaled_channel_matrix_val.append(scaled_channel_val)
+			scaled_channel_val = np.array(transposed_scaled_channel_val)
+			scaled_channel_val = scaled_channel_val.transpose()
+			scaled_channel_matrix_val.append(scaled_channel_val)
 
-		scaled_channel_test = np.array(transposed_scaled_channel_test)
-		scaled_channel_test = scaled_channel_test.transpose()
-		scaled_channel_matrix_test.append(scaled_channel_test)
+			scaled_channel_test = np.array(transposed_scaled_channel_test)
+			scaled_channel_test = scaled_channel_test.transpose()
+			scaled_channel_matrix_test.append(scaled_channel_test)
+	else:
+		# Scale training and val together
+		for channel_data_train, channel_data_val in zip(channel_matrix_train, channel_matrix_val): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
+			transposed_matrix_train = np.transpose(channel_data_train) # shape (energy points per sample, num samples)
+			transposed_matrix_val = np.transpose(channel_data_val)
+
+			transposed_scaled_channel_train = []
+			transposed_scaled_channel_val = []
+			for energy_point_train, energy_point_val in zip(transposed_matrix_train[:-1], transposed_matrix_val[:-1]): # each point on the unionised energy grid
+
+				train_mean = np.mean(energy_point_train)
+				train_std = np.std(energy_point_train)
+
+				scaled_point_train = zscore(energy_point_train)
+				transposed_scaled_channel_train.append(scaled_point_train)
+
+				scaled_point_val = (np.array(energy_point_val) - train_mean) / train_std
+				transposed_scaled_channel_val.append(scaled_point_val)
+
+			scaled_channel_train = np.array(transposed_scaled_channel_train)
+			scaled_channel_train = scaled_channel_train.transpose()
+			scaled_channel_matrix_train.append(scaled_channel_train)
+
+			scaled_channel_val = np.array(transposed_scaled_channel_val)
+			scaled_channel_val = scaled_channel_val.transpose()
+			scaled_channel_matrix_val.append(scaled_channel_val)
+
+		# scale only test alone
+		for channel_data_test in channel_matrix_test:  # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
+			transposed_matrix_test = np.transpose(channel_data_test)  # shape (energy points per sample, num samples)
+
+			transposed_scaled_channel_test = []
+			for energy_point_test in  transposed_matrix_test[:-1]:  # each point on the unionised energy grid
+
+				scaled_point_test = zscore(energy_point_test)
+				transposed_scaled_channel_test.append(scaled_point_test)
+
+			scaled_channel_test = np.array(transposed_scaled_channel_test)
+			scaled_channel_test = scaled_channel_test.transpose()
+			scaled_channel_matrix_test.append(scaled_channel_test)
 
 	###################################################################################################################################################################
 	# print('Forming scaled training data...')
@@ -275,7 +319,7 @@ if test_data_directory == 'x':
 	XS_test = XS_val
 	y_test = y_val
 
-X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test)
+X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test, scale_separately=scale_separately)
 
 X_test[np.isinf(X_test)] = -1
 
