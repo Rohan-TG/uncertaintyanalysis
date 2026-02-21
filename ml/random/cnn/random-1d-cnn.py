@@ -156,18 +156,18 @@ if test_data_directory != 'x':
 	print('Fetching test data...')
 	test_files = os.listdir(test_data_directory)
 
-	XS_test = []
+	raw_XS_test = []
 	keff_test = []
 	with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		futures_test = [executor.submit(fetch_data, test_file, test_data_directory) for test_file in test_files]
 
 		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
 			xs_values_test, keff_value_test = future_test.result()
-			XS_test.append(xs_values_test)
+			raw_XS_test.append(xs_values_test)
 			keff_test.append(keff_value_test)
 
 	print('Processing test data...')
-	temp_XS_test = np.array(XS_test)
+	temp_XS_test = np.array(raw_XS_test)
 	XS_test = interpolate_to_default_grid(temp_XS_test)
 	y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
 
@@ -277,7 +277,7 @@ if test_data_directory == 'x':
 
 X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test)
 
-
+X_test[np.isinf(X_test)] = -1
 
 
 
