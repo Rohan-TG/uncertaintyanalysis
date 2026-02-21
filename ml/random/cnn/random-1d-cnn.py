@@ -135,13 +135,12 @@ def interpolate_to_default_grid(XS_matrix):
 
 	thinned_XS_matrix = []
 	for sample in tqdm.tqdm(XS_matrix, total=len(XS_matrix)):
-		transposed_sample = sample.transpose()
-		interpolated_transposed_sample = []
-		for channel_xs in transposed_sample:
+		# transposed_sample = sample.transpose()
+		interpolated_sample = []
+		for channel_xs in sample:
 			thinned_xs = np.interp(default_grid, native_grid, channel_xs)
-			interpolated_transposed_sample.append(thinned_xs)
-		interpolated_sample = np.array(interpolated_transposed_sample)
-		interpolated_sample = interpolated_sample.transpose()
+			interpolated_sample.append(thinned_xs)
+		interpolated_sample = np.array(interpolated_sample)
 
 		thinned_XS_matrix.append(interpolated_sample)
 
