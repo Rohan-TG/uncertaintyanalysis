@@ -129,9 +129,11 @@ def interpolate_to_default_grid(XS_matrix):
 	"""Interpolates any XS_matrix data to the PCHIP-sampled Pu-239 MT=18 grid"""
 	default_df = pd.read_parquet(f'{data_directory}/{all_parquets[0]}')
 	default_grid = default_df['ERG'].values
+	default_grid = [e for e in default_grid if e >= lower_energy_bound]
 
 	native_df = pd.read_parquet(f'{test_data_directory}/{test_files[0]}')
 	native_grid = native_df['ERG'].values
+	native_grid = [e for e in native_grid if e >= lower_energy_bound]
 
 	thinned_XS_matrix = []
 	for sample in tqdm.tqdm(XS_matrix, total=len(XS_matrix)):
