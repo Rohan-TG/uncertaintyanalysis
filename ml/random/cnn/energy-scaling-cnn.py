@@ -40,3 +40,74 @@ for file in all_parquets:
 	if file not in training_files:
 		val_files.append(file)
 
+
+print('Fetching training data...')
+
+def fetch_data(datafile, data_dir=data_directory):
+
+	temp_df = pd.read_parquet(f'{data_dir}/{datafile}', engine='pyarrow')
+	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
+
+	keff_value = float(temp_df['keff'].values[0])
+
+	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
+	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
+	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
+
+	pu9_mt2xs = temp_df['94239_MT2_XS'].values.tolist()
+	pu0_mt2xs = temp_df['94240_MT2_XS'].values.tolist()
+	pu1_mt2xs = temp_df['94241_MT2_XS'].values.tolist()
+
+	pu9_mt4xs = temp_df['94239_MT4_XS'].values.tolist()
+	pu0_mt4xs = temp_df['94240_MT4_XS'].values.tolist()
+	pu1_mt4xs = temp_df['94241_MT4_XS'].values.tolist()
+
+	pu9_mt16xs = temp_df['94239_MT16_XS'].values.tolist()
+	pu0_mt16xs = temp_df['94240_MT16_XS'].values.tolist()
+	pu1_mt16xs = temp_df['94241_MT16_XS'].values.tolist()
+
+	pu9_mt102xs = temp_df['94239_MT102_XS'].values.tolist()
+	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
+	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
+
+	# xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	#
+	# XS_obj = xsobject
+
+	XS_obj = [pu9_mt2xs, pu9_mt4xs, pu9_mt16xs, pu9_mt18xs, pu9_mt102xs,
+				pu0_mt2xs, pu0_mt4xs, pu0_mt16xs, pu0_mt18xs, pu0_mt102xs,
+				pu1_mt2xs, pu1_mt4xs, pu1_mt16xs, pu1_mt18xs, pu1_mt102xs,]
+
+	return(XS_obj, keff_value)
+
+keff_train = [] # k_eff labels
+XS_train = []
+
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
+
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values, keff_value = future.result()
+		XS_train.append(xs_values)
+		keff_train.append(keff_value)
+
+XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per channel)
+
+keff_train_mean = np.mean(keff_train)
+keff_train_std = np.std(keff_train)
+y_train = zscore(keff_train)
+
+XS_val = []
+keff_val = []
+print('Fetching val data...')
+
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, val_file) for val_file in val_files]
+
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values_val, keff_value_val = future.result()
+		XS_val.append(xs_values_val)
+		keff_val.append(keff_value_val)
+
+XS_val = np.array(XS_val)
+y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
