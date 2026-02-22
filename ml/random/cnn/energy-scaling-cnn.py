@@ -111,3 +111,55 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 
 XS_val = np.array(XS_val)
 y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
+
+
+
+
+###### !!! WIP !!! still not done probably don't use this for a while
+def interpolate_to_default_grid(XS_matrix):
+	"""Interpolates any XS_matrix data to the PCHIP-sampled Pu-239 MT=18 grid"""
+	default_df = pd.read_parquet(f'{data_directory}/{all_parquets[0]}')
+	default_grid = default_df['ERG'].values
+	default_grid = [e for e in default_grid if e >= lower_energy_bound]
+
+	native_df = pd.read_parquet(f'{test_data_directory}/{test_files[0]}')
+	native_grid = native_df['ERG'].values
+	native_grid = [e for e in native_grid if e >= lower_energy_bound]
+
+	thinned_XS_matrix = []
+	for sample in tqdm.tqdm(XS_matrix, total=len(XS_matrix)):
+		# transposed_sample = sample.transpose()
+		interpolated_sample = []
+		for channel_xs in sample:
+			thinned_xs = np.interp(default_grid, native_grid, channel_xs)
+			interpolated_sample.append(thinned_xs)
+		interpolated_sample = np.array(interpolated_sample)
+
+		thinned_XS_matrix.append(interpolated_sample)
+
+	thinned_XS_matrix = np.array(thinned_XS_matrix)
+
+	return thinned_XS_matrix
+
+
+if test_data_directory != 'x':
+	print('Fetching test data...')
+	test_files = os.listdir(test_data_directory)
+
+	raw_XS_test = []
+	keff_test = []
+	with ProcessPoolExecutor(max_workers=data_processes) as executor:
+		futures_test = [executor.submit(fetch_data, test_file, test_data_directory) for test_file in test_files]
+
+		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
+			xs_values_test, keff_value_test = future_test.result()
+			raw_XS_test.append(xs_values_test)
+			keff_test.append(keff_value_test)
+
+	print('Processing test data...')
+	temp_XS_test = np.array(raw_XS_test)
+	XS_test = interpolate_to_default_grid(temp_XS_test)
+	y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
+
+
+print('Scaling all data...')
