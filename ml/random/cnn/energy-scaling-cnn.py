@@ -198,9 +198,13 @@ def process_data_full_spectrum(XS_train, XS_val, XS_test, scale_separately = Fal
 		for channel_data_train, channel_data_val, channel_data_test in zip(channel_matrix_train, channel_matrix_val, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
 
 			# Apply lg transform to reduce dynamic range
-			logged_channel_data_train = np.log(channel_data_train)
-			logged_channel_data_val = np.log(channel_data_val)
-			logged_channel_data_test = np.log(channel_data_test)
+			# logged_channel_data_train = np.log(channel_data_train)
+			# logged_channel_data_val = np.log(channel_data_val)
+			# logged_channel_data_test = np.log(channel_data_test)
+
+			logged_channel_data_train = channel_data_train
+			logged_channel_data_val = channel_data_val
+			logged_channel_data_test = channel_data_test
 
 			# Calculate scaling statistics using training distribution
 			channel_mean_train = np.mean(logged_channel_data_train)
