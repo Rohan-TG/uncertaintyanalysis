@@ -19,7 +19,7 @@ import time
 
 
 
-
+print('\n\n')
 data_directory = input('Data directory: ')
 test_data_directory = input('Test data directory (x for set to val): ')
 scale_separately = input('Scale test with separate statistics? (y): ')
@@ -50,7 +50,7 @@ for file in all_parquets:
 
 
 
-print('Fetching training data...')
+print('\nFetching training data...')
 
 
 
@@ -115,7 +115,7 @@ y_train = zscore(keff_train)
 XS_val = []
 keff_val = []
 
-print('Fetching val data...')
+print('\nFetching val data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
@@ -157,7 +157,7 @@ def interpolate_to_default_grid(XS_matrix):
 
 
 if test_data_directory != 'x':
-	print('Fetching test data...')
+	print('\nFetching test data...')
 	test_files = os.listdir(test_data_directory)
 
 	raw_XS_test = []
@@ -176,7 +176,7 @@ if test_data_directory != 'x':
 	y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
 
 
-print('Scaling all data...')
+print('\nScaling all data...')
 
 
 # le_bound_index = 1 # filters out NaNs
@@ -346,7 +346,7 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 # model.add(keras.layers.Dense(100, activation='relu'))
 # model.add(keras.layers.Dense(1, activation='linear'))
 # model.compile(loss='MeanSquaredError', optimizer='adam')
-
+print('\n\n')
 model = keras.Sequential()
 model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
 model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
