@@ -295,3 +295,115 @@ if test_data_directory == 'x':
 
 
 X_train, X_val, X_test = process_data_full_spectrum(XS_train, XS_val, XS_test)
+
+
+callback = keras.callbacks.EarlyStopping(monitor='val_loss',
+										 # min_delta=0.005,
+										 patience=10,
+										 mode='min',
+										 start_from_epoch=3,
+										 restore_best_weights=True)
+
+
+model = keras.Sequential()
+model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
+model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
+# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
+# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
+model.add(keras.layers.Flatten())
+model.add(keras.layers.Dense(900, activation='relu'))
+model.add(keras.layers.Dense(750, activation='relu'))
+model.add(keras.layers.Dense(550, activation='relu'))
+model.add(keras.layers.Dense(400, activation='relu'))
+model.add(keras.layers.Dense(300, activation='relu'))
+model.add(keras.layers.Dense(200, activation='relu'))
+model.add(keras.layers.Dense(100, activation='relu'))
+model.add(keras.layers.Dense(1, activation='linear'))
+model.compile(loss='MeanSquaredError', optimizer='adam')
+
+
+import datetime
+trainstart = time.time()
+history = model.fit(X_train,
+					y_train,
+					epochs=1000,
+					batch_size=32,
+					callbacks=callback,
+					validation_data=(X_val, y_val),
+					verbose=1)
+
+train_end = time.time()
+print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+predictions = model.predict(X_test)
+predictions = predictions.ravel()
+
+
+rescaled_predictions = []
+predictions_list = predictions.tolist()
+
+
+for pred in predictions_list:
+	descaled_p = pred * keff_train_std + keff_train_mean
+	rescaled_predictions.append(float(descaled_p))
+
+errors = []
+for predicted, true in zip(rescaled_predictions, keff_test):
+	errors.append((predicted - true) * 1e5)
+	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+sorted_errors = sorted(errors)
+absolute_errors = [abs(x) for x in sorted_errors]
+print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+
+print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
+
+
+print(f"Smallest absolute error: {min(absolute_errors)} pcm")
+acceptable_predictions = []
+borderline_predictions = []
+twenty_pcm_predictions = []
+for x in absolute_errors:
+	if x <= 5.0:
+		acceptable_predictions.append(x)
+	if x <= 10.0:
+		borderline_predictions.append(x)
+	if x <= 20.0:
+		twenty_pcm_predictions.append(x)
+
+
+print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
+print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+
+import matplotlib.pyplot as plt
+save_histogram = input('Save histogram? (y): ')
+if save_histogram == 'y':
+	plt.figure()
+	plt.hist(sorted_errors, bins=25)
+	plt.grid()
+	plt.title('Distribution of errors')
+	plt.xlabel('Error / pcm')
+	plt.ylabel('Count')
+	plt.savefig('asdfcnn.png', dpi=300)
+	plt.show()
+
+	plt.figure()
+	plt.plot(keff_val, errors, 'x')
+	plt.grid()
+	plt.title('Distribution of errors')
+	plt.xlabel('True k_eff')
+	plt.ylabel('Error / pcm')
+	plt.savefig('errors_as_function_of_keff.png', dpi=300)
+	plt.show()
+
+skew_positive = []
+skew_negative = []
+
+for x in errors:
+	if x >0:
+		skew_positive.append(x)
+	else:
+		skew_negative.append(x)
+
+print(f'skew_positive: {len(skew_positive)} / {len(errors)}')
+print(f'skew_negative: {len(skew_negative)} / {len(errors)}')
