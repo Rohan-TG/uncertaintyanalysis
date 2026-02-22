@@ -287,3 +287,11 @@ def process_data_full_spectrum(XS_train, XS_val, XS_test, scale_separately = Fal
 	X_matrix_test[np.isnan(X_matrix_test)] = 0
 
 	return X_matrix_train, X_matrix_val, X_matrix_test
+
+if test_data_directory == 'x':
+	XS_test = XS_val
+	y_test = y_val
+
+
+
+X_train, X_val, X_test = process_data_full_spectrum(XS_train, XS_val, XS_test)
