@@ -16,6 +16,7 @@ from scipy.stats import zscore
 import tqdm
 import keras
 import time
+print('\n\n')
 
 data_directory = input('Data directory: ')
 test_data_directory = input('Test data directory (x for set to val): ')
