@@ -198,9 +198,9 @@ def process_data_full_spectrum(XS_train, XS_val, XS_test, scale_separately = Fal
 		for channel_data_train, channel_data_val, channel_data_test in zip(channel_matrix_train, channel_matrix_val, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
 
 			# Apply lg transform to reduce dynamic range
-			logged_channel_data_train = np.log10(channel_data_train)
-			logged_channel_data_val = np.log10(channel_data_val)
-			logged_channel_data_test = np.log10(channel_data_test)
+			logged_channel_data_train = np.log(channel_data_train)
+			logged_channel_data_val = np.log(channel_data_val)
+			logged_channel_data_test = np.log(channel_data_test)
 
 			# Calculate scaling statistics using training distribution
 			channel_mean_train = np.mean(logged_channel_data_train)
@@ -347,7 +347,7 @@ for pred in predictions_list:
 	rescaled_predictions.append(float(descaled_p))
 
 errors = []
-for predicted, true in zip(rescaled_predictions, keff_test):
+for predicted, true in zip(rescaled_predictions, keff_val):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
