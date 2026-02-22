@@ -188,7 +188,6 @@ def process_data(XS_train, XS_val, XS_test, scale_separately = False):
 	channel_matrix_test = [[] for i in range(len(XS_test[0]))]
 
 
-	# Pu-239 (n,el)
 	scaled_channel_matrix_train = []
 	scaled_channel_matrix_val = []
 	scaled_channel_matrix_test = []
