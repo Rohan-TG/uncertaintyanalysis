@@ -20,7 +20,7 @@ endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 # pendf = endf6.get_pendf(err=0.0001)
 
 
-num_samples = 5  # number of samples
+num_samples = 100  # number of samples
 processes = 5
 
 
