@@ -211,9 +211,9 @@ def process_data(XS_train, XS_val, XS_test, scale_separately = False):
 	#################################################################################################################################################################
 	if not scale_separately:
 		for channel_data_train, channel_data_val, channel_data_test in zip(channel_matrix_train, channel_matrix_val, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
-			transposed_matrix_train = np.transpose(channel_data_train) # shape (energy points per sample, num samples)
-			transposed_matrix_val = np.transpose(channel_data_val)
-			transposed_matrix_test = np.transpose(channel_data_test)
+			transposed_matrix_train = np.transpose(np.log(channel_data_train)) # shape (energy points per sample, num samples)
+			transposed_matrix_val = np.transpose(np.log(channel_data_val))
+			transposed_matrix_test = np.transpose(np.log(channel_data_test))
 
 			transposed_scaled_channel_train = []
 			transposed_scaled_channel_val = []
