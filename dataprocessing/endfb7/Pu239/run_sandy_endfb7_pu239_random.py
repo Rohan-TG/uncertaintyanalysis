@@ -11,7 +11,7 @@ elif computer == 'oppie':
 from groupEnergies import Pu239
 
 
-lib_name = "ENDFB_71"
+lib_name = "END"
 nucl = Pu239.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
