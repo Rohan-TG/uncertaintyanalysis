@@ -99,7 +99,7 @@ y_train = zscore(keff_train)
 
 XS_val = []
 keff_val = []
-print('Fetching val data...')
+print('\nFetching val data...')
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, val_file) for val_file in val_files]
@@ -162,7 +162,7 @@ if test_data_directory != 'x':
 	y_test = (np.array(keff_test) - keff_train_mean) / keff_train_std
 
 
-print('Scaling all data...')
+print('\nScaling all data...')
 
 def process_data_full_spectrum(XS_train, XS_val, XS_test, scale_separately = False):
 	"""Scales across the entire energy spectrum instead of pointwise like in previous versions. Scales across all energy and samples, but per channel.
@@ -303,7 +303,7 @@ X_train, X_val, X_test = process_data_full_spectrum(XS_train, XS_val, XS_test)
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=10,
+										 patience=30,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
@@ -316,11 +316,11 @@ model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activat
 # model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
 model.add(keras.layers.Flatten())
 model.add(keras.layers.Dense(900, activation='relu'))
-# model.add(keras.layers.Dense(750, activation='relu'))
+model.add(keras.layers.Dense(750, activation='relu'))
 model.add(keras.layers.Dense(550, activation='relu'))
-# model.add(keras.layers.Dense(400, activation='relu'))
+model.add(keras.layers.Dense(400, activation='relu'))
 model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(200, activation='relu'))
+model.add(keras.layers.Dense(200, activation='relu'))
 model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
