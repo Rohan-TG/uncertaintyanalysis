@@ -6,7 +6,7 @@ if computer == 'fermiac':
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 import pandas as pd
-from groupEnergies import Reactions
+from groupEnergies import Reactions, pchip_energies
 import tqdm
 import ENDF6
 import numpy as np
@@ -167,7 +167,7 @@ interpolation_energies = pchip_initialiser()
 
 print('\nReading PENDFs and forming dataframes...')
 
-def parquet_maker(index_combination):
+def parquet_maker(index_combination, full_thinned_erg=pchip_energies):
 	"""Filename should be the name of the PENDF we're reading from"""
 
 	pu239_index = index_combination[0]
@@ -254,7 +254,7 @@ def parquet_maker(index_combination):
 
 
 
-	full_thinned_erg = list(interpolation_energies) + list(fast_energy_mt18_239) # full energy grid after applying PCHIP
+	# full_thinned_erg = list(interpolation_energies) + list(fast_energy_mt18_239) # full energy grid after applying PCHIP
 
 	full_thinned_xs = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
 
