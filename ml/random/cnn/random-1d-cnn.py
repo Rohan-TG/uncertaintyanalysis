@@ -432,7 +432,7 @@ if save_histogram == 'y':
 	plt.show()
 
 	plt.figure()
-	plt.plot(keff_val, errors, 'x')
+	plt.plot(keff_test, errors, 'x')
 	plt.grid()
 	plt.title('Distribution of errors')
 	plt.xlabel('True k_eff')
