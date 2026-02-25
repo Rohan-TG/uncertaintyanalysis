@@ -8,9 +8,9 @@ if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-from groupEnergies import Pu241
+from groupEnergies import Ga69
 
-nuclide = Pu241
+nuclide = Ga69
 lib_name = "ENDFB_80"
 nucl = nuclide.ZA * 10
 filename = f"{nuclide.ZA}_{lib_name}.pendf"
