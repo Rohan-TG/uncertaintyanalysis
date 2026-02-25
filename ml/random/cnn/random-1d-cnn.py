@@ -422,13 +422,17 @@ print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absol
 import matplotlib.pyplot as plt
 save_histogram = input('Save histogram? (y): ')
 if save_histogram == 'y':
+
+	histogram_title = input('Histogram title: ')
+	scatterplot_title = input('Scatterplot title: ')
+
 	plt.figure()
 	plt.hist(sorted_errors, bins=25)
 	plt.grid()
 	plt.title('Distribution of errors')
 	plt.xlabel('Error / pcm')
 	plt.ylabel('Count')
-	plt.savefig('asdfcnn.png', dpi=300)
+	plt.savefig(f'{histogram_title}.png')
 	plt.show()
 
 	plt.figure()
@@ -437,7 +441,7 @@ if save_histogram == 'y':
 	plt.title('Distribution of errors')
 	plt.xlabel('True k_eff')
 	plt.ylabel('Error / pcm')
-	plt.savefig('errors_as_function_of_keff.png', dpi=300)
+	plt.savefig(f'{scatterplot_title}.png')
 	plt.show()
 
 skew_positive = []
