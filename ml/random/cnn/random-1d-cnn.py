@@ -461,18 +461,18 @@ print(f'skew_negative: {len(skew_negative)} / {len(errors)}')
 original_data = pd.read_parquet('/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/original_data_ENDFBVIII.0.parquet')
 original_pu239_fission = original_data['94239_MT18_XS']
 
-
+list_of_average_deviations = []
 for error, data_file in zip(errors, val_files):
-
-	fission_ratio_pu239 = original_pu239_fission / data_file['94239_MT18_XS'].values
+	perturbed_data_file = pd.read_parquet(f'{data_directory}/{data_file}')
+	fission_ratio_pu239 = original_pu239_fission / perturbed_data_file['94239_MT18_XS'].values
 	average_deviation = np.mean(1-fission_ratio_pu239)
 	absolute_average_deviation = np.mean(np.abs(1-fission_ratio_pu239))
-
+	list_of_average_deviations.append(absolute_average_deviation)
 	print(f'ML Error: {error} pcm, Absolute deviation: {absolute_average_deviation} ')
 
 figure_name = input('Deviation figure name: ')
 plt.figure()
-plt.plot(absolute_average_deviation, errors, 'x')
+plt.plot(list_of_average_deviations, errors, 'x')
 plt.grid()
 plt.title('Average perturbation level vs. error')
 plt.xlabel('Absolute deviation')
