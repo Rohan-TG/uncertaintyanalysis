@@ -400,6 +400,9 @@ def plot_index(idx):
 
 	true_pct_error = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_full_p[idx]))
 
+	sigma_2_upper = 2* true_pct_error
+	sigma_2_lower = -1 * true_pct_error
+
 	plt.figure()
 	plt.plot(rescaled_full_p[idx], label='Prediction')
 	plt.plot(rescaled_y_val[idx], label='True')
@@ -411,6 +414,7 @@ def plot_index(idx):
 	plt.figure()
 	plt.plot(pct_list[idx], label = 'ML error')
 	plt.plot(true_pct_error, label='MC Error')
+	plt.fill_between(x_axis, sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$')
 	plt.xlabel('Point')
 	plt.ylabel('% Deviation')
 	plt.grid()
