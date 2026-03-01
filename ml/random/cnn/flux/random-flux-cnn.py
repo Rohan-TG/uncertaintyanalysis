@@ -396,17 +396,21 @@ def plot_index(idx):
 
 	lower_error_bound = np.array(rescaled_full_p[idx]) - np.array(flux_errors_val[idx])
 	upper_error_bound = np.array(rescaled_full_p[idx]) + np.array(flux_errors_val[idx])
+	x_axis = np.arange(0,300,1)
+
+	true_pct_error = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_full_p[idx]))
 
 	plt.figure()
 	plt.plot(rescaled_full_p[idx], label='Prediction')
 	plt.plot(rescaled_y_val[idx], label='True')
-	plt.fill_between(lower_error_bound, upper_error_bound, color='r', alpha=0.3)
+	plt.fill_between(x_axis, lower_error_bound, upper_error_bound, color='r', alpha=0.3)
 	plt.legend()
 	plt.grid()
 	plt.savefig(f'{idx}.png')
 
 	plt.figure()
-	plt.plot(pct_list[idx])
+	plt.plot(pct_list[idx], label = 'ML error')
+	plt.plot(true_pct_error, label='MC Error')
 	plt.xlabel('Point')
 	plt.ylabel('% Deviation')
 	plt.grid()
