@@ -19,22 +19,27 @@ import time
 
 
 
-print('\n\n')
+print('\n')
 data_directory = input('Data directory: ')
-test_data_directory = input('Test data directory (x for set to val): ')
-scale_separately = input('Scale test with separate statistics? (y): ')
+test_data_directory = input('\nTest data directory (x for set to val): ')
+scale_separately = input('\nScale test with separate statistics? (y): ')
 if scale_separately == 'y':
 	scale_separately = True
 else:
 	scale_separately = False
 
-data_processes = int(input('Num. data processors: '))
+data_processes = int(input('\nNum. data processors: '))
 
 all_parquets = os.listdir(data_directory)
 
-training_fraction = float(input('Enter training data fraction: '))
-lower_energy_bound = float(input('Enter lower energy bound in eV: '))
-patience = int(input('Patience: '))
+training_fraction = float(input('\nEnter training data fraction: '))
+lower_energy_bound = float(input('\nEnter lower energy bound in eV: '))
+patience = int(input('\nPatience: '))
+
+try:
+	mask = float(input('\nMask (x skip): '))
+except:
+	print('Skip masking...')
 
 n_training_samples = int(training_fraction * len(all_parquets))
 
@@ -323,8 +328,8 @@ X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test, scale_separatel
 
 X_test[np.isinf(X_test)] = -1
 
-
-
+if type(mask) != str:
+	X_test[np.abs(X_test) >= mask] = 0
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
