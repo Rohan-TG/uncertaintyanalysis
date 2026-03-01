@@ -96,12 +96,17 @@ def fetch_data(datafile):
 	flux_file = f'Flux_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}.parquet'
 	flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
 	flux_data = flux_read_obj['flux'].values
+	flux_error = flux_read_obj['flux_errror']
+
+	pct_flux_error = np.array(flux_error) / np.array(flux_data)
+
 	global flux_lower_bounds, flux_upper_bounds
 	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
 	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 	return(XS_obj,
-		   flux_data
+		   flux_data,
+		   flux_error,
 		   )
 
 
@@ -113,7 +118,7 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values, flux_values = future.result()
+		xs_values, flux_values, flux_error = future.result()
 		XS_train.append(xs_values)
 		flux_train.append(flux_values)
 
@@ -121,16 +126,20 @@ XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per cha
 flux_train = np.array(flux_train) # matrix
 
 
-def scale_flux(flux_array, train_mode = False, means = None, stds = None):
+def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
 
 	normalised_flux_array = []
-	for flux_set in flux_array:
+	normalised_flux_error_array = []
+	for flux_set, flux_error_set in zip(flux_array, flux_error_array):
 		area = np.sum(flux_set)
 		norm_flux_vector = np.array(flux_set) / area
+		norm_flux_error = np.array(flux_error_set) / area
 		normalised_flux_array.append(norm_flux_vector)
+		normalised_flux_error_array.append(norm_flux_error)
 
 	normalised_flux_array = np.array(normalised_flux_array)
+	normalised_flux_error_array = np.array(normalised_flux_error_array)
 
 	transposed_flux_array = normalised_flux_array.transpose()
 	if train_mode:
@@ -146,7 +155,7 @@ def scale_flux(flux_array, train_mode = False, means = None, stds = None):
 		scaling_column_means = np.array(scaling_column_means)
 		scaled_transposed_flux_array = np.array(scaling_columns)
 		scaled_flux_array = scaled_transposed_flux_array.transpose()
-		return scaled_flux_array, scaling_column_means, scaling_column_stds
+		return scaled_flux_array, scaling_column_means, scaling_column_stds, normalised_flux_error_array
 
 	else:
 		scaling_columns = []
@@ -155,7 +164,7 @@ def scale_flux(flux_array, train_mode = False, means = None, stds = None):
 
 		scaled_transposed_flux_array = np.array(scaling_columns)
 		scaled_flux_array = scaled_transposed_flux_array.transpose()
-		return scaled_flux_array
+		return scaled_flux_array, normalised_flux_error_array
 	# return normalised_flux_array
 
 def descaler(scaled_flux_array, means, stds):
@@ -168,7 +177,7 @@ def descaler(scaled_flux_array, means, stds):
 	rescaled_flux_array = rescaled_flux_array.transpose()
 	return rescaled_flux_array
 
-y_train, scaling_means, scaling_stds = scale_flux(flux_train, train_mode=True)
+y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, train_mode=True)
 
 XS_val = []
 flux_val = []
@@ -185,7 +194,7 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 
 XS_val = np.array(XS_val)
 
-y_val = scale_flux(flux_val, train_mode=False, means=scaling_means, stds=scaling_stds)
+y_val, flux_errors_val = scale_flux(flux_val, train_mode=False, means=scaling_means, stds=scaling_stds)
 y_val = np.array(y_val)
 
 
@@ -204,7 +213,7 @@ if test_data_directory != 'x':
 			flux_test.append(flux_value_test)
 
 	XS_test = np.array(XS_test)
-	y_test = scale_flux(flux_test, train_mode=False, means=scaling_means, stds=scaling_stds)
+	y_test, flux_errors_test = scale_flux(flux_test, train_mode=False, means=scaling_means, stds=scaling_stds)
 
 
 print('Scaling training data...')
@@ -377,9 +386,13 @@ print(f'Mean R2: {np.mean(r2s):0.5f}')
 
 def plot_index(idx):
 
+	lower_error_bound = np.array(rescaled_full_p[idx]) - np.array(flux_errors_val[idx])
+	upper_error_bound = np.array(rescaled_full_p[idx]) + np.array(flux_errors_val[idx])
+
 	plt.figure()
 	plt.plot(rescaled_full_p[idx], label='Prediction')
 	plt.plot(rescaled_y_val[idx], label='True')
+	plt.fill_between(lower_error_bound, upper_error_bound, color='r', alpha=0.3)
 	plt.legend()
 	plt.grid()
 	plt.savefig(f'{idx}.png')
