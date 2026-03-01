@@ -27,6 +27,7 @@ all_parquets = os.listdir(data_directory)
 
 training_fraction = float(input('Enter training data fraction: '))
 lower_energy_bound = float(input('Enter lower energy bound in eV: '))
+patience = int(input('Patience: '))
 
 n_training_samples = int(training_fraction * len(all_parquets))
 
@@ -304,7 +305,7 @@ X_train, X_val, X_test = process_data_full_spectrum(XS_train, XS_val, XS_test)
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=30,
+										 patience=patience,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
