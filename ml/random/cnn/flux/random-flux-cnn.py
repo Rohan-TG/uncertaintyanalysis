@@ -112,7 +112,9 @@ def fetch_data(datafile):
 
 
 flux_train = [] # flux labels
+flux_train_error = []
 XS_train = []
+
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
@@ -121,9 +123,11 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		xs_values, flux_values, flux_error = future.result()
 		XS_train.append(xs_values)
 		flux_train.append(flux_values)
+		flux_train_error.append(flux_error)
 
 XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per channel)
 flux_train = np.array(flux_train) # matrix
+flux_train_error = np.array(flux_train_error)
 
 
 def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None):
@@ -177,10 +181,11 @@ def descaler(scaled_flux_array, means, stds):
 	rescaled_flux_array = rescaled_flux_array.transpose()
 	return rescaled_flux_array
 
-y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, train_mode=True)
+y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True)
 
 XS_val = []
 flux_val = []
+flux_val_error = []
 print('Fetching val data...')
 
 
@@ -188,13 +193,14 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, val_file) for val_file in val_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values_val, flux_value_val = future.result()
+		xs_values_val, flux_value_val, flux_error_val = future.result()
 		XS_val.append(xs_values_val)
 		flux_val.append(flux_value_val)
+		flux_val_error.append(flux_error_val)
 
 XS_val = np.array(XS_val)
 
-y_val, flux_errors_val = scale_flux(flux_val, train_mode=False, means=scaling_means, stds=scaling_stds)
+y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds)
 y_val = np.array(y_val)
 
 
@@ -204,16 +210,18 @@ if test_data_directory != 'x':
 
 	XS_test = []
 	flux_test = []
+	flux_test_error = []
 	with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		futures_test = [executor.submit(fetch_data, test_file) for test_file in test_files]
 
 		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
-			xs_values_test, flux_value_test = future_test.result()
+			xs_values_test, flux_value_test, flux_test_err = future_test.result()
 			XS_test.append(xs_values_test)
 			flux_test.append(flux_value_test)
+			flux_test_error.append(flux_test_err)
 
 	XS_test = np.array(XS_test)
-	y_test, flux_errors_test = scale_flux(flux_test, train_mode=False, means=scaling_means, stds=scaling_stds)
+	y_test, flux_errors_test = scale_flux(flux_test, flux_error_array=flux_test_error, train_mode=False, means=scaling_means, stds=scaling_stds)
 
 
 print('Scaling training data...')
