@@ -414,4 +414,5 @@ def plot_index(idx):
 	plt.xlabel('Point')
 	plt.ylabel('% Deviation')
 	plt.grid()
+	plt.legend()
 	plt.savefig(f'{idx}_val_pct_error.png')
