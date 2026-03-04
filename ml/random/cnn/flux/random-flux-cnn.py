@@ -26,8 +26,8 @@ test_data_directory = input('Test data directory (x for set to val): ')
 flux_data_directory = input('Flux data directory: ')
 
 
-data_processes = int(input('Num. data processors: '))
-
+# data_processes = int(input('Num. data processors: '))
+data_processes = 6
 all_parquets = os.listdir(xs_directory)
 
 training_fraction = float(input('Enter training data fraction: '))
