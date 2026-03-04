@@ -473,7 +473,7 @@ for error, data_file in zip(errors, val_files):
 	average_deviation = np.mean(1-fission_ratio_pu239)
 	absolute_average_deviation = np.mean(np.abs(1-fission_ratio_pu239))
 	list_of_average_deviations.append(absolute_average_deviation)
-	print(f'ML Error: {error} pcm, Absolute deviation: {absolute_average_deviation} ')
+	print(f'ML Error: {error:0.0f} pcm, Absolute deviation: {100* absolute_average_deviation:0.1f} %')
 
 figure_name = input('Deviation figure name: ')
 plt.figure()
