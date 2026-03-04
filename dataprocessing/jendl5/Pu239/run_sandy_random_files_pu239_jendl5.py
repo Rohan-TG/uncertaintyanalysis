@@ -15,9 +15,9 @@ lib_name = "JENDL_5"
 nucl = Pu239.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
-endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
+# endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 # endf6.to_file(filename)
-# endf6 = sandy.Endf6.from_file('n_94-Pu-239g.')
+endf6 = sandy.Endf6.from_file('n_094-Pu-239_300K.endf')
 # pendf = endf6.get_pendf(err=0.0001)
 
 

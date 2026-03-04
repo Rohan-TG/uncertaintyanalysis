@@ -8,16 +8,16 @@ if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-from groupEnergies import Pu239
+from groupEnergies import Pu241
 
 
-lib_name = "JEFF_33"
-nucl = Pu239.ZA * 10
-filename = f"{nucl}.{lib_name}"
+# lib_name = "JEFF_33"
+# nucl = Pu24`.ZA * 10
+# filename = f"{nucl}.{lib_name}"
 
 # endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
 # endf6.to_file(filename)
-endf6 = sandy.Endf6.from_file('n_94-Pu-239g.jeff')
+endf6 = sandy.Endf6.from_file('n_094-Pu-241_300K.endf')
 # pendf = endf6.get_pendf(err=0.0001)
 
 
