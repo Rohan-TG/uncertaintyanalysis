@@ -375,6 +375,7 @@ r2s = []
 rescaled_full_p = [] # contains predictions
 rescaled_y_val = [] # contains labels
 pct_list = []
+over_limit_list = []
 for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
 	rescaled_full_p.append(rescaled_predictions)
@@ -393,6 +394,7 @@ for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 		if point_ml_error > point_real_error:
 			count += 1
 	over_limit_pct = (count / len(pct_deviation)) * 100
+	over_limit_list.append(over_limit_pct)
 	print(f'{idx} - {over_limit_pct:0.1f}% Points over limit, Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
 	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
@@ -412,7 +414,7 @@ edges = []
 for i in grid:
 	if i not in edges:
 		edges.append(i)
-
+widths = np.diff(edges)
 def plot_index(idx):
 
 	# lower_error_bound = np.array(rescaled_full_p[idx]) - np.array(flux_errors_val[idx])
@@ -433,7 +435,7 @@ def plot_index(idx):
 	# plt.savefig(f'{idx}.png')
 
 
-	widths = np.diff(edges)
+
 	plt.figure()
 	plt.bar(edges[:-1], rescaled_full_p[idx], width=widths, label='Prediction')
 	plt.bar(edges[:-1], rescaled_y_val[idx], width=widths, label = "True")
@@ -446,13 +448,15 @@ def plot_index(idx):
 	plt.savefig(f'{idx}_bar.png')
 
 
-
+	scale_log = input('Log scale? (y): ')
 	plt.figure()
-	plt.plot(pct_list[idx], label = 'ML error')
-	plt.plot(true_pct_error, label='MC Error')
-	plt.fill_between(x_axis, sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$')
-	plt.xlabel('Point')
+	plt.bar(edges[:-1], pct_list[idx], width=widths, label = 'ML error')
+	plt.plot(edges[:-1], true_pct_error, label='MC Error')
+	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$')
+	plt.xlabel('Energy / Mev')
 	plt.ylabel('% Deviation')
+	if scale_log == 'y':
+		plt.xscale('log')
 	plt.grid()
 	plt.legend()
-	plt.savefig(f'{idx}_val_pct_error.png')
+	plt.savefig(f'{idx}_val_pct_error_bar.png')
