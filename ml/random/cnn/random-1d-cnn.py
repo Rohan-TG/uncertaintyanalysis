@@ -28,7 +28,7 @@ if scale_separately == 'y':
 else:
 	scale_separately = False
 
-data_processes = int(input('\nNum. data processors: '))
+data_processes = 5
 
 all_parquets = os.listdir(data_directory)
 
