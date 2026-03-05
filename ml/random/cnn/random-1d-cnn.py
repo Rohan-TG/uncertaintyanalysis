@@ -39,6 +39,7 @@ patience = int(input('\nPatience: '))
 try:
 	mask = float(input('\nMask (x skip): '))
 except:
+	mask = 'x'
 	print('Skip masking...')
 
 n_training_samples = int(training_fraction * len(all_parquets))
