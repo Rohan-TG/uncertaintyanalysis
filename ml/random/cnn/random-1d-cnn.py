@@ -472,19 +472,19 @@ def check_ratios(quantity):
 	absolute_average_deviation = np.mean(np.abs(1-ratio))
 	return absolute_average_deviation
 
-deviation_dictionary = {}
+deviation_dictionary = {'94239_MT18_XS': [],'94239_MT2_XS': [],'94240_MT18_XS': [],'94240_MT2_XS': [],'94241_MT18_XS':[],'94241_MT2_XS': []}
 
 for error, data_file in zip(errors, val_files):
 	perturbed_data_file = pd.read_parquet(f'{data_directory}/{data_file}')
 
-	deviation_dictionary['94239_MT18_XS'] = check_ratios(quantity='94239_MT18_XS')
-	deviation_dictionary['94239_MT2_XS'] = check_ratios(quantity='94239_MT2_XS')
+	deviation_dictionary['94239_MT18_XS'].append(check_ratios(quantity='94239_MT18_XS'))
+	deviation_dictionary['94239_MT2_XS'].append(check_ratios(quantity='94239_MT2_XS'))
 
-	deviation_dictionary['94240_MT18_XS'] = check_ratios(quantity='94240_MT18_XS')
-	deviation_dictionary['94240_MT2_XS'] = check_ratios(quantity='94240_MT2_XS')
+	deviation_dictionary['94240_MT18_XS'].append(check_ratios(quantity='94240_MT18_XS'))
+	deviation_dictionary['94240_MT2_XS'].append(check_ratios(quantity='94240_MT2_XS'))
 
-	deviation_dictionary['94241_MT18_XS'] = check_ratios(quantity='94241_MT18_XS')
-	deviation_dictionary['94241_MT2_XS'] = check_ratios(quantity='94241_MT2_XS')
+	deviation_dictionary['94241_MT18_XS'].append(check_ratios(quantity='94241_MT18_XS'))
+	deviation_dictionary['94241_MT2_XS'].append(check_ratios(quantity='94241_MT2_XS'))
 		# print(f'\nML Error: {error:0.0f} pcm, Absolute Pu-239 MT18 deviation: {100* absolute_average_deviation:0.1f} \n %')
 
 # figure_name = input('Deviation figure name: ')
