@@ -7,6 +7,7 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
+	flux_data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/flux_data'
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 import pandas as pd
@@ -23,7 +24,7 @@ import matplotlib.pyplot as plt
 xs_directory = input('XS directory: ')
 test_data_directory = input('Test data directory (x for set to val): ')
 
-flux_data_directory = input('Flux data directory: ')
+# flux_data_directory = input('Flux data directory: ')
 
 
 # data_processes = int(input('Num. data processors: '))
