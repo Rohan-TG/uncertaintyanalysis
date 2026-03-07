@@ -8,11 +8,11 @@ if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
 elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
-from groupEnergies import Pu239
+from groupEnergies import Pu240
 
 
 lib_name = "ENDFB_71"
-nucl = Pu239.ZA * 10
+nucl = Pu240.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
 endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
@@ -21,7 +21,7 @@ pendf = endf6.get_pendf(err=0.0001)
 
 
 outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf)
-with open(f"Pu_239_ENDFBVII1.03c", mode="w") as f:
+with open(f"Pu_240_ENDFBVII1.03c", mode="w") as f:
 	f.write(outs["ace"])
 
 # num_samples = 100  # number of samples
