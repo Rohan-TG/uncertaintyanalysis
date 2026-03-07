@@ -341,18 +341,7 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 
-# model = keras.Sequential()
-# model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
-# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
-# # model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
-# # model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
-# model.add(keras.layers.Flatten())
-# model.add(keras.layers.Dense(500, activation='relu'))
-# model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(150, activation='relu'))
-# model.add(keras.layers.Dense(100, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MeanSquaredError', optimizer='adam')
+
 print('\n\n')
 model = keras.Sequential()
 model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
@@ -376,7 +365,7 @@ trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=1000,
-					batch_size=32,
+					batch_size=16,
 					callbacks=callback,
 					validation_data=(X_val, y_val),
 					verbose=1)
