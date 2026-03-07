@@ -419,12 +419,14 @@ def plot_index(idx):
 
 	# lower_error_bound = np.array(rescaled_full_p[idx]) - np.array(flux_errors_val[idx])
 	# upper_error_bound = np.array(rescaled_full_p[idx]) + np.array(flux_errors_val[idx])
-	x_axis = np.arange(0,300,1)
+	# x_axis = np.arange(0,300,1)
 
 	true_pct_error = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_y_val[idx]))
 
+	global sigma_2_upper
+	global sigma_2_lower
 	sigma_2_upper = 2* true_pct_error
-	sigma_2_lower = -1 * true_pct_error
+	sigma_2_lower = -2 * true_pct_error
 
 	# plt.figure()
 	# plt.plot(rescaled_full_p[idx], label='Prediction')
