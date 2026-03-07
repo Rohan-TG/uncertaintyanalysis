@@ -106,8 +106,8 @@ def fetch_data(datafile):
 	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 	return(XS_obj,
-		   np.log(flux_data),
-		   np.log(flux_error),
+		   flux_data,
+		   flux_error,
 		   )
 
 
@@ -180,7 +180,7 @@ def descaler(scaled_flux_array, means, stds):
 
 	rescaled_flux_array = np.array(rescaled_flux_array)
 	rescaled_flux_array = rescaled_flux_array.transpose()
-	rescaled_flux_array = np.e ** rescaled_flux_array
+	rescaled_flux_array = rescaled_flux_array
 	return rescaled_flux_array
 
 y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True)
@@ -205,7 +205,7 @@ XS_val = np.array(XS_val)
 y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds)
 y_val = np.array(y_val)
 
-flux_errors_val = np.e ** np.array(flux_errors_val)
+flux_errors_val = np.array(flux_errors_val)
 
 if test_data_directory != 'x':
 	print('Fetching test data...')
@@ -422,7 +422,7 @@ for i in grid:
 widths = np.diff(edges)
 def plot_index(sample_idx):
 
-	true_pct_error = 100 * (np.array(np.e** flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
+	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
 
 	sigma_2_upper = 2* true_pct_error
 	sigma_2_lower = -2 * true_pct_error
