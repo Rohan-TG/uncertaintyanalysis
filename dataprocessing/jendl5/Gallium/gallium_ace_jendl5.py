@@ -10,8 +10,8 @@ elif computer == 'oppie':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 
 
-endf6 = sandy.Endf6.from_file('../Pu239/Pu_239_JENDL5.endf')
+endf6 = sandy.Endf6.from_file('../Pu240/Pu_240_JENDL5.endf')
 pendf = endf6.get_pendf(err=0.0001, verbose=True)
 outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf)
-with open(f"Pu_239_JENDL5.03c", mode="w") as f:
+with open(f"Pu_240_JENDL5.03c", mode="w") as f:
 	f.write(outs["ace"])
