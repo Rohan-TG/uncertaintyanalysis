@@ -392,14 +392,16 @@ for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 
 	count = 0
 	for point_ml_error, point_real_error in zip(pct_deviation, true_percentage_errors):
-		if point_ml_error > point_real_error:
+		if abs(point_ml_error) > abs(point_real_error * 2):
 			count += 1
+
 	over_limit_pct = (count / len(pct_deviation)) * 100
 	over_limit_list.append(over_limit_pct)
 	print(f'{idx} - {over_limit_pct:0.1f}% Points over limit, Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
 	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
 print(f'Mean R2: {np.mean(r2s):0.5f}')
+print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}% over limit')
 
 d1, d2, d3 = fetch_data(all_parquets[0])
 
@@ -416,44 +418,32 @@ for i in grid:
 	if i not in edges:
 		edges.append(i)
 widths = np.diff(edges)
-def plot_index(idx):
+def plot_index(sample_idx: int):
 
-	# lower_error_bound = np.array(rescaled_full_p[idx]) - np.array(flux_errors_val[idx])
-	# upper_error_bound = np.array(rescaled_full_p[idx]) + np.array(flux_errors_val[idx])
-	# x_axis = np.arange(0,300,1)
-
-	true_pct_error = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_y_val[idx]))
+	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
 
 	global sigma_2_upper
 	global sigma_2_lower
 	sigma_2_upper = 2* true_pct_error
 	sigma_2_lower = -2 * true_pct_error
 
-	# plt.figure()
-	# plt.plot(rescaled_full_p[idx], label='Prediction')
-	# plt.plot(rescaled_y_val[idx], label='True')
-	# plt.fill_between(x_axis, lower_error_bound, upper_error_bound, color='r', alpha=0.3)
-	# plt.legend()
-	# plt.grid()
-	# plt.savefig(f'{idx}.png')
-
 
 
 	plt.figure()
-	plt.bar(edges[:-1], rescaled_full_p[idx], width=widths, label='Prediction')
-	plt.bar(edges[:-1], rescaled_y_val[idx], width=widths, label = "True")
+	plt.bar(edges[:-1], rescaled_full_p[sample_idx], width=widths, label='Prediction')
+	plt.bar(edges[:-1], rescaled_y_val[sample_idx], width=widths, label = "True")
 	plt.grid()
 	plt.legend()
 	plt.xlabel('Energy / MeV')
 	plt.ylabel('Normalised flux')
 	plt.xscale('log')
 	plt.ylim(0,0.015)
-	plt.savefig(f'{idx}_bar.png')
+	plt.savefig(f'{sample_idx}_bar.png')
 
 
 	scale_log = input('Log scale? (y): ')
 	plt.figure()
-	plt.bar(edges[:-1], pct_list[idx], width=widths, label = 'ML error')
+	plt.bar(edges[:-1], pct_list[sample_idx], width=widths, label = 'ML error')
 	plt.plot(edges[:-1], true_pct_error, label='MC Error')
 	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$')
 	plt.xlabel('Energy / Mev')
@@ -462,4 +452,4 @@ def plot_index(idx):
 		plt.xscale('log')
 	plt.grid()
 	plt.legend()
-	plt.savefig(f'{idx}_val_pct_error_bar.png')
+	plt.savefig(f'{sample_idx}_val_pct_error_bar.png')
