@@ -205,6 +205,7 @@ XS_val = np.array(XS_val)
 y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds)
 y_val = np.array(y_val)
 
+flux_errors_val = np.e ** np.array(flux_errors_val)
 
 if test_data_directory != 'x':
 	print('Fetching test data...')
@@ -419,12 +420,10 @@ for i in grid:
 	if i not in edges:
 		edges.append(i)
 widths = np.diff(edges)
-def plot_index(sample_idx: int):
+def plot_index(sample_idx):
 
-	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
+	true_pct_error = 100 * (np.array(np.e** flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
 
-	global sigma_2_upper
-	global sigma_2_lower
 	sigma_2_upper = 2* true_pct_error
 	sigma_2_lower = -2 * true_pct_error
 
