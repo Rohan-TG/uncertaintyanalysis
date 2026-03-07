@@ -500,3 +500,115 @@ def plot_deviation_analysis(deviations, quantity):
 
 for key in deviation_dictionary:
 	plot_deviation_analysis(deviations=deviation_dictionary[key], quantity=key)
+#######################################################################################################################
+
+more_analysis = input('More analysis (1): ')
+if more_analysis == '1':
+	acceptable_batch = []
+	acceptable_true = []
+
+	unacceptable_batch = []
+	unacceptable_true = []
+
+	for mlerror, truevalue in zip(errors, keff_test):
+		if abs(mlerror) > 10.0:
+			unacceptable_batch.append(mlerror)
+			unacceptable_true.append(truevalue)
+		else:
+			acceptable_batch.append(mlerror)
+			acceptable_true.append(truevalue)
+
+	plt.figure()
+	plt.plot(unacceptable_true, unacceptable_batch, 'x', color='red', label = 'unacceptable')
+	plt.plot(acceptable_true, acceptable_batch, 'x', color='blue', label = 'acceptable')
+	plt.grid()
+	plt.legend()
+	plt.xlabel('True k_eff')
+	plt.ylabel('Error / pcm')
+	plt.savefig('Comparison_of_acceptable_and_unacceptable.png')
+
+
+
+
+	keff_sections = np.arange(0.97, 1.06, 0.005)
+	step_size = 0.005
+
+	bin_array = []
+	for border in keff_sections:
+		bin_array.append([border, border + step_size])
+	# defines the bins for the bar chart
+
+	error_groups_sorted_by_bin = [[] for g in bin_array]
+	true_value_groups_sorted_by_bin = [[] for g in bin_array]
+	for group_index, group in enumerate(bin_array):
+		for error, true_value in zip(errors, keff_test):
+			if true_value >= group[0] and true_value <= group[1]:
+				error_groups_sorted_by_bin[group_index].append(error)
+				true_value_groups_sorted_by_bin[group_index].append(true_value)
+
+
+
+	mean_error_by_keff_group = []
+	for error_grouping in error_groups_sorted_by_bin:
+		mean_error_by_keff_group.append(np.mean(np.abs(error_grouping)))
+
+	plt.figure()
+	plt.plot(bin_array, mean_error_by_keff_group, 'x-', color='red', label = 'mean error')
+	plt.grid()
+	plt.ylabel('Mean error / pcm')
+	plt.xlabel('True k_eff')
+	plt.legend()
+	plt.savefig('group_error_plot.png')
+
+
+
+	##### Plotting error vs. signal amplitude and variance
+
+	signal_mean = []
+	signal_variance = []
+	for signal_input in X_test:
+		signal_mean.append(np.mean(signal_input))
+		signal_variance.append(np.var(signal_input))
+
+	plt.figure()
+	plt.plot(signal_mean, errors, 'x', color='red')
+	plt.grid()
+	plt.ylabel('Mean error / pcm')
+	plt.xlabel('Signal mean')
+	plt.legend()
+	plt.savefig('signal_mean.png')
+
+	plt.figure()
+	plt.plot(signal_variance, errors, 'x', color='blue')
+	plt.xlabel('Signal variance')
+	plt.ylabel('Mean error / pcm')
+	plt.legend()
+	plt.grid()
+	plt.savefig('signal_variance.png')
+
+
+def analyse_channel(channel_idx):
+	sample_mean = []
+	sample_variance = []
+	for sample in X_test:
+		sample_mean.append(np.mean(sample[channel_idx]))
+		sample_variance.append(np.var(sample[channel_idx]))
+
+	return sample_mean, sample_variance
+
+def plot_means_and_vars(means, variances, channel_name):
+	plt.figure()
+	plt.plot(means, errors, 'x', color='red')
+	plt.xlabel('Channel means')
+	plt.title('error as function of mean of '+ channel_name)
+	plt.ylabel('Error / pcm')
+	plt.grid()
+	plt.savefig(f'{channel_name}_means.png')
+
+	plt.figure()
+	plt.plot(variances, errors, 'x', color='blue')
+	plt.xlabel('Channel variances')
+	plt.title('error as function of variance of '+ channel_name)
+	plt.ylabel('Error / pcm')
+	plt.grid()
+	plt.savefig(f'{channel_name}_variances.png')
