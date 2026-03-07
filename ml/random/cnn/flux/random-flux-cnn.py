@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 
 xs_directory = input('XS directory: ')
 test_data_directory = input('Test data directory (x for set to val): ')
-
+patience = int(input('Patience: '))
 # flux_data_directory = input('Flux data directory: ')
 
 
@@ -336,7 +336,7 @@ X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test)
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=50,
+										 patience=patience,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
