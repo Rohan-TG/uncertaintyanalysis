@@ -106,8 +106,8 @@ def fetch_data(datafile):
 	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 	return(XS_obj,
-		   flux_data,
-		   flux_error,
+		   np.log(flux_data),
+		   np.log(flux_error),
 		   )
 
 
@@ -180,6 +180,7 @@ def descaler(scaled_flux_array, means, stds):
 
 	rescaled_flux_array = np.array(rescaled_flux_array)
 	rescaled_flux_array = rescaled_flux_array.transpose()
+	rescaled_flux_array = np.e ** rescaled_flux_array
 	return rescaled_flux_array
 
 y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True)
