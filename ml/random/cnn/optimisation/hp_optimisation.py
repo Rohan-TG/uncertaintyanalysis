@@ -280,9 +280,6 @@ def build_model(hp):
 
 
 	#### Begin model stuff
-
-
-
 	hp_units = hp.Int('filters', min_value=16, max_value=256, step=16)
 	model = keras.Sequential()
 	model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
@@ -297,6 +294,8 @@ def build_model(hp):
 	model.add(keras.layers.Dense(1, activation='linear'))
 	model.compile(loss='MeanSquaredError', optimizer='adam')
 
+	print(model.summary())
+	time.sleep(50)
 	return model
 
 
