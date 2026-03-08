@@ -295,7 +295,7 @@ def build_model(hp):
 	model.compile(loss='MeanSquaredError', optimizer='adam')
 
 	print(model.summary())
-	time.sleep(50)
+	time.sleep(5)
 	return model
 
 
