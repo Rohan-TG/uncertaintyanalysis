@@ -601,3 +601,50 @@ def plot_means_and_vars(means, variances, channel_name):
 	plt.ylabel('Error / pcm')
 	plt.grid()
 	plt.savefig(f'{channel_name}_variances.png')
+
+
+
+channel_keys = {'94239_MT2_XS': 0,'94239_MT4_XS': 1,'94239_MT16_XS': 2,
+				'94239_MT18_XS': 3,'94239_MT102_XS': 4,'94240_MT2_XS': 5,
+				'94240_MT4_XS': 6,'94240_MT16_XS': 7,'94240_MT18_XS': 8,
+				'94240_MT102_XS': 9,'94241_MT2_XS': 10,'94241_MT4_XS': 11,
+				'94241_MT16_XS': 12,'94241_MT18_XS': 13,'94241_MT102_XS': 14,}
+
+def channel_group_analysis(sample, channel_name, group_lb, group_ub):
+
+	keff_ml_error = errors[sample]
+	keff_value = keff_test[sample]
+
+	channel_index = channel_keys[channel_name] # index number of channel
+	raw_perturbed_cross_sections = XS_test[sample][channel_index] # full energy of XS test xs
+
+	truncated_original_data = original_data[(original_data.ERG >= group_lb) & (original_data.ERG <= group_ub)] # truncated unperturbed xs
+	truncated_indices = truncated_original_data.index
+	original_unperturbed_cross_sections = truncated_original_data[channel_name].values
+
+	grouped_raw_perturbed_cross_sections = raw_perturbed_cross_sections[truncated_indices[0]:truncated_indices[-1]+1]
+
+	perturbation_list = np.array(grouped_raw_perturbed_cross_sections) / np.array(original_unperturbed_cross_sections)
+
+	perturbation_mean = np.mean(perturbation_list)
+	perturbation_std = np.std(perturbation_list)
+
+	return perturbation_mean, perturbation_std
+
+def channel_plot(channel_name, lb, ub):
+
+	pert_means = []
+	pert_stds = []
+
+	for sample_idx, xs_sample in tqdm.tqdm(enumerate(XS_test), total=len(XS_test)):
+		pert_mean, pert_std = channel_group_analysis(sample=sample_idx, channel_name=channel_name, group_lb=lb, group_ub=ub)
+
+		pert_means.append(pert_mean)
+		pert_stds.append(pert_std)
+
+	plt.figure()
+	plt.plot(pert_means, errors, 'x', color='red')
+	plt.xlabel('Ratio of perturbed mean to mean unperturbed xs')
+	plt.ylabel('Error / pcm')
+	plt.grid()
+	plt.savefig(f'{channel_name}_perturbed_mean_{lb}-{ub}_eV.png')
