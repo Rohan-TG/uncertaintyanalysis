@@ -318,7 +318,7 @@ tuner.search(
     validation_data=(X_val, y_val),
     epochs=2000,
     batch_size=32,
-	callbacks = callback
+	callbacks = [callback]
 )
 
 import datetime
