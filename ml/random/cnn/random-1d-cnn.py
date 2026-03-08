@@ -357,7 +357,7 @@ model.add(keras.layers.Dense(300, activation='relu'))
 model.add(keras.layers.Dense(200, activation='relu'))
 model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
-model.compile(loss='MeanSquaredError', optimizer='adam')
+model.compile(loss=keras.losses.Huber(), optimizer='adam')
 
 
 import datetime
