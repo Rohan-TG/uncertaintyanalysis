@@ -16,7 +16,7 @@ nucl = Pu239.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
 endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
-# endf6.to_file(filename)
+endf6.to_file(filename)
 # pendf = endf6.get_pendf(err=0.0001)
 
 
