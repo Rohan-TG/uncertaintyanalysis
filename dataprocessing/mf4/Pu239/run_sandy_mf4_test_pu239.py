@@ -25,7 +25,7 @@ processes = 5
 
 
 
-cli = f"{filename}  --processes {processes}  --samples {num_samples}  --mf 34  --temperatures 300  --acer  --debug"
+cli = f"{filename}  --processes {processes}  --samples {num_samples}  --mf 35  --temperatures 300  --acer  --debug"
 sandy.sampling.run(cli.split())
 
 #
