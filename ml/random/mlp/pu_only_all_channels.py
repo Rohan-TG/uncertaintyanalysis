@@ -22,14 +22,15 @@ import time
 
 
 
-data_directory = input('Data directory: ')
-data_processes = 5
+data_directory = input('\n\nData directory: ')
+data_processes = 6
 # data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/0-4999/xserg_data'
 
 all_parquets = os.listdir(data_directory)
 
-training_fraction = float(input('Enter training data fraction: '))
-lower_energy_bound = float(input('Enter lower energy bound in eV: '))
+training_fraction = float(input('\nEnter training data fraction: '))
+lower_energy_bound = float(input('\nEnter lower energy bound in eV: '))
+patience = float(input('\nEnter patience: '))
 
 n_training_samples = int(training_fraction * len(all_parquets))
 
@@ -173,7 +174,7 @@ X_train = np.nan_to_num(X_train, nan=0.0)
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
-										 patience=30,
+										 patience=patience,
 										 mode='min',
 										 start_from_epoch=3,
 										 restore_best_weights=True)
@@ -222,7 +223,7 @@ import datetime
 trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
-					epochs=200,
+					epochs=3000,
 					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_test, y_test),
