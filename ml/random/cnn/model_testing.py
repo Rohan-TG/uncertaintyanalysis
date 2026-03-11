@@ -349,8 +349,6 @@ def run_model(model):
 		descaled_p = pred * keff_train_std + keff_train_mean
 		rescaled_predictions.append(float(descaled_p))
 
-	if test_data_directory == 'x':
-		keff_test = keff_val
 	errors = []
 	for predicted, true in zip(rescaled_predictions, keff_test):
 		errors.append((predicted - true) * 1e5)
