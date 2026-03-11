@@ -345,17 +345,17 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 print('\n\n')
 model = keras.Sequential()
 model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
-model.add(keras.layers.Conv1D(filters=32, kernel_size=2, padding='same', activation='relu',))
-# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
-# model.add(keras.layers.Conv1D(filters=32, kernel_size=3, padding='same', activation='relu',))
+# model.add(keras.layers.Conv1D(filters=32, kernel_size=2, padding='same', activation='relu',))
+model.add(keras.layers.Conv1D(filters=80, kernel_size=2, padding='same', activation='relu',))
 model.add(keras.layers.Flatten())
-model.add(keras.layers.Dense(900, activation='relu'))
-model.add(keras.layers.Dense(750, activation='relu'))
-model.add(keras.layers.Dense(550, activation='relu'))
+model.add(keras.layers.Dense(1100, activation='relu'))
+model.add(keras.layers.Dense(850, activation='relu'))
+model.add(keras.layers.Dense(850, activation='relu'))
+model.add(keras.layers.Dense(700, activation='relu'))
+model.add(keras.layers.Dense(1000, activation='relu'))
 model.add(keras.layers.Dense(400, activation='relu'))
 model.add(keras.layers.Dense(300, activation='relu'))
-model.add(keras.layers.Dense(200, activation='relu'))
-model.add(keras.layers.Dense(100, activation='relu'))
+model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
@@ -365,7 +365,7 @@ trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=2500,
-					batch_size=16,
+					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_val, y_val),
 					verbose=1)
