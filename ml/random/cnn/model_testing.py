@@ -34,7 +34,7 @@ all_parquets = os.listdir(data_directory)
 
 training_fraction = float(input('\nEnter training data fraction: '))
 lower_energy_bound = float(input('\nEnter lower energy bound in eV: '))
-patience = int(input('\nPatience: '))
+
 
 try:
 	mask = float(input('\nMask (x skip): '))
@@ -334,7 +334,7 @@ if type(mask) != str:
 
 
 modelname = input("Model name: ")
-model = keras.models.load_model(modelname)
+model = keras.models.load_model(f'saved_models/{modelname}')
 
 def run_model(model):
 
