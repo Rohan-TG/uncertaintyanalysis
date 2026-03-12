@@ -188,7 +188,7 @@ X_train = np.nan_to_num(X_train, nan=0.0)
 
 class tunerHyperModel():
 
-	def build_model(self, hp):
+	def build(self, hp):
 
 		hp_units = hp.Int('input_nodes', min_value=100, max_value=2000, step=200)
 
