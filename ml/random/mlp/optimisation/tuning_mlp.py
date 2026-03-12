@@ -186,7 +186,7 @@ X_train = np.nan_to_num(X_train, nan=0.0)
 
 
 
-class tunerHyperModel():
+class tunerHyperModel(kt.HyperModel):
 
 	def build(self, hp):
 
@@ -211,7 +211,7 @@ class tunerHyperModel():
 
 		return model
 
-tuner = kt.BayesianOptimization(hypermodel=tunerHyperModel,
+tuner = kt.BayesianOptimization(hypermodel=tunerHyperModel(),
 								objective='val_loss',
 								max_trials=200,
 								)
