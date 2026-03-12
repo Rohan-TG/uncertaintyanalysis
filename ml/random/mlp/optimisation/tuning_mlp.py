@@ -211,7 +211,7 @@ class tunerHyperModel():
 
 		return model
 
-tuner = kt.BayesianOptimization(hypermodel=tunerHyperModel(),
+tuner = kt.BayesianOptimization(hypermodel=tunerHyperModel,
 								objective='val_loss',
 								max_trials=200,
 								)
