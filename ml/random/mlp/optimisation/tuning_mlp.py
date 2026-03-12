@@ -1,4 +1,10 @@
 import os
+num_threads = 30
+os.environ["OMP_NUM_THREADS"] = f"{num_threads}"
+os.environ["MKL_NUM_THREADS"] = f"{num_threads}"
+os.environ["OPENBLAS_NUM_THREADS"] = f"{num_threads}"
+os.environ["TF_NUM_INTEROP_THREADS"] = f"{num_threads}"
+os.environ["TF_NUM_INTRAOP_THREADS"] = f"{num_threads}"
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
