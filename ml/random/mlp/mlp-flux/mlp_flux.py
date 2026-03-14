@@ -229,7 +229,56 @@ if test_data_directory != 'x':
 print('Scaling training data...')
 
 
-# le_bound_index = 1 # filters out NaNs
+le_bound_index = 1 # filters out NaNs
+def process_data_mlp(XS_train, XS_test):
+	xs_train = np.array(XS_train)
+	scaling_matrix_xtrain = xs_train.transpose()
+	scaled_columns_xtrain = []
+
+	training_column_means = []
+	training_column_stds = []
+
+	for column in tqdm.tqdm(scaling_matrix_xtrain[le_bound_index:-1],
+							total=len(scaling_matrix_xtrain[le_bound_index:-1])):
+		scaled_column = zscore(column)
+
+		column_mean = np.mean(column)
+		column_std = np.std(column)
+		training_column_means.append(column_mean)
+		training_column_stds.append(column_std)
+		scaled_columns_xtrain.append(scaled_column)
+
+	scaled_columns_xtrain = np.array(scaled_columns_xtrain)
+	X_train = scaled_columns_xtrain.transpose()
+
+	scaling_matrix_xtest = XS_test.transpose()
+
+	scaled_columns_xtest = []
+	print('\nScaling test data...')
+	for column, c_mean, c_std in tqdm.tqdm(
+			zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds),
+			total=len(scaling_matrix_xtest[le_bound_index:-1])):
+		# scaled_column = zscore(column)
+
+		scaled_column = (np.array(column) - c_mean) / c_std
+		scaled_columns_xtest.append(scaled_column)
+
+	scaled_columns_xtest = np.array(scaled_columns_xtest)
+	X_test = scaled_columns_xtest.transpose()
+
+	X_test = np.nan_to_num(X_test, nan=0.0)
+
+	# train_mask = ~np.isnan(X_train).any(axis=0)
+	# X_train = X_train[:, train_mask]
+	X_train = np.nan_to_num(X_train, nan=0.0)
+
+	return X_train, X_test
+
+
+
+
+
+
 
 
 
@@ -248,7 +297,7 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 restore_best_weights=True)
 
 
-
+X_train, X_val = process_data_mlp(XS_train, XS_val)
 
 model = keras.Sequential()
 model.add(keras.layers.Input(shape=(X_train.shape[1], X_train.shape[2])))
@@ -344,7 +393,7 @@ def plot_index(sample_idx):
 	plt.ylabel('Normalised flux')
 	plt.xscale('log')
 	plt.ylim(0,0.015)
-	plt.savefig(f'{sample_idx}_bar.png')
+	plt.savefig(f'{sample_idx}_bar_mlp.png')
 
 
 	scale_log = input('Log scale? (y): ')
@@ -358,4 +407,4 @@ def plot_index(sample_idx):
 		plt.xscale('log')
 	plt.grid()
 	plt.legend()
-	plt.savefig(f'{sample_idx}_val_pct_error_bar.png')
+	plt.savefig(f'{sample_idx}_val_pct_error_bar_mlp.png')
