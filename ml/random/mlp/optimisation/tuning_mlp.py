@@ -200,9 +200,10 @@ class tunerHyperModel(kt.HyperModel):
 			node_units_1 = hp.Int(f'dense_{n_layers}_units', min_value=500, max_value=1800, step=100)
 			model.add(keras.layers.Dense(node_units_1, activation='relu'))
 
-		n_dense_2 = hp.Int('n_dense_layers', min_value=1, max_value=5, step=1)
-		for n_layers in range(n_dense_1):
-			node_units_2 = hp.Int(f'dense_{n_layers}_units', min_value=10, max_value=800, step=100)
+		n_dense_2 = hp.Int('n_dense_layers_2', min_value=1, max_value=5, step=1)
+		for n_layers_2 in range(n_dense_2):
+			node_units_2 = hp.Int(f'dense_{n_layers_2}_units', min_value=10, max_value=800, step=100)
+			model.add(keras.layers.Dense(node_units_2, activation='relu'))
 
 		model.add(keras.layers.Dense(1, activation='linear'))
 		model.compile(loss='MeanSquaredError', optimizer='adam')
