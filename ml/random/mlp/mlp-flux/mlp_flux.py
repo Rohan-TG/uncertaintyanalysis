@@ -57,8 +57,12 @@ print('Fetching training data...')
 
 def fetch_data(datafile):
 
-	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	temp_df = pd.read_parquet(f'{xs_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
+
+	pu9_index = int(datafile.split('_')[4])
+	pu0_index = int(datafile.split('_')[6])
+	pu1_index = int(datafile.split('_')[8].split('.')[0])
 
 	keff_value = float(temp_df['keff'].values[0])
 
@@ -87,7 +91,22 @@ def fetch_data(datafile):
 
 	XS_obj = xsobject
 
-	return(XS_obj, keff_value)
+
+	# Now fetch spectrum data labels
+
+	flux_file = f'Flux_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}.parquet'
+	flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
+	flux_data = flux_read_obj['flux'].values
+	flux_error = flux_read_obj['flux_errror']
+
+	global flux_lower_bounds, flux_upper_bounds
+	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
+	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
+
+	return(XS_obj,
+		   flux_data,
+		   flux_error,
+		   )
 
 
 
@@ -212,105 +231,12 @@ print('Scaling training data...')
 
 # le_bound_index = 1 # filters out NaNs
 
-def process_data(XS_train, XS_val, XS_test):
-
-
-	channel_matrix_train = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
-	channel_matrix_val = [[] for i in range(len(XS_val[0]))]
-	channel_matrix_test = [[] for i in range(len(XS_test[0]))]
-
-
-	# Pu-239 (n,el)
-	scaled_channel_matrix_train = []
-	scaled_channel_matrix_val = []
-	scaled_channel_matrix_test = []
-
-
-	for matrix in tqdm.tqdm(XS_train, total =len(XS_train)):
-		# Each matrix has shape (num channels, points per channel)
-		for channel_index, channel in enumerate(matrix):
-			channel_matrix_train[channel_index].append(channel)
-
-		# channel_matrix now has shape (num channels, num samples, points per channel)
-		# Each element of channel matrix has shape (num samples, points per channel)
-	for matrix in tqdm.tqdm(XS_val, total =len(XS_val)):
-		for channel_index, channel in enumerate(matrix):
-			channel_matrix_val[channel_index].append(channel)
-
-	for matrix in tqdm.tqdm(XS_test, total =len(XS_test)):
-		for channel_index, channel in enumerate(matrix):
-			channel_matrix_test[channel_index].append(channel)
-
-	#################################################################################################################################################################
-	for channel_data_train, channel_data_val, channel_data_test in zip(channel_matrix_train, channel_matrix_val, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
-		transposed_matrix_train = np.transpose(channel_data_train) # shape (energy points per sample, num samples)
-		transposed_matrix_val = np.transpose(channel_data_val)
-		transposed_matrix_test = np.transpose(channel_data_test)
-
-		transposed_scaled_channel_train = []
-		transposed_scaled_channel_val = []
-		transposed_scaled_channel_test = []
-		for energy_point_train, energy_point_val, energy_point_test in zip(transposed_matrix_train[:-1], transposed_matrix_val[:-1], transposed_matrix_test[:-1]): # each point on the unionised energy grid
-
-			train_mean = np.mean(energy_point_train)
-			train_std = np.std(energy_point_train)
-
-			scaled_point_train = zscore(energy_point_train)
-			transposed_scaled_channel_train.append(scaled_point_train)
-
-			scaled_point_val = (np.array(energy_point_val) - train_mean) / train_std
-			transposed_scaled_channel_val.append(scaled_point_val)
-
-			scaled_point_test = (np.array(energy_point_test) - train_mean) / train_std
-			transposed_scaled_channel_test.append(scaled_point_test)
-
-		scaled_channel_train = np.array(transposed_scaled_channel_train)
-		scaled_channel_train = scaled_channel_train.transpose()
-		scaled_channel_matrix_train.append(scaled_channel_train)
-
-		scaled_channel_val = np.array(transposed_scaled_channel_val)
-		scaled_channel_val = scaled_channel_val.transpose()
-		scaled_channel_matrix_val.append(scaled_channel_val)
-
-		scaled_channel_test = np.array(transposed_scaled_channel_test)
-		scaled_channel_test = scaled_channel_test.transpose()
-		scaled_channel_matrix_test.append(scaled_channel_test)
-
-	###################################################################################################################################################################
-	# print('Forming scaled training data...')
-	X_matrix_train = [[] for i in range(XS_train.shape[0])] # number of samples
-	X_matrix_val = [[] for i in range(XS_val.shape[0])]
-	X_matrix_test = [[] for i in range(XS_test.shape[0])]
-
-	for scaled_observable in scaled_channel_matrix_train:
-		for sample_index, channel_sample in enumerate(scaled_observable):
-			X_matrix_train[sample_index].append(channel_sample)
-
-	for scaled_observable in scaled_channel_matrix_val:
-		for sample_index, channel_sample in enumerate(scaled_observable):
-			X_matrix_val[sample_index].append(channel_sample)
-
-	for scaled_observable in scaled_channel_matrix_test:
-		for sample_index, channel_sample in enumerate(scaled_observable):
-			X_matrix_test[sample_index].append(channel_sample)
-
-	X_matrix_train = np.array(X_matrix_train)
-	X_matrix_train[np.isnan(X_matrix_train)] = 0
-
-	X_matrix_val = np.array(X_matrix_val)
-	X_matrix_val[np.isnan(X_matrix_val)] = 0 # changes nans to 0
-
-	X_matrix_test = np.array(X_matrix_test)
-	X_matrix_test[np.isnan(X_matrix_test)] = 0
-
-	return X_matrix_train, X_matrix_val, X_matrix_test
 
 
 if test_data_directory == 'x':
 	XS_test = XS_val
 	y_test = y_val
 
-X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test)
 
 
 
