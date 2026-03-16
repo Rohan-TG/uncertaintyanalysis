@@ -182,29 +182,8 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 
 
 
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(475, activation='relu'))
-# model.add(keras.layers.Dense(375, activation='relu'))
-# model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(270, activation='relu'))
-# model.add(keras.layers.Dense(140, activation='relu'))
-# model.add(keras.layers.Dense(120, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MSE', optimizer='adam')
 
 
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(900, activation='relu'))
-# model.add(keras.layers.Dense(750, activation='relu'))
-# model.add(keras.layers.Dense(600, activation='relu'))
-# model.add(keras.layers.Dense(540, activation='relu'))
-# model.add(keras.layers.Dense(380, activation='relu'))
-# model.add(keras.layers.Dense(280, activation='relu'))
-# model.add(keras.layers.Dense(200, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MeanSquaredError', optimizer='adam')
 model =keras.Sequential()
 model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 model.add(keras.layers.Dense(900, activation='relu'))
@@ -273,16 +252,15 @@ print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absol
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
 print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
 
-save_histogram = input('Save histogram? (y): ')
-if save_histogram == 'y':
-	plt.figure()
-	plt.hist(sorted_errors, bins=30)
-	plt.grid()
-	plt.title('Distribution of errors')
-	plt.xlabel('Error / pcm')
-	plt.ylabel('Count')
-	plt.savefig('absolute_errors_corrected_scaling.png', dpi = 300)
-	plt.show()
+
+plt.figure()
+plt.hist(sorted_errors, bins=30)
+plt.grid()
+plt.title('Distribution of errors')
+plt.xlabel('Error / pcm')
+plt.ylabel('Count')
+# plt.savefig('absolute_errors_corrected_scaling.png', dpi = 300)
+plt.show()
 
 
 
@@ -302,5 +280,35 @@ plt.grid()
 plt.title('Distribution of errors')
 plt.xlabel('True k_eff')
 plt.ylabel('Error / pcm')
-plt.savefig('errors_as_function_of_keff.png', dpi = 300)
+# plt.savefig('errors_as_function_of_keff.png', dpi = 300)
 plt.show()
+
+
+dump_directory = input('Dump directory: ')
+RUNCODE = int(input('Run code: '))
+for error, prediction, file in tqdm.tqdm(zip(errors, predictions, test_files), total=len(errors)):
+
+
+	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
+	df2 = data_df.copy()
+	iterator = list(range(0, len(df2)))
+
+	pu9_index = int(file.split('_')[4])
+	pu0_index = int(file.split('_')[6])
+	pu1_index = int(file.split('_')[8].split('.')[0])
+
+	index_list_pu9 = [pu9_index for i in iterator]
+	index_list_pu0 = [pu0_index for i in iterator]
+	index_list_pu1 = [pu1_index for i in iterator]
+
+	error_data_list = [error for i in iterator]
+	prediction_list = [prediction for i in iterator]
+
+	df2['prediction'] = prediction_list
+	df2['ml_error'] = error_data_list
+	df2['pu239_index'] = index_list_pu9
+	df2['pu240_index'] = index_list_pu0
+	df2['pu241_index'] = index_list_pu1
+
+	df2.to_parquet(f'{dump_directory}/diagnosis_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}_runcode-{RUNCODE}.parquet',
+				   engine='pyarrow')
