@@ -208,8 +208,8 @@ model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(540, activation='relu'))
 model.add(keras.layers.Dense(380, activation='relu'))
 model.add(keras.layers.Dense(280, activation='relu'))
-model.add(keras.layers.Dense(150, activation='relu'))
-model.add(keras.layers.Dense(100, activation='relu'))
+model.add(keras.layers.Dense(250, activation='relu'))
+model.add(keras.layers.Dense(500, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
@@ -309,7 +309,7 @@ plt.show()
 
 dump_directory = input('Dump directory: ')
 RUNCODE = int(input('Run code: '))
-for error, prediction, file in zip(errors, predictions, test_files):
+for error, prediction, file in tqdm.tqdm(zip(errors, predictions, test_files), total=len(errors)):
 
 
 	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
