@@ -9,6 +9,7 @@ import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import matplotlib.pyplot as plt
+import shap
 
 # MLP
 
@@ -199,42 +200,20 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 # model.compile(loss='MSE', optimizer='adam')
 
 
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(900, activation='relu'))
-# model.add(keras.layers.Dense(750, activation='relu'))
-# model.add(keras.layers.Dense(600, activation='relu'))
-# model.add(keras.layers.Dense(540, activation='relu'))
-# model.add(keras.layers.Dense(380, activation='relu'))
-# model.add(keras.layers.Dense(280, activation='relu'))
-# model.add(keras.layers.Dense(200, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MeanSquaredError', optimizer='adam')
 model =keras.Sequential()
-model.add(keras.layers.Dense(1500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(1300, activation='relu'))
-model.add(keras.layers.Dense(1150, activation='relu'))
-model.add(keras.layers.Dense(1000, activation='relu'))
-model.add(keras.layers.Dense(840, activation='relu'))
-model.add(keras.layers.Dense(780, activation='relu'))
-model.add(keras.layers.Dense(680, activation='relu'))
-model.add(keras.layers.Dense(400, activation='relu'))
-model.add(keras.layers.Dense(390, activation='relu'))
-model.add(keras.layers.Dense(350, activation='relu'))
-model.add(keras.layers.Dense(200, activation='relu'))
+model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+model.add(keras.layers.Dense(900, activation='relu'))
+model.add(keras.layers.Dense(750, activation='relu'))
+model.add(keras.layers.Dense(600, activation='relu'))
+model.add(keras.layers.Dense(540, activation='relu'))
+model.add(keras.layers.Dense(380, activation='relu'))
+model.add(keras.layers.Dense(280, activation='relu'))
+model.add(keras.layers.Dense(150, activation='relu'))
+model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(300, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(275, activation='relu'))
-# model.add(keras.layers.Dense(175, activation='relu'))
-# model.add(keras.layers.Dense(100, activation='relu'))
-# model.add(keras.layers.Dense(70, activation='relu'))
-# model.add(keras.layers.Dense(40, activation='relu'))
-# model.add(keras.layers.Dense(20, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MeanSquaredError', optimizer='adam')
+
 
 
 import datetime
@@ -320,3 +299,39 @@ plt.xlabel('True k_eff')
 plt.ylabel('Error / pcm')
 plt.savefig('errors_as_function_of_keff.png', dpi = 300)
 plt.show()
+
+### Feature importance
+
+# shap_values = shap.DeepExplainer(model=model, data=X_test)
+
+
+### register errors
+
+dump_directory = input('Dump directory: ')
+RUNCODE = 1
+for error, prediction, file in zip(errors, predictions, test_files):
+
+
+	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
+	df2 = data_df.copy()
+	iterator = list(range(0, len(df2)))
+
+	pu9_index = int(file.split('_')[4])
+	pu0_index = int(file.split('_')[6])
+	pu1_index = int(file.split('_')[8].split('.')[0])
+
+	index_list_pu9 = [pu9_index for i in iterator]
+	index_list_pu0 = [pu0_index for i in iterator]
+	index_list_pu1 = [pu1_index for i in iterator]
+
+	error_data_list = [error for i in iterator]
+	prediction_list = [prediction for i in iterator]
+
+	df2['prediction'] = prediction_list
+	df2['ml_error'] = error_data_list
+	df2['pu239_index'] = index_list_pu9
+	df2['pu240_index'] = index_list_pu0
+	df2['pu241_index'] = index_list_pu1
+
+	df2.to_parquet(f'{dump_directory}/diagnosis_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}_runcode-{RUNCODE}.parquet',
+				   engine='pyarrow')
