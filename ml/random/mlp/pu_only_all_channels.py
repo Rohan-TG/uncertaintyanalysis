@@ -308,7 +308,7 @@ plt.show()
 ### register errors
 
 dump_directory = input('Dump directory: ')
-RUNCODE = 1
+RUNCODE = int(input('Run code: '))
 for error, prediction, file in zip(errors, predictions, test_files):
 
 
