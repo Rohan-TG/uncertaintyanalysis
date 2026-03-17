@@ -1,15 +1,15 @@
 import os
 import sys
 import matplotlib.pyplot as plt
-import shap
+# import shap
 
 # MLP
 
-computer = os.uname().nodename
-if computer == 'fermiac':
-	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
-elif computer == 'oppie':
-	sys.path.append('/home/rnt26/uncertaintyanalysis/')
+# computer = os.uname().nodename
+# if computer == 'fermiac':
+# 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
+# elif computer == 'oppie':
+# 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 import pandas as pd
 import random
 import numpy as np
@@ -53,7 +53,7 @@ def fetch_data(datafile):
 	temp_df = pd.read_parquet(f'{error_data_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
-	error_value = temp_df['ml_error']
+	error_value = temp_df['ml_error'].values[0]
 
 	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
@@ -165,7 +165,6 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 # min_delta=0.005,
 										 patience=patience,
 										 mode='min',
-										 start_from_epoch=3,
 										 restore_best_weights=True)
 
 
@@ -213,7 +212,7 @@ for pred in predictions_list:
 errors = []
 for predicted, true in zip(rescaled_predictions, error_test):
 	errors.append((predicted - true) * 1e5)
-	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+	print(f'ML Error: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
 sorted_errors = sorted(errors)
 absolute_errors = [abs(x) for x in sorted_errors]
