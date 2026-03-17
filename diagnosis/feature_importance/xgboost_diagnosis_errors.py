@@ -111,7 +111,6 @@ model = xg.XGBRegressor(n_estimators=950, # define regressor
 
 
 model.fit(X_train, y_train, verbose=True,
-		  early_stopping_rounds=10,
 		  eval_set = [(X_val, y_val)])
 
 print("\nTraining complete")
