@@ -95,7 +95,7 @@ for val_f in tqdm.tqdm(validation_files, total=len(validation_files)):
 
 
 def make_X_matrix(matrix, labels):
-	channel_columns = [[] for i in matrix[0]]
+	channel_columns = [[] for i in matrix[1]]
 
 	label_column = []
 
