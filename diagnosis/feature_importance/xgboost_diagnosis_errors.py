@@ -73,31 +73,36 @@ print('\nFetching training data...\n')
 
 
 raw_train = []
-y_train = []
+y_train_raw = []
 for train_f in tqdm.tqdm(training_files, total=len(training_files)):
 	xs_obj_train, labels_train = fetch_data(train_f)
 
 	raw_train.append(xs_obj_train)
-	y_train.append(labels_train)
+	y_train_raw.append(labels_train)
 
 
 print('\nFetching validation data...\n')
 
 raw_val = []
-y_val = []
+y_val_raw = []
 for val_f in tqdm.tqdm(validation_files, total=len(validation_files)):
 	xs_obj_val, labels_val = fetch_data(val_f)
 
 	raw_val.append(xs_obj_val)
-	y_val.append(labels_val)
+	y_val_raw.append(labels_val)
 
 
 
 
-def make_X_matrix(matrix):
+def make_X_matrix(matrix, labels):
 	channel_columns = [[] for i in matrix[0]]
 
-	for sample in tqdm.tqdm(matrix, total=len(matrix)):
+	label_column = []
+
+	for sample, label_value in tqdm.tqdm(zip(matrix, labels), total=len(matrix)):
+
+		temp_label_column = [label_value for i in sample]
+		label_column.append(temp_label_column)
 		for j, channel in enumerate(sample):
 			channel_columns[j].append(channel)
 
@@ -106,16 +111,19 @@ def make_X_matrix(matrix):
 		flattened_channel = np.array(channel).ravel()
 		X_matrix.append(flattened_channel)
 
-	return np.array(X_matrix)
+	labels_column = np.array(label_column).ravel()
+
+	return np.array(X_matrix, labels_column)
 
 
 
 print('\nMaking X_train...')
-X_train = make_X_matrix(raw_train)
+X_train, y_train = make_X_matrix(raw_train, y_train_raw)
+X_train = X_train.transpose()
 
 print('\nMaking X_val...')
-X_val = make_X_matrix(raw_val)
-
+X_val, y_val = make_X_matrix(raw_val, y_val_raw)
+X_val = X_val.transpose()
 
 
 
