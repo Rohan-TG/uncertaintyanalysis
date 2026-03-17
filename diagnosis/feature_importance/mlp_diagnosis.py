@@ -212,7 +212,7 @@ for pred in predictions_list:
 errors = []
 for predicted, true in zip(rescaled_predictions, error_test):
 	errors.append((predicted - true) * 1e5)
-	print(f'ML Error: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+	print(f'ML Target: {true:0.5f} pcm - : Predicted value: {predicted:0.5f} pcm, Loss = {(predicted - true):0.0f} pcm')
 
 sorted_errors = sorted(errors)
 absolute_errors = [abs(x) for x in sorted_errors]
@@ -224,30 +224,25 @@ print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]
 print(f"Smallest absolute error: {min(absolute_errors)} pcm")
 acceptable_predictions = []
 borderline_predictions = []
-twenty_pcm_predictions = []
 for x in absolute_errors:
 	if x <= 5.0:
 		acceptable_predictions.append(x)
 	if x <= 10.0:
 		borderline_predictions.append(x)
-	if x <= 20.0:
-		twenty_pcm_predictions.append(x)
 
 
 print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
-print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
 
-save_histogram = input('Save histogram? (y): ')
-if save_histogram == 'y':
-	plt.figure()
-	plt.hist(sorted_errors, bins=30)
-	plt.grid()
-	plt.title('Distribution of errors')
-	plt.xlabel('Error / pcm')
-	plt.ylabel('Count')
-	# plt.savefig('absolute_ml_errors_errors_corrected_scaling.png', dpi = 300)
-	plt.show()
+
+plt.figure()
+plt.hist(sorted_errors, bins=30)
+plt.grid()
+plt.title('Distribution of errors')
+plt.xlabel('Error / pcm')
+plt.ylabel('Count')
+# plt.savefig('absolute_ml_errors_errors_corrected_scaling.png', dpi = 300)
+plt.show()
 
 
 
