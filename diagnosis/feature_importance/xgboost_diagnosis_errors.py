@@ -113,7 +113,7 @@ def make_X_matrix(matrix, labels):
 
 	labels_column = np.array(label_column).ravel()
 
-	return np.array(X_matrix, labels_column)
+	return (np.array(X_matrix), labels_column))
 
 
 
