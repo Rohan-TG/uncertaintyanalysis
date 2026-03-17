@@ -238,18 +238,22 @@ print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]
 print(f"Smallest absolute error: {min(absolute_errors)} pcm")
 acceptable_predictions = []
 borderline_predictions = []
+fifteen_pcm_predictions = []
 twenty_pcm_predictions = []
 for x in absolute_errors:
 	if x <= 5.0:
 		acceptable_predictions.append(x)
 	if x <= 10.0:
 		borderline_predictions.append(x)
+	if x <= 15.0 :
+		fifteen_pcm_predictions.append(x)
 	if x <= 20.0:
 		twenty_pcm_predictions.append(x)
 
 
 print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+print(f' {len(fifteen_pcm_predictions)} ({len(fifteen_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 15 pcm error)')
 print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
 
 
@@ -286,9 +290,8 @@ plt.show()
 
 dump_directory = input('Dump directory: ')
 RUNCODE = int(input('Run code: '))
+
 for error, prediction, file in tqdm.tqdm(zip(errors, predictions, test_files), total=len(errors)):
-
-
 	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
 	df2 = data_df.copy()
 	iterator = list(range(0, len(df2)))
