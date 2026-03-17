@@ -3,6 +3,7 @@ import tqdm
 import xgboost as xg
 import pandas as pd
 import random
+import numpy as np
 
 
 error_data_directory = input('Error data directory: ')
@@ -71,33 +72,49 @@ channel_keys = {'94239_MT2_XS': 0,'94239_MT4_XS': 1,'94239_MT16_XS': 2,
 print('\nFetching training data...\n')
 
 
-X_train = []
+raw_train = []
 y_train = []
 for train_f in tqdm.tqdm(training_files, total=len(training_files)):
 	xs_obj_train, labels_train = fetch_data(train_f)
 
-	X_train.append(xs_obj_train)
+	raw_train.append(xs_obj_train)
 	y_train.append(labels_train)
 
 
 print('\nFetching validation data...\n')
 
-X_val = []
+raw_val = []
 y_val = []
 for val_f in tqdm.tqdm(validation_files, total=len(validation_files)):
 	xs_obj_val, labels_val = fetch_data(val_f)
 
-	X_val.append(xs_obj_val)
+	raw_val.append(xs_obj_val)
 	y_val.append(labels_val)
 
 
 
 
+def make_X_matrix(matrix):
+	channel_columns = [[] for i in matrix[0]]
+
+	for sample in tqdm.tqdm(matrix, total=len(matrix)):
+		for j, channel in enumerate(sample):
+			channel_columns[j].append(channel)
+
+	X_matrix = []
+	for channel in channel_columns:
+		flattened_channel = np.array(channel).ravel()
+		X_matrix.append(flattened_channel)
+
+	return np.array(X_matrix)
 
 
 
+print('\nMaking X_train...')
+X_train = make_X_matrix(raw_train)
 
-
+print('\nMaking X_val...')
+X_val = make_X_matrix(raw_val)
 
 
 
