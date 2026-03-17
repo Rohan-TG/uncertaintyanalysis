@@ -287,6 +287,40 @@ plt.ylabel('Error / pcm')
 # plt.savefig('errors_as_function_of_keff.png', dpi = 300)
 plt.show()
 
+rmse_correction = input('RMSE correction y/n: ')
+if rmse_correction == 'y':
+	rmse_correction_errors = []
+	for predicted, true in zip(rescaled_predictions, keff_test):
+		calculated_error = (predicted - true) * 1e5
+		corrected_error = (calculated_error ** 2 - 5 ** 2) ** 0.5
+		if calculated_error < 0:
+			corrected_error = corrected_error * -1
+
+		rmse_correction_errors.append(corrected_error)
+		print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {corrected_error:0.0f} pcm')
+
+	absolute_corrected_errors = [abs(x) for x in rmse_correction_errors]
+	print(
+		f'\nAverage absolute error: {np.mean(absolute_corrected_errors):0.1f} +- {np.std(absolute_corrected_errors):0.1f} pcm')
+
+	acceptable_corrected_predictions = []
+	borderline_corrected_predictions = []
+	fifteen_corrected_predictions = []
+	twenty_corrected_predictions = []
+	for x in absolute_corrected_errors:
+		if x <= 5.0:
+			acceptable_corrected_predictions.append(x)
+		if x <= 10.0:
+			borderline_corrected_predictions.append(x)
+		if x <= 15.0:
+			fifteen_corrected_predictions.append(x)
+		if x <= 20.0:
+			twenty_corrected_predictions.append(x)
+
+	print(f' {len(acceptable_corrected_predictions)} ({len(acceptable_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 5 pcm error')
+	print(f' {len(borderline_corrected_predictions)} ({len(borderline_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 10 pcm error')
+	print(f' {len(fifteen_corrected_predictions)} ({len(fifteen_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 15 pcm error')
+	print(f' {len(twenty_corrected_predictions)} ({len(twenty_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 20 pcm error')
 
 dump_directory = input('Dump directory: ')
 RUNCODE = int(input('Run code: '))
