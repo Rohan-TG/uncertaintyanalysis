@@ -6,8 +6,6 @@ os.environ["OPENBLAS_NUM_THREADS"] = f"{num_threads}"
 os.environ["TF_NUM_INTEROP_THREADS"] = f"{num_threads}"
 os.environ["TF_NUM_INTRAOP_THREADS"] = f"{num_threads}"
 import sys
-from concurrent.futures import ProcessPoolExecutor, as_completed
-
 import matplotlib.pyplot as plt
 import shap
 
@@ -28,8 +26,6 @@ import time
 
 
 
-
-
 error_data_directory = input('Error data directory: ')
 
 all_files = os.listdir(error_data_directory)
@@ -38,6 +34,8 @@ training_fraction = float(input('Training fraction: '))
 n_training_samples = int(training_fraction * len(all_files))
 
 lower_energy_bound = float(input('Lower energy bound eV: '))
+
+patience = int(input('Patience: '))
 
 training_files = []
 while len(training_files) < n_training_samples:
@@ -58,10 +56,10 @@ print('\nFetching training data...')
 
 def fetch_data(datafile):
 
-	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	temp_df = pd.read_parquet(f'{error_data_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
-	keff_value = float(temp_df['keff'].values[0])
+	error_value = temp_df['ml_error']
 
 	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
@@ -83,31 +81,28 @@ def fetch_data(datafile):
 	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
 	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
 
-	# xsobject = pu9_mt2xs + pu9_mt4xs +  pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt18xs + pu1_mt102xs
 	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
 
 	XS_obj = xsobject
 
-	return(XS_obj, keff_value)
+	return(XS_obj, error_value)
 
 
 
-keff_train = [] # k_eff labels
+error_train = [] # error labels
 XS_train = []
 
-with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
+for train_file in tqdm.tqdm(training_files, total=n_training_samples):
+	xs_values, error_value = fetch_data(train_file)
 
-	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values, keff_value = future.result()
-		XS_train.append(xs_values)
-		keff_train.append(keff_value)
+	XS_train.append(xs_values)
+	error_train.append(error_value)
 
 XS_train = np.array(XS_train)
-y_train = zscore(keff_train)
+y_train = zscore(error_train)
 
-train_labels_mean = np.mean(keff_train)
-train_labels_std = np.std(keff_train)
+train_labels_mean = np.mean(error_train)
+train_labels_std = np.std(error_train)
 
 
 scaling_matrix_xtrain = XS_train.transpose()
@@ -136,23 +131,18 @@ X_train = scaled_columns_xtrain.transpose()
 
 
 XS_test = []
-keff_test = []
+error_test = []
 
 print('\nFetching test data...')
 
 
-with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
-
-	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values_test, keff_value_test = future.result()
-		XS_test.append(xs_values_test)
-		keff_test.append(keff_value_test)
+for test_file in tqdm.tqdm(test_files, total=len(test_files)):
+	xs_values_test, error_value_test = fetch_data(test_file)
+	XS_test.append(xs_values_test)
+	error_test.append(error_value_test)
 
 XS_test = np.array(XS_test)
-# keff_mean = np.mean(keff_test)
-# keff_std = np.std(keff_test)
-y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+y_test = (np.array(error_test) - train_labels_mean) / train_labels_std
 
 scaling_matrix_xtest = XS_test.transpose()
 
@@ -185,17 +175,6 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 restore_best_weights=True)
 
 
-
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(475, activation='relu'))
-# model.add(keras.layers.Dense(375, activation='relu'))
-# model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(270, activation='relu'))
-# model.add(keras.layers.Dense(140, activation='relu'))
-# model.add(keras.layers.Dense(120, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MSE', optimizer='adam')
 
 
 model =keras.Sequential()
@@ -238,7 +217,7 @@ for pred in predictions_list:
 	rescaled_predictions.append(float(descaled_p))
 
 errors = []
-for predicted, true in zip(rescaled_predictions, keff_test):
+for predicted, true in zip(rescaled_predictions, error_test):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
@@ -274,7 +253,7 @@ if save_histogram == 'y':
 	plt.title('Distribution of errors')
 	plt.xlabel('Error / pcm')
 	plt.ylabel('Count')
-	plt.savefig('absolute_errors_corrected_scaling.png', dpi = 300)
+	# plt.savefig('absolute_ml_errors_errors_corrected_scaling.png', dpi = 300)
 	plt.show()
 
 
@@ -290,46 +269,15 @@ for x in errors:
 		skew_negative.append(x)
 
 plt.figure()
-plt.plot(keff_test, errors, 'x')
+plt.plot(error_test, errors, 'x')
 plt.grid()
 plt.title('Distribution of errors')
-plt.xlabel('True k_eff')
+plt.xlabel('True error')
 plt.ylabel('Error / pcm')
-plt.savefig('errors_as_function_of_keff.png', dpi = 300)
+# plt.savefig('errors_as_function_of_true_error.png', dpi = 300)
 plt.show()
 
 ### Feature importance
 
 # shap_values = shap.DeepExplainer(model=model, data=X_test)
 
-
-### register errors
-
-dump_directory = input('Dump directory: ')
-RUNCODE = int(input('Run code: '))
-for error, prediction, file in tqdm.tqdm(zip(errors, predictions, test_files), total=len(errors)):
-
-
-	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
-	df2 = data_df.copy()
-	iterator = list(range(0, len(df2)))
-
-	pu9_index = int(file.split('_')[4])
-	pu0_index = int(file.split('_')[6])
-	pu1_index = int(file.split('_')[8].split('.')[0])
-
-	index_list_pu9 = [pu9_index for i in iterator]
-	index_list_pu0 = [pu0_index for i in iterator]
-	index_list_pu1 = [pu1_index for i in iterator]
-
-	error_data_list = [error for i in iterator]
-	prediction_list = [prediction for i in iterator]
-
-	df2['prediction'] = prediction_list
-	df2['ml_error'] = error_data_list
-	df2['pu239_index'] = index_list_pu9
-	df2['pu240_index'] = index_list_pu0
-	df2['pu241_index'] = index_list_pu1
-
-	df2.to_parquet(f'{dump_directory}/diagnosis_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}_runcode-{RUNCODE}.parquet',
-				   engine='pyarrow')
