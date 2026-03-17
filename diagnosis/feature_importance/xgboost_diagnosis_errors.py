@@ -95,13 +95,13 @@ for val_f in tqdm.tqdm(validation_files, total=len(validation_files)):
 
 
 def make_X_matrix(matrix, labels):
-	channel_columns = [[] for i in matrix[1]]
+	channel_columns = [[] for i in matrix[0]]
 
 	label_column = []
 
 	for sample, label_value in tqdm.tqdm(zip(matrix, labels), total=len(matrix)):
 
-		temp_label_column = [label_value for i in sample]
+		temp_label_column = [label_value for i in sample[1]]
 		label_column.append(temp_label_column)
 		for j, channel in enumerate(sample):
 			channel_columns[j].append(channel)
