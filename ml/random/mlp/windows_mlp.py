@@ -8,6 +8,7 @@ import os
 # import sys
 import matplotlib.pyplot as plt
 
+
 # MLP
 
 # computer = os.uname().nodename
@@ -18,7 +19,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import random
 import numpy as np
-from scipy.stats import zscore
+from scipy.stats import zscore, norm
 import tqdm
 import keras
 import time
@@ -292,9 +293,13 @@ if rmse_correction == 'y':
 	rmse_correction_errors = []
 	for predicted, true in zip(rescaled_predictions, keff_test):
 		calculated_error = (predicted - true) * 1e5
-		corrected_error = (calculated_error ** 2 - 5 ** 2) ** 0.5
-		if calculated_error < 0:
-			corrected_error = corrected_error * -1
+
+		if abs(calculated_error) > 5:
+			corrected_error = (calculated_error ** 2 - 5 ** 2) ** 0.5
+			if calculated_error < 0:
+				corrected_error = corrected_error * -1
+		else:
+			corrected_error = calculated_error
 
 		rmse_correction_errors.append(corrected_error)
 		print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {corrected_error:0.0f} pcm')
@@ -321,6 +326,39 @@ if rmse_correction == 'y':
 	print(f' {len(borderline_corrected_predictions)} ({len(borderline_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 10 pcm error')
 	print(f' {len(fifteen_corrected_predictions)} ({len(fifteen_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 15 pcm error')
 	print(f' {len(twenty_corrected_predictions)} ({len(twenty_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 20 pcm error')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+print('Gaussian correction:')
+gaussian_correction_probabilities = []
+for predicted, true in zip(rescaled_predictions, keff_test):
+	calculated_error = (predicted - true) * 1e5
+
+	corrected_gaussian_error = norm.cdf((calculated_error + 10) / 5) - norm.cdf((calculated_error - 10) / 5)
+
+	gaussian_correction_probabilities.append(corrected_gaussian_error)
+	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {calculated_error:0.0f} pcm, Chance: {corrected_gaussian_error* 100:0.1f}%')
+
+expectation_value = np.sum(corrected_gaussian_error)
+fractional_expectation = expectation_value / len(keff_test) * 100
+
+
+
+
+
+
+
 
 dump_directory = input('Dump directory: ')
 RUNCODE = int(input('Run code: '))
