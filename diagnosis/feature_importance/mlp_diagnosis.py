@@ -211,7 +211,7 @@ for pred in predictions_list:
 
 errors = []
 for predicted, true in zip(rescaled_predictions, error_test):
-	errors.append((predicted - true) * 1e5)
+	errors.append((predicted - true))
 	print(f'ML Target: {true:0.5f} pcm - : Predicted value: {predicted:0.5f} pcm, Loss = {(predicted - true):0.0f} pcm')
 
 sorted_errors = sorted(errors)
