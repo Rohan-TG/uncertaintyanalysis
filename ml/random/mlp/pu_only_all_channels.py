@@ -1,10 +1,10 @@
 import os
-num_threads = 30
-os.environ["OMP_NUM_THREADS"] = f"{num_threads}"
-os.environ["MKL_NUM_THREADS"] = f"{num_threads}"
-os.environ["OPENBLAS_NUM_THREADS"] = f"{num_threads}"
-os.environ["TF_NUM_INTEROP_THREADS"] = f"{num_threads}"
-os.environ["TF_NUM_INTRAOP_THREADS"] = f"{num_threads}"
+# num_threads = 30
+# os.environ["OMP_NUM_THREADS"] = f"{num_threads}"
+# os.environ["MKL_NUM_THREADS"] = f"{num_threads}"
+# os.environ["OPENBLAS_NUM_THREADS"] = f"{num_threads}"
+# os.environ["TF_NUM_INTEROP_THREADS"] = f"{num_threads}"
+# os.environ["TF_NUM_INTRAOP_THREADS"] = f"{num_threads}"
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
@@ -16,7 +16,7 @@ import shap
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
-elif computer == 'oppie':
+elif computer == 'oppie' or computer == 'bethe':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 import pandas as pd
 import random
