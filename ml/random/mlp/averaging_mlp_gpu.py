@@ -9,7 +9,7 @@ import os
 # import sys
 import matplotlib.pyplot as plt
 import keras.backend
-
+import pickle
 # MLP
 
 # computer = os.uname().nodename
@@ -242,7 +242,7 @@ for num in tqdm.tqdm(range(n_models)):
 	errors = []
 	for predicted, true in zip(rescaled_predictions, keff_test):
 		errors.append((predicted - true) * 1e5)
-		print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+		# print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
 	# Save data into matrices
 	for p_index, p in enumerate(rescaled_predictions):
@@ -315,7 +315,11 @@ for num in tqdm.tqdm(range(n_models)):
 	gc.collect()
 
 
+with open("errors_2.pkl", "wb") as f:
+	pickle.dump(error_matrix, f)
 
+with open("predictions_2.pkl", "wb") as f:
+	pickle.dump(prediction_matrix, f)
 
 
 
