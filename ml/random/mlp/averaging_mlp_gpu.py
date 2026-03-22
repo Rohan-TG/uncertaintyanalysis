@@ -1,3 +1,4 @@
+import gc
 import os
 # num_threads = 30
 # os.environ["OMP_NUM_THREADS"] = f"{num_threads}"
@@ -7,7 +8,7 @@ import os
 # os.environ["TF_NUM_INTRAOP_THREADS"] = f"{num_threads}"
 # import sys
 import matplotlib.pyplot as plt
-
+import keras.backend
 
 # MLP
 
@@ -206,7 +207,12 @@ def build_model():
 model_list = []
 
 prediction_matrix = [[] for i in range(len(y_test))]
-for num in range(n_models):
+
+error_matrix = [[] for i in range(len(y_test))]
+
+for num in tqdm.tqdm(range(n_models)):
+	keras.backend.clear_session()
+
 	temp_model, callback = build_model()
 
 
@@ -225,9 +231,6 @@ for num in range(n_models):
 	predictions = temp_model.predict(X_test)
 	predictions = predictions.ravel()
 
-	for p_index, p in enumerate(predictions):
-		prediction_matrix[p_index].append(p)
-
 
 	rescaled_predictions = []
 	predictions_list = predictions.tolist()
@@ -240,6 +243,13 @@ for num in range(n_models):
 	for predicted, true in zip(rescaled_predictions, keff_test):
 		errors.append((predicted - true) * 1e5)
 		print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+	# Save data into matrices
+	for p_index, p in enumerate(rescaled_predictions):
+		prediction_matrix[p_index].append(p)
+
+	for err_index, err in enumerate(errors):
+		error_matrix[err_index].append(err)
 
 	sorted_errors = sorted(errors)
 	absolute_errors = [abs(x) for x in sorted_errors]
@@ -270,14 +280,14 @@ for num in range(n_models):
 	print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
 
 
-	plt.figure()
-	plt.hist(sorted_errors, bins=30)
-	plt.grid()
-	plt.title('Distribution of errors')
-	plt.xlabel('Error / pcm')
-	plt.ylabel('Count')
-	# plt.savefig('absolute_errors_corrected_scaling.png', dpi = 300)
-	plt.show()
+	# plt.figure()
+	# plt.hist(sorted_errors, bins=30)
+	# plt.grid()
+	# plt.title(f'Session {num} Distribution of errors')
+	# plt.xlabel('Error / pcm')
+	# plt.ylabel('Count')
+	# # plt.savefig('absolute_errors_corrected_scaling.png', dpi = 300)
+	# plt.show()
 
 
 
@@ -291,14 +301,18 @@ for num in range(n_models):
 		else:
 			skew_negative.append(x)
 
-	plt.figure()
-	plt.plot(keff_test, errors, 'x')
-	plt.grid()
-	plt.title('Distribution of errors')
-	plt.xlabel('True k_eff')
-	plt.ylabel('Error / pcm')
-	# plt.savefig('errors_as_function_of_keff.png', dpi = 300)
-	plt.show()
+	# plt.figure()
+	# plt.plot(keff_test, errors, 'x')
+	# plt.grid()
+	# plt.title(f'Session {num} Distribution of errors')
+	# plt.xlabel('True k_eff')
+	# plt.ylabel('Error / pcm')
+	# # plt.savefig('errors_as_function_of_keff.png', dpi = 300)
+	# plt.show()
+
+	del history
+	del temp_model
+	gc.collect()
 
 
 
@@ -306,70 +320,3 @@ for num in range(n_models):
 
 
 
-
-#
-# rmse_correction = input('RMSE correction y/n: ')
-# if rmse_correction == 'y':
-# 	rmse_correction_errors = []
-# 	for predicted, true in zip(rescaled_predictions, keff_test):
-# 		calculated_error = (predicted - true) * 1e5
-#
-# 		if abs(calculated_error) > 5:
-# 			corrected_error = (calculated_error ** 2 - 5 ** 2) ** 0.5
-# 			if calculated_error < 0:
-# 				corrected_error = corrected_error * -1
-# 		else:
-# 			corrected_error = calculated_error
-#
-# 		rmse_correction_errors.append(corrected_error)
-# 		print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {corrected_error:0.0f} pcm')
-#
-# 	absolute_corrected_errors = [abs(x) for x in rmse_correction_errors]
-# 	print(
-# 		f'\nAverage absolute error: {np.mean(absolute_corrected_errors):0.1f} +- {np.std(absolute_corrected_errors):0.1f} pcm')
-#
-# 	acceptable_corrected_predictions = []
-# 	borderline_corrected_predictions = []
-# 	fifteen_corrected_predictions = []
-# 	twenty_corrected_predictions = []
-# 	for x in absolute_corrected_errors:
-# 		if x <= 5.0:
-# 			acceptable_corrected_predictions.append(x)
-# 		if x <= 10.0:
-# 			borderline_corrected_predictions.append(x)
-# 		if x <= 15.0:
-# 			fifteen_corrected_predictions.append(x)
-# 		if x <= 20.0:
-# 			twenty_corrected_predictions.append(x)
-#
-# 	print(f' {len(acceptable_corrected_predictions)} ({len(acceptable_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 5 pcm error')
-# 	print(f' {len(borderline_corrected_predictions)} ({len(borderline_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 10 pcm error')
-# 	print(f' {len(fifteen_corrected_predictions)} ({len(fifteen_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 15 pcm error')
-# 	print(f' {len(twenty_corrected_predictions)} ({len(twenty_corrected_predictions) / len(absolute_corrected_errors) * 100:.2f}%) predictions <= 20 pcm error')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# print('Gaussian correction:')
-# gaussian_correction_probabilities = []
-# for predicted, true in zip(rescaled_predictions, keff_test):
-# 	calculated_error = (predicted - true) * 1e5
-#
-# 	corrected_gaussian_error = norm.cdf((calculated_error + 10) / 5) - norm.cdf((calculated_error - 10) / 5)
-#
-# 	gaussian_correction_probabilities.append(corrected_gaussian_error)
-# 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {calculated_error:0.0f} pcm, Chance: {corrected_gaussian_error* 100:0.1f}%')
-#
-# expectation_value = np.sum(corrected_gaussian_error)
-# fractional_expectation = expectation_value / len(keff_test) * 100
-#
