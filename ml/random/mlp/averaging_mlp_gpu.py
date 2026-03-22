@@ -205,6 +205,7 @@ def build_model():
 
 model_list = []
 
+prediction_matrix = [[] for i in range(len(y_test))]
 for num in range(n_models):
 	temp_model, callback = build_model()
 
@@ -221,8 +222,11 @@ for num in range(n_models):
 
 	train_end = time.time()
 	print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-	predictions = model.predict(X_test)
+	predictions = temp_model.predict(X_test)
 	predictions = predictions.ravel()
+
+	for p_index, p in enumerate(predictions):
+		prediction_matrix[p_index].append(p)
 
 
 	rescaled_predictions = []
