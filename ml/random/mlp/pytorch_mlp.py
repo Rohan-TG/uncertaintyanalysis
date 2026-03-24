@@ -18,7 +18,7 @@ import random
 import numpy as np
 from scipy.stats import zscore
 import tqdm
-import time
+from torch.utils.data import DataLoader, TensorDataset
 
 
 
@@ -241,9 +241,15 @@ y_train_t = torch.tensor(y_train, dtype=torch.float32, device=device).view(-1, 1
 X_val_t = torch.tensor(X_val, dtype=torch.float32, device=device)
 y_val_t = torch.tensor(y_val, dtype=torch.float32, device=device).view(-1, 1)
 
+
+train_loader = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=64, shuffle=False)
+val_loader = DataLoader(TensorDataset(X_val_t, y_val_t), batch_size=256, shuffle=False)
+
+
+
 # Define model
 model = MLP(input_dim=X_train.shape[1]).to(device)
-criterion = nn.MSELoss()
+criterion = nn.MSELoss()  # Mean squared error loss
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-7)
 
 early_stopper = EarlyStopping(patience=patience)
@@ -255,13 +261,11 @@ n = X_train_t.shape[0]
 for epoch in range(num_epochs):
 	model.train()
 
-	perm = torch.randperm(n, device=device)
-	epoch_loss = 0.0
+	# perm = torch.randperm(n, device=device)
+	train_loss = 0.0
 
-	for i in range(0, n, batch_size):
-		idx = perm[i:i+batch_size]
-		xb = X_train_t[idx]
-		yb = y_train_t[idx]
+	for xb, yb in train_loader:
+		xb, yb = xb.to(device), yb.to(device)
 
 		optimizer.zero_grad()
 		preds = model(xb)
@@ -269,19 +273,43 @@ for epoch in range(num_epochs):
 		loss.backward()
 		optimizer.step()
 
-		epoch_loss += loss.item() * xb.size(0)
+		train_loss += loss.item() * xb.size(0)
 
-	epoch_loss /= n
+	train_loss /= len(train_loader.dataset)
+
+	# for i in range(0, n, batch_size):
+	# 	idx = perm[i:i+batch_size]
+	# 	xb = X_train_t[idx]
+	# 	yb = y_train_t[idx]
+	#
+	# 	optimizer.zero_grad()
+	# 	preds = model(xb)
+	# 	loss = criterion(preds, yb)
+	# 	loss.backward()
+	# 	optimizer.step()
+	#
+	# 	epoch_loss += loss.item() * xb.size(0)
+
+	# epoch_loss /= n
 
 	model.eval()
+	val_loss = 0.0
 	with torch.no_grad():
-		val_loss = criterion(model(X_val_t), y_val_t).item()
+		# val_loss = criterion(model(X_val_t), y_val_t).item()
+		for xb, yb in val_loader:
+			xb, yb = xb.to(device), yb.to(device)
+			preds = model(xb)
+			loss = criterion(preds, yb)
+			val_loss += loss.item() * xb.size(0)
 
-	print(f"Epoch {epoch+1:3d} | train_loss={epoch_loss:.6f} | val_loss={val_loss:.6f}")
+	val_loss /= len(val_loader.dataset)
+
+
+	print(f"Epoch {epoch+1:3d} | train_loss={train_loss:.6f} | val_loss={val_loss:.6f}")
 
 	early_stopper.step(val_loss, model)
 	if early_stopper.early_stop:
-		print("Early stopping triggered.")
+		print("Early stopping triggered, restoring best model...")
 		break
 if early_stopper.best_state is not None:
 	model.load_state_dict(early_stopper.best_state)
