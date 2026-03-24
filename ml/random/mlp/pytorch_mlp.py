@@ -247,7 +247,7 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 early_stopper = EarlyStopping(patience=patience)
-num_epochs = 3000
+num_epochs = 100
 
 batch_size = 32
 n = X_train_t.shape[0]
