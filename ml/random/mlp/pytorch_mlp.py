@@ -244,7 +244,7 @@ y_val_t = torch.tensor(y_val, dtype=torch.float32, device=device).view(-1, 1)
 # Define model
 model = MLP(input_dim=X_train.shape[1]).to(device)
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
 
 early_stopper = EarlyStopping(patience=patience)
 num_epochs = 100
@@ -293,8 +293,8 @@ with torch.no_grad():
 print("\nVal MSE:", val_loss.item())
 print('\nProcessing results...')
 rescaled_predictions = []
-predictions_list = predictions.tolist()
-
+predictions_list = predictions.ravel()
+predictions_list = predictions_list.tolist()
 for pred in predictions_list:
 	descaled_p = pred * train_labels_std + train_labels_mean
 	rescaled_predictions.append(float(descaled_p))
