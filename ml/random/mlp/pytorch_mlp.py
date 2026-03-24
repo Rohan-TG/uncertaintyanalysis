@@ -244,7 +244,7 @@ y_val_t = torch.tensor(y_val, dtype=torch.float32, device=device).view(-1, 1)
 # Define model
 model = MLP(input_dim=X_train.shape[1]).to(device)
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
 
 early_stopper = EarlyStopping(patience=patience)
 num_epochs = 100
@@ -279,11 +279,12 @@ for epoch in range(num_epochs):
 
 	print(f"Epoch {epoch+1:3d} | train_loss={epoch_loss:.6f} | val_loss={val_loss:.6f}")
 
-	stop = early_stopper.step(val_loss, model)
-	if stop:
+	early_stopper.step(val_loss, model)
+	if early_stopper.early_stop:
 		print("Early stopping triggered.")
 		break
-
+if early_stopper.best_state is not None:
+	model.load_state_dict(early_stopper.best_state)
 # evaluate
 model.eval()
 with torch.no_grad():
