@@ -249,32 +249,92 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 early_stopper = EarlyStopping(patience=patience)
 num_epochs = 3000
 
+batch_size = 32
+n = X_train_t.shape[0]
 
 for epoch in range(num_epochs):
-	# training
 	model.train()
-	optimizer.zero_grad()
 
-	train_preds = model(X_train_t)
-	train_loss = criterion(train_preds, y_train_t)
+	perm = torch.randperm(n, device=device)
+	epoch_loss = 0.0
 
-	train_loss.backward()
-	optimizer.step()
+	for i in range(0, n, batch_size):
+		idx = perm[i:i+batch_size]
+		xb = X_train_t[idx]
+		yb = y_train_t[idx]
 
-	# validation
+		optimizer.zero_grad()
+		preds = model(xb)
+		loss = criterion(preds, yb)
+		loss.backward()
+		optimizer.step()
+
+		epoch_loss += loss.item() * xb.size(0)
+
+	epoch_loss /= n
+
 	model.eval()
 	with torch.no_grad():
-		val_preds = model(X_val_t)
-		val_loss = criterion(val_preds, y_val_t)
+		val_loss = criterion(model(X_val_t), y_val_t).item()
 
-	print(
-		f"Epoch {epoch+1:3d} | "
-		f"train_loss={train_loss.item():.6f} | "
-		f"val_loss={val_loss.item():.6f}"
-	)
+	print(f"Epoch {epoch+1:3d} | train_loss={epoch_loss:.6f} | val_loss={val_loss:.6f}")
 
-	stop = early_stopper.step(val_loss.item(), model)
+	stop = early_stopper.step(val_loss, model)
 	if stop:
 		print("Early stopping triggered.")
 		break
 
+# evaluate
+model.eval()
+with torch.no_grad():
+	predictions = model(X_val_t)
+	val_loss = criterion(predictions, y_val_t)
+
+print("\nVal MSE:", val_loss.item())
+print('\nProcessing results...')
+rescaled_predictions = []
+predictions_list = predictions.tolist()
+
+for pred in predictions_list:
+	descaled_p = pred * train_labels_std + train_labels_mean
+	rescaled_predictions.append(float(descaled_p))
+
+errors = []
+for predicted, true in zip(rescaled_predictions, keff_val):
+	errors.append((predicted - true) * 1e5)
+	# print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+# Save data into matrices
+# for p_index, p in enumerate(rescaled_predictions):
+# 	prediction_matrix[p_index].append(p)
+#
+# for err_index, err in enumerate(errors):
+# 	error_matrix[err_index].append(err)
+
+sorted_errors = sorted(errors)
+absolute_errors = [abs(x) for x in sorted_errors]
+print(f'\nAverage absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+
+print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
+
+
+print(f"Smallest absolute error: {min(absolute_errors)} pcm")
+acceptable_predictions = []
+borderline_predictions = []
+fifteen_pcm_predictions = []
+twenty_pcm_predictions = []
+for x in absolute_errors:
+	if x <= 5.0:
+		acceptable_predictions.append(x)
+	if x <= 10.0:
+		borderline_predictions.append(x)
+	if x <= 15.0 :
+		fifteen_pcm_predictions.append(x)
+	if x <= 20.0:
+		twenty_pcm_predictions.append(x)
+
+
+print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
+print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+print(f' {len(fifteen_pcm_predictions)} ({len(fifteen_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 15 pcm error)')
+print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
