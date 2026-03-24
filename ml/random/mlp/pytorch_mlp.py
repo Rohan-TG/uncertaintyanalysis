@@ -244,7 +244,7 @@ y_val_t = torch.tensor(y_val, dtype=torch.float32, device=device).view(-1, 1)
 # Define model
 model = MLP(input_dim=X_train.shape[1]).to(device)
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-7)
 
 early_stopper = EarlyStopping(patience=patience)
 num_epochs = 100
