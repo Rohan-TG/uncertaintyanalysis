@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
-elif computer == 'oppie':
+elif computer == 'oppie' or computer == 'bethe':
 	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 
 import pandas as pd
@@ -24,7 +24,7 @@ from scipy.stats import zscore
 import tqdm
 import time
 
-
+print(f'\nGPU availability: {torch.cuda.is_available()}')
 
 
 data_directory = input('Data directory: ')
