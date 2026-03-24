@@ -29,7 +29,7 @@ data_directory = input('Data directory: ')
 data_processes = int(input('Num. data processors: '))
 
 all_parquets = os.listdir(data_directory)
-
+num_epochs = int(input('Num epochs: '))
 training_fraction = float(input('Enter training data fraction: '))
 lower_energy_bound = float(input('Enter lower energy bound in eV: '))
 patience = int(input('\nEnter patience: '))
@@ -247,7 +247,7 @@ criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-7)
 
 early_stopper = EarlyStopping(patience=patience)
-num_epochs = 100
+
 
 batch_size = 32
 n = X_train_t.shape[0]
