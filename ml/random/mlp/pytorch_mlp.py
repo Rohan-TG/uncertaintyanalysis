@@ -242,8 +242,9 @@ X_val_t = torch.tensor(X_val, dtype=torch.float32, device=device)
 y_val_t = torch.tensor(y_val, dtype=torch.float32, device=device).view(-1, 1)
 
 train_batch_size = 32
+validation_batch_size = X_val.shape[0]
 train_loader = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=train_batch_size, shuffle=False)
-val_loader = DataLoader(TensorDataset(X_val_t, y_val_t), batch_size=256, shuffle=False)
+val_loader = DataLoader(TensorDataset(X_val_t, y_val_t), batch_size=validation_batch_size, shuffle=False)
 
 
 
