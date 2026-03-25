@@ -317,7 +317,7 @@ if early_stopper.best_state is not None:
 # evaluate
 trainend = time.time()
 import datetime
-print(f"Training time: {datetime.timedelta(seconds=trainend-trainstart):.2f}")
+print(f"Training time: {datetime.timedelta(seconds=trainend-trainstart)}")
 
 model.eval()
 with torch.no_grad():
