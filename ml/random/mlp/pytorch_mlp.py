@@ -241,8 +241,8 @@ y_train_t = torch.tensor(y_train, dtype=torch.float32, device=device).view(-1, 1
 X_val_t = torch.tensor(X_val, dtype=torch.float32, device=device)
 y_val_t = torch.tensor(y_val, dtype=torch.float32, device=device).view(-1, 1)
 
-
-train_loader = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=64, shuffle=False)
+train_batch_size = 32
+train_loader = DataLoader(TensorDataset(X_train_t, y_train_t), batch_size=train_batch_size, shuffle=False)
 val_loader = DataLoader(TensorDataset(X_val_t, y_val_t), batch_size=256, shuffle=False)
 
 
@@ -255,7 +255,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-7)
 early_stopper = EarlyStopping(patience=patience)
 
 
-batch_size = 32
+
 n = X_train_t.shape[0]
 
 trainstart = time.time()
