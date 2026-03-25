@@ -301,9 +301,13 @@ class RegressionTransformerFeatureRows(nn.Module):
 		src_key_padding_mask: (batch, seq_len) with True where padding exists (optional)
 		"""
 
+		model_device = self.input_proj.weight.device
+		print('Model device:', model_device)
+		x = x.to(model_device)
+
 		# re orient input to make columns/tokens
 		#
-		# rows = features and columns = tokens, so we transpose:
+		# rows = features and columns = tokens, so we transpose
 		#
 		#   Before: (batch, num_features, seq_len)
 		#   After:  (batch, seq_len, num_features)
@@ -323,10 +327,8 @@ class RegressionTransformerFeatureRows(nn.Module):
 			src_key_padding_mask=src_key_padding_mask # ignore padded tokens
 		)  # (batch, seq_len, d_model)
 
-
-		# mask-aware mean pooling (if padding is used) or simple mean pooling (no padding)
-
 		if src_key_padding_mask is not None: # pool sequence into single vector for regression head
+			# mask-aware mean pooling (if padding is used) or simple mean pooling (no padding)
 			# Mask: True = padded token, False = real token
 			mask = ~src_key_padding_mask  # invert: True = valid token
 			mask = mask.unsqueeze(-1)  # (batch, seq_len, 1)
@@ -435,6 +437,8 @@ for epoch in tqdm.tqdm(range(1, max_epochs + 1)):
 
 	for Xb, yb in iter_minibatches(X_train, y_train, batch_size, shuffle=True, device=device):
 		optimiser.zero_grad(set_to_none=True)
+		print("Xb device:", Xb.device)
+		print("model device:", next(model.parameters()).device)
 
 		preds = model(Xb)              # (B,)
 		loss = criterion(preds, yb)    # scalar
