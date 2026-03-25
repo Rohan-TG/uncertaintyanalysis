@@ -251,7 +251,7 @@ val_loader = DataLoader(TensorDataset(X_val_t, y_val_t), batch_size=validation_b
 # Define model
 model = MLP(input_dim=X_train.shape[1]).to(device)
 criterion = nn.MSELoss()  # Mean squared error loss
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-8)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-7)
 
 early_stopper = EarlyStopping(patience=patience)
 
