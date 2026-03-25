@@ -407,7 +407,7 @@ def iter_minibatches(X, y, batch_size, shuffle=False, device=None):
 		yield Xb, yb
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+print('Device:', device)
 N_train, F, T = X_train.shape # F stands for features i.e. number of reaction channels (T stands for tokens, each token is an energy point)
 N_val = X_val.shape[0]
 
