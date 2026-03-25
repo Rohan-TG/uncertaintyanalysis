@@ -31,7 +31,7 @@ data_directory = input('Data directory: ')
 data_processes = int(input('Num. data processors: '))
 max_epochs = int(input('Max epochs: '))
 all_parquets = os.listdir(data_directory)
-
+patience = int(input('Patience: '))
 training_fraction = float(input('Enter training data fraction: '))
 lower_energy_bound = float(input('Enter lower energy bound in eV: '))
 
@@ -353,7 +353,7 @@ class RegressionTransformerFeatureRows(nn.Module):
 
 
 class EarlyStopping:
-	def __init__(self, patience=10, min_delta=0.0, mode="min", restore_best_weights=True):
+	def __init__(self, patience, min_delta=0.0, mode="min", restore_best_weights=True):
 		assert mode in ("min", "max")
 		self.patience = patience
 		self.min_delta = min_delta
@@ -422,7 +422,7 @@ optimiser = torch.optim.AdamW(model.parameters(), lr=1e-4)
 
 print('\nDefining early stopping criteria...')
 
-early = EarlyStopping(patience=10, min_delta=1e-5, mode="min", restore_best_weights=True)
+early = EarlyStopping(patience=patience, min_delta=1e-5, mode="min", restore_best_weights=True)
 
 batch_size = 32
 
