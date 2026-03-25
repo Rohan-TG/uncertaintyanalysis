@@ -172,24 +172,24 @@ class MLP(nn.Module):
 	def __init__(self, input_dim):
 		super().__init__()
 		self.net = nn.Sequential(
-			nn.Linear(input_dim, 2000),  # Keras first Dense(1000), no activation
-			nn.Linear(2000, 1800),
+			nn.Linear(input_dim, 1000),  # Keras first Dense(1000), no activation
+			nn.Linear(1000, 900),
 			nn.ReLU(),
-			nn.Linear(1800, 1500),
+			nn.Linear(900, 750),
 			nn.ReLU(),
-			nn.Linear(1500, 1200),
+			nn.Linear(750, 600),
 			nn.ReLU(),
-			nn.Linear(1200, 1000),
+			nn.Linear(600, 540),
 			nn.ReLU(),
-			nn.Linear(1000, 800),
+			nn.Linear(540, 380),
 			nn.ReLU(),
-			nn.Linear(800, 500),
+			nn.Linear(380, 280),
 			nn.ReLU(),
-			nn.Linear(500, 400),
+			nn.Linear(280, 150),
 			nn.ReLU(),
-			nn.Linear(400, 300),
+			nn.Linear(150, 100),
 			nn.ReLU(),
-			nn.Linear(300, 1)  # linear output
+			nn.Linear(100, 1)  # linear output
 		)
 
 		self._init_weights()
@@ -234,8 +234,7 @@ y_train = torch.from_numpy(y_train).float()
 X_val = torch.from_numpy(X_val).float()
 y_val = torch.from_numpy(y_val).float()
 
-
-# Convert to tensors
+# If your data is numpy arrays:
 X_train_t = torch.tensor(X_train, dtype=torch.float32, device=device)
 y_train_t = torch.tensor(y_train, dtype=torch.float32, device=device).view(-1, 1)
 
