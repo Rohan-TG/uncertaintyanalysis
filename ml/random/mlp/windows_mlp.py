@@ -212,7 +212,7 @@ history = model.fit(X_train,
 					verbose=1)
 
 train_end = time.time()
-print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
 
@@ -229,6 +229,7 @@ for predicted, true in zip(rescaled_predictions, keff_test):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
+print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 sorted_errors = sorted(errors)
 absolute_errors = [abs(x) for x in sorted_errors]
 print(f'\nAverage absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
