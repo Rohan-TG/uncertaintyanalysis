@@ -29,7 +29,7 @@ print(f'\nGPU availability: {torch.cuda.is_available()}')
 
 data_directory = input('Data directory: ')
 data_processes = int(input('Num. data processors: '))
-
+max_epochs = int(input('Max epochs: '))
 all_parquets = os.listdir(data_directory)
 
 training_fraction = float(input('Enter training data fraction: '))
@@ -425,7 +425,7 @@ print('\nDefining early stopping criteria...')
 early = EarlyStopping(patience=10, min_delta=1e-5, mode="min", restore_best_weights=True)
 
 batch_size = 32
-max_epochs = 100
+
 
 print('\nBeginning training...')
 
