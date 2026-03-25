@@ -19,7 +19,7 @@ import numpy as np
 from scipy.stats import zscore
 import tqdm
 from torch.utils.data import DataLoader, TensorDataset
-
+import time
 
 
 print(f'\nGPU availability: {torch.cuda.is_available()}')
@@ -258,6 +258,7 @@ early_stopper = EarlyStopping(patience=patience)
 batch_size = 32
 n = X_train_t.shape[0]
 
+trainstart = time.time()
 for epoch in range(num_epochs):
 	model.train()
 
@@ -314,6 +315,10 @@ for epoch in range(num_epochs):
 if early_stopper.best_state is not None:
 	model.load_state_dict(early_stopper.best_state)
 # evaluate
+trainend = time.time()
+import datetime
+print(f"Training time: {datetime.timedelta(seconds=trainend-trainstart):.2f}")
+
 model.eval()
 with torch.no_grad():
 	predictions = model(X_val_t)
