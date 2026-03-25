@@ -323,8 +323,6 @@ class RegressionTransformerFeatureRows(nn.Module):
 			src_key_padding_mask=src_key_padding_mask # ignore padded tokens
 		)  # (batch, seq_len, d_model)
 
-		print("x:", x.device)
-		print("mask:", None if src_key_padding_mask is None else src_key_padding_mask.device)
 
 		# mask-aware mean pooling (if padding is used) or simple mean pooling (no padding)
 
