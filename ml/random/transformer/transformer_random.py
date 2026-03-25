@@ -302,7 +302,7 @@ class RegressionTransformerFeatureRows(nn.Module):
 		"""
 
 		model_device = self.input_proj.weight.device
-		print('Model device:', model_device)
+		# print('Model device:', model_device)
 		x = x.to(model_device)
 
 		# re orient input to make columns/tokens
@@ -437,8 +437,8 @@ for epoch in tqdm.tqdm(range(1, max_epochs + 1)):
 
 	for Xb, yb in iter_minibatches(X_train, y_train, batch_size, shuffle=True, device=device):
 		optimiser.zero_grad(set_to_none=True)
-		print("Xb device:", Xb.device)
-		print("model device:", next(model.parameters()).device)
+		# print("Xb device:", Xb.device)
+		# print("model device:", next(model.parameters()).device)
 
 		preds = model(Xb)              # (B,)
 		loss = criterion(preds, yb)    # scalar
