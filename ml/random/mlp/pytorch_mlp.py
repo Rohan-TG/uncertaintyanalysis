@@ -187,9 +187,9 @@ class MLP(nn.Module):
 			nn.ReLU(),
 			nn.Linear(280, 150),
 			nn.ReLU(),
-			nn.Linear(150, 500),
+			nn.Linear(150, 100),
 			nn.ReLU(),
-			nn.Linear(500, 1)  # linear output
+			nn.Linear(100, 1)  # linear output
 		)
 
 		self._init_weights()
