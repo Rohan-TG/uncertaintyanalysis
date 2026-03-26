@@ -28,4 +28,7 @@ data_directory = input('\n\nData directory: ')
 all_parquets = os.listdir(data_directory)
 
 
-model_directory = input('\nModel directory: ')
+errors_directory = input('\nErrors directory: ')
+
+predictions_directory = input('\nPredictions directory: ')
+
