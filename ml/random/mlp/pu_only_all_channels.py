@@ -227,7 +227,7 @@ history = model.fit(X_train,
 					verbose=1)
 
 train_end = time.time()
-print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+
 predictions = model.predict(X_test)
 predictions = predictions.ravel()
 
@@ -271,6 +271,8 @@ print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absol
 print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
 print(f' {len(fifteen_pcm_predictions)} ({len(fifteen_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 15 pcm error)')
 print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+
+print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 
 save_histogram = input('Save histogram? (y): ')
 if save_histogram == 'y':
