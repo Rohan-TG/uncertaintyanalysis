@@ -100,11 +100,24 @@ keff_train = [] # k_eff labels
 XS_train = []
 
 
+pu9_train_indices = []
+pu0_train_indices = []
+pu1_train_indices = []
+
 for train_file in tqdm.tqdm(training_files, total=n_training_samples):
 	xs_values, keff_value = fetch_data(train_file)
 
 	XS_train.append(xs_values)
 	keff_train.append(keff_value)
+
+	pu9_train_index = int(train_file.split('_')[4])
+	pu0_train_indices.append(pu9_train_index)
+
+	pu0_train_index = int(train_file.split('_')[6])
+	pu0_train_indices.append(pu0_train_index)
+
+	pu1_train_index = int(train_file.split('_')[8].split('.')[0])
+	pu1_train_indices.append(pu1_train_index)
 
 XS_train = np.array(XS_train)
 y_train = zscore(keff_train)
@@ -144,10 +157,24 @@ keff_test = []
 print('\nFetching test data...')
 
 
+
+pu9_val_indices = []
+pu0_val_indices = []
+pu1_val_indices = []
+
 for test_file in tqdm.tqdm(test_files, total=len(test_files)):
 	xs_values_test, keff_value_test = fetch_data(test_file)
 	XS_test.append(xs_values_test)
 	keff_test.append(keff_value_test)
+
+	pu9_val_index = int(test_file.split('_')[4])
+	pu0_val_indices.append(pu9_val_index)
+
+	pu0_val_index = int(test_file.split('_')[6])
+	pu0_val_indices.append(pu0_val_index)
+
+	pu1_val_index = int(test_file.split('_')[8].split('.')[0])
+	pu1_val_indices.append(pu1_val_index)
 
 XS_test = np.array(XS_test)
 # keff_mean = np.mean(keff_test)
@@ -315,12 +342,17 @@ for num in tqdm.tqdm(range(n_models)):
 	gc.collect()
 
 
-with open("errors_2.pkl", "wb") as f:
+overall_run = 3
+
+with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(error_matrix, f)
 
-with open("predictions_2.pkl", "wb") as f:
+with open(f"predictions_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(prediction_matrix, f)
 
 
+training_indices_df = pd.DataFrame({'Pu239': pu9_train_indices, 'Pu240': pu0_train_indices, 'Pu241': pu1_train_indices})
+training_indices_df.to_csv(f'training_indices_df_{overall_run}_averaging_model.csv')
 
-
+val_indices_df = pd.DataFrame({{'Pu239': pu9_val_indices, 'Pu240': pu0_val_indices, 'Pu241': pu1_val_indices}})
+val_indices_df.to_csv(f'val_indices_df_{overall_run}_averaging_model.csv')
