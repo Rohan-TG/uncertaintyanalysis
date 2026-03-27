@@ -236,7 +236,6 @@ def build_model():
 model_list = []
 
 prediction_matrix = [[] for i in range(len(y_test))]
-
 error_matrix = [[] for i in range(len(y_test))]
 
 for num in tqdm.tqdm(range(n_models)):
@@ -352,6 +351,8 @@ with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
 with open(f"predictions_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(prediction_matrix, f)
 
+with open(f"labels_{overall_run}.pkl", "wb") as f:
+	pickle.dump(keff_test, f)
 
 training_indices_df = pd.DataFrame({'Pu239': pu9_train_indices, 'Pu240': pu0_train_indices, 'Pu241': pu1_train_indices})
 training_indices_df.to_csv(f'training_indices_df_{overall_run}_averaging_model.csv')
