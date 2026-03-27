@@ -27,6 +27,8 @@ import time
 import tensorflow as tf
 import datetime
 
+from scone_benchmarks.capture.eccogroups.g1.run_scone_g1_ngamma import end_time
+
 print(tf.config.list_physical_devices('GPU'))
 
 
@@ -56,7 +58,7 @@ for file in all_parquets:
 
 print('\nFetching training data...')
 
-
+start_time = time.time()
 
 
 
@@ -111,7 +113,7 @@ for train_file in tqdm.tqdm(training_files, total=n_training_samples):
 	keff_train.append(keff_value)
 
 	pu9_train_index = int(train_file.split('_')[4])
-	pu0_train_indices.append(pu9_train_index)
+	pu9_train_indices.append(pu9_train_index)
 
 	pu0_train_index = int(train_file.split('_')[6])
 	pu0_train_indices.append(pu0_train_index)
@@ -168,7 +170,7 @@ for test_file in tqdm.tqdm(test_files, total=len(test_files)):
 	keff_test.append(keff_value_test)
 
 	pu9_val_index = int(test_file.split('_')[4])
-	pu0_val_indices.append(pu9_val_index)
+	pu9_val_indices.append(pu9_val_index)
 
 	pu0_val_index = int(test_file.split('_')[6])
 	pu0_val_indices.append(pu0_val_index)
@@ -354,5 +356,10 @@ with open(f"predictions_matrix_{overall_run}.pkl", "wb") as f:
 training_indices_df = pd.DataFrame({'Pu239': pu9_train_indices, 'Pu240': pu0_train_indices, 'Pu241': pu1_train_indices})
 training_indices_df.to_csv(f'training_indices_df_{overall_run}_averaging_model.csv')
 
-val_indices_df = pd.DataFrame({{'Pu239': pu9_val_indices, 'Pu240': pu0_val_indices, 'Pu241': pu1_val_indices}})
+val_indices_df = pd.DataFrame({'Pu239': pu9_val_indices, 'Pu240': pu0_val_indices, 'Pu241': pu1_val_indices})
 val_indices_df.to_csv(f'val_indices_df_{overall_run}_averaging_model.csv')
+
+
+end_time = time.time()
+import datetime
+print(f'\nTotal runtime: {datetime.timedelta(seconds = (end_time - start_time))}')
