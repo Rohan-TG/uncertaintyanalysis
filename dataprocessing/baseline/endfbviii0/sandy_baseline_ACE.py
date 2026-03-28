@@ -10,8 +10,6 @@ import sys
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 from groupEnergies import Groups, Pu239, Pu240, Pu241, Ga69, Ga71, Reactions
 
-processes = int(input("Num. processes: "))
-
 za = Pu239.ZA
 
 
