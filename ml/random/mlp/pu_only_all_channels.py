@@ -330,7 +330,7 @@ plt.show()
 ### Feature importance
 
 # shap_values = shap.DeepExplainer(model=model, data=X_test)
-if generate_test_data:
+if generate_test_data == 'y':
 	test_predictions = model.predict(X_test)
 	test_predictions = test_predictions.ravel()
 
