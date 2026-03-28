@@ -352,29 +352,25 @@ if generate_test_data:
 
 	print(f'Max -ve error: {sorted_test_errors[0]} pcm, Max +ve error: {sorted_test_errors[-1]} pcm')
 
-	print(f"Smallest absolute error: {min(absolute_errors)} pcm")
-	acceptable_predictions = []
-	borderline_predictions = []
-	fifteen_pcm_predictions = []
-	twenty_pcm_predictions = []
-	for x in absolute_errors:
+	print(f"Smallest absolute error: {min(absolute_test_errors)} pcm")
+	acceptable_test_predictions = []
+	borderline_test_predictions = []
+	fifteen_pcm_test_predictions = []
+	twenty_pcm_test_predictions = []
+	for x in absolute_test_errors:
 		if x <= 5.0:
-			acceptable_predictions.append(x)
+			acceptable_test_predictions.append(x)
 		if x <= 10.0:
-			borderline_predictions.append(x)
+			borderline_test_predictions.append(x)
 		if x <= 15.0:
-			fifteen_pcm_predictions.append(x)
+			fifteen_pcm_test_predictions.append(x)
 		if x <= 20.0:
-			twenty_pcm_predictions.append(x)
+			twenty_pcm_test_predictions.append(x)
 
-	print(
-		f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
-	print(
-		f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
-	print(
-		f' {len(fifteen_pcm_predictions)} ({len(fifteen_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 15 pcm error)')
-	print(
-		f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+	print(f' {len(acceptable_test_predictions)} ({len(acceptable_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 5 pcm error')
+	print(f' {len(borderline_test_predictions)} ({len(borderline_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 10 pcm error')
+	print(f' {len(fifteen_pcm_test_predictions)} ({len(fifteen_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 15 pcm error)')
+	print(f' {len(twenty_pcm_test_predictions)} ({len(twenty_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 20 pcm error)')
 
 	print('#### End test ####')
 
