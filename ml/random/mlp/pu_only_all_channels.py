@@ -55,7 +55,6 @@ for file in all_parquets:
 		val_files.append(file)
 
 if generate_test_data == 'y':
-	generate_test_data = True
 	test_directory = input('\nTest data directory: ')
 	test_files = os.listdir(test_directory)
 else:
