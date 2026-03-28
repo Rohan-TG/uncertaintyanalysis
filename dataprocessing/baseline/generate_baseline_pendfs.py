@@ -16,7 +16,7 @@ nucl = Ga69.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
 # endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
-endf_name = 'n-094_Ga69.endf'
+endf_name = 'n-031_Ga69.endf'
 endf6 = sandy.Endf6.from_file(f'/home/rnt26/uncertaintyanalysis/dataprocessing/baseline/endfbviii.1/neutrons-version.VIII.1/{endf_name}')
 # endf6.to_file(filename)
 pendf = endf6.get_pendf(err=0.0001)
