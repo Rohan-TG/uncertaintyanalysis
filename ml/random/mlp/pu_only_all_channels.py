@@ -175,7 +175,7 @@ scaled_columns_xval = np.array(scaled_columns_xval)
 X_val = scaled_columns_xval.transpose()
 
 #####
-if generate_test_data:
+if generate_test_data == 'y':
 	print("\nFetching test data")
 	XS_test = []
 	keff_test = []
