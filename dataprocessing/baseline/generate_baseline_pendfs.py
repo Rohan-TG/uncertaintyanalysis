@@ -12,16 +12,16 @@ from groupEnergies import Pu239, Pu240, Pu241
 
 
 lib_name = "ENDFB_81"
-nucl = Pu239.ZA * 10
+nucl = Pu240.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
 # endf6 = sandy.get_endf6_file(lib_name, 'xs', nucl)
-endf_name = 'n-094_Pu_239.endf'
+endf_name = 'n-094_Pu_240.endf'
 endf6 = sandy.Endf6.from_file(f'/home/rnt26/uncertaintyanalysis/dataprocessing/baseline/endfbviii.1/neutrons-version.VIII.1/{endf_name}')
 # endf6.to_file(filename)
 pendf = endf6.get_pendf(err=0.0001)
 
-pendf.to_file('Pu-239_ENDFBVIII_1.pendf')
+pendf.to_file('Pu-240_ENDFBVIII_1.pendf')
 
 
 
@@ -33,6 +33,6 @@ outs = endf6.get_ace(temperature=300,
 					 verbose=True,
 					 pendf=pendf)
 
-savefilename = f"Pu239_ENDFBVIII_1.03c"
+savefilename = f"Pu240_ENDFBVIII_1.03c"
 with open(f"{savefilename}", mode="w") as f:
 	f.write(outs["ace"])
