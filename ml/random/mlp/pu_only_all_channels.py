@@ -232,6 +232,7 @@ model.add(keras.layers.Dense(280, activation='relu'))
 model.add(keras.layers.Dense(150, activation='relu'))
 model.add(keras.layers.Dense(100, activation='relu'))
 model.add(keras.layers.Dense(50, activation='relu'))
+model.add(keras.layers.Dense(20, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
