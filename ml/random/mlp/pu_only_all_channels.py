@@ -65,9 +65,9 @@ print('\nFetching training data...')
 
 
 
-def fetch_data(datafile):
+def fetch_data(datafile, data_dir=data_directory):
 
-	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	temp_df = pd.read_parquet(f'{data_dir}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
 	keff_value = float(temp_df['keff'].values[0])
@@ -181,7 +181,7 @@ if generate_test_data:
 	keff_test = []
 
 	with ProcessPoolExecutor(max_workers=data_processes) as executor:
-		futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+		futures = [executor.submit(fetch_data, test_file, test_directory) for test_file in test_files]
 
 		for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 			xs_values_test, keff_value_test = future.result()
