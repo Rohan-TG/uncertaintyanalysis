@@ -10,7 +10,7 @@ import sys
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
 from groupEnergies import Groups, Pu239, Pu240, Pu241, Ga69, Ga71, Reactions
 
-za = Pu240.ZA
+za = Pu241.ZA
 
 
 # endf6 = sandy.Endf6.from_file('/home/rnt26/PycharmProjects/uncertaintyanalysis/n-094_Pu_239.endf')
@@ -19,7 +19,7 @@ endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 
 
 lib_name = "ENDFB_80"
-nucl = Pu240.ZA * 10
+nucl = Pu241.ZA * 10
 filename = f"{nucl}.{lib_name}"
 
 # endf6.to_file(filename)
@@ -34,7 +34,7 @@ outs = endf6.get_ace(temperature=300,
 					 verbose=True,
 					 pendf=pendf)
 
-savefilename = f"Pu240_ENDFBVIII.0.03c"
+savefilename = f"Pu241_ENDFBVIII.0.03c"
 with open(f"{savefilename}", mode="w") as f:
 	f.write(outs["ace"])
 
