@@ -30,6 +30,10 @@ import time
 
 
 data_directory = input('\n\nData directory: ')
+generate_test_data = input('\nGenerate test data (y/n): ')
+if generate_test_data == 'y':
+	test_directory = input('\nTest data directory: ')
+
 data_processes = 6
 # data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/0-4999/xserg_data'
 
@@ -47,10 +51,10 @@ while len(training_files) < n_training_samples:
 	if choice not in training_files:
 		training_files.append(choice)
 
-test_files = []
+val_files = []
 for file in all_parquets:
 	if file not in training_files:
-		test_files.append(file)
+		val_files.append(file)
 
 print('\nFetching training data...')
 
@@ -137,42 +141,42 @@ scaled_columns_xtrain = np.array(scaled_columns_xtrain)
 X_train = scaled_columns_xtrain.transpose()
 
 
-XS_test = []
-keff_test = []
+XS_val = []
+keff_val = []
 
-print('\nFetching test data...')
+print('\nFetching val data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+	futures = [executor.submit(fetch_data, val_file) for val_file in val_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values_test, keff_value_test = future.result()
-		XS_test.append(xs_values_test)
-		keff_test.append(keff_value_test)
+		xs_values_val, keff_value_val = future.result()
+		XS_val.append(xs_values_val)
+		keff_val.append(keff_value_val)
 
-XS_test = np.array(XS_test)
+XS_val = np.array(XS_val)
 # keff_mean = np.mean(keff_test)
 # keff_std = np.std(keff_test)
-y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+y_val = (np.array(keff_val) - train_labels_mean) / train_labels_std
 
-scaling_matrix_xtest = XS_test.transpose()
+scaling_matrix_xval = XS_val.transpose()
 
-scaled_columns_xtest = []
-print('\nScaling test data...')
-for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
+scaled_columns_xval = []
+print('\nScaling val data...')
+for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xval[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xval[le_bound_index:-1])):
 	# scaled_column = zscore(column)
 
 	scaled_column = (np.array(column) - c_mean) / c_std
-	scaled_columns_xtest.append(scaled_column)
+	scaled_columns_xval.append(scaled_column)
 
-scaled_columns_xtest = np.array(scaled_columns_xtest)
-X_test = scaled_columns_xtest.transpose()
+scaled_columns_xval = np.array(scaled_columns_xval)
+X_val = scaled_columns_xval.transpose()
 
 
 # test_mask = ~np.isnan(X_test).any(axis=0)
 # X_test = X_test[:, test_mask]
-X_test = np.nan_to_num(X_test, nan=0.0)
+X_val = np.nan_to_num(X_val, nan=0.0)
 
 # train_mask = ~np.isnan(X_train).any(axis=0)
 # X_train = X_train[:, train_mask]
@@ -223,12 +227,12 @@ history = model.fit(X_train,
 					epochs=3000,
 					batch_size=32,
 					callbacks=callback,
-					validation_data=(X_test, y_test),
+					validation_data=(X_val, y_val),
 					verbose=1)
 
 train_end = time.time()
 
-predictions = model.predict(X_test)
+predictions = model.predict(X_val)
 predictions = predictions.ravel()
 
 
@@ -240,7 +244,7 @@ for pred in predictions_list:
 	rescaled_predictions.append(float(descaled_p))
 
 errors = []
-for predicted, true in zip(rescaled_predictions, keff_test):
+for predicted, true in zip(rescaled_predictions, keff_val):
 	errors.append((predicted - true) * 1e5)
 	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
@@ -298,7 +302,7 @@ for x in errors:
 		skew_negative.append(x)
 
 plt.figure()
-plt.plot(keff_test, errors, 'x')
+plt.plot(keff_val, errors, 'x')
 plt.grid()
 plt.title('Distribution of errors')
 plt.xlabel('True k_eff')
@@ -315,7 +319,7 @@ plt.show()
 
 dump_directory = input('Dump directory: ')
 RUNCODE = int(input('Run code: '))
-for error, prediction, file in tqdm.tqdm(zip(errors, predictions, test_files), total=len(errors)):
+for error, prediction, file in tqdm.tqdm(zip(errors, predictions, val_files), total=len(errors)):
 
 
 	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
