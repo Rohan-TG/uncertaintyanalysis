@@ -31,8 +31,6 @@ import time
 
 data_directory = input('\n\nData directory: ')
 generate_test_data = input('\nGenerate test data (y/n): ')
-if generate_test_data == 'y':
-	test_directory = input('\nTest data directory: ')
 
 data_processes = 6
 # data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/0-4999/xserg_data'
@@ -56,9 +54,14 @@ for file in all_parquets:
 	if file not in training_files:
 		val_files.append(file)
 
+if generate_test_data == 'y':
+	generate_test_data = True
+	test_directory = input('\nTest data directory: ')
+	test_files = os.listdir(test_directory)
+else:
+	print("\nSkipping test...")
+
 print('\nFetching training data...')
-
-
 
 
 
@@ -156,8 +159,6 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 		keff_val.append(keff_value_val)
 
 XS_val = np.array(XS_val)
-# keff_mean = np.mean(keff_test)
-# keff_std = np.std(keff_test)
 y_val = (np.array(keff_val) - train_labels_mean) / train_labels_std
 
 scaling_matrix_xval = XS_val.transpose()
@@ -173,13 +174,40 @@ for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xval[le_bound_index:-1
 scaled_columns_xval = np.array(scaled_columns_xval)
 X_val = scaled_columns_xval.transpose()
 
+#####
+if generate_test_data:
+	print("\nFetching test data")
+	XS_test = []
+	keff_test = []
 
-# test_mask = ~np.isnan(X_test).any(axis=0)
-# X_test = X_test[:, test_mask]
+	with ProcessPoolExecutor(max_workers=data_processes) as executor:
+		futures = [executor.submit(fetch_data, test_file) for test_file in test_files]
+
+		for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+			xs_values_test, keff_value_test = future.result()
+			XS_test.append(xs_values_test)
+			keff_test.append(keff_value_test)
+
+	XS_test = np.array(XS_test)
+	y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+
+	scaling_matrix_xtest = XS_test.transpose()
+
+	scaled_columns_xtest = []
+	print('\nScaling test data...')
+	for column, c_mean, c_std in tqdm.tqdm(
+			zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds),
+			total=len(scaling_matrix_xtest[le_bound_index:-1])):
+
+		scaled_column = (np.array(column) - c_mean) / c_std
+		scaled_columns_xtest.append(scaled_column)
+
+	scaled_columns_xtest = np.array(scaled_columns_xtest)
+	X_test = scaled_columns_xtest.transpose()
+
+	X_test = np.nan_to_num(X_test, nan=0.0)
+
 X_val = np.nan_to_num(X_val, nan=0.0)
-
-# train_mask = ~np.isnan(X_train).any(axis=0)
-# X_train = X_train[:, train_mask]
 X_train = np.nan_to_num(X_train, nan=0.0)
 
 
@@ -191,17 +219,6 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 										 restore_best_weights=True)
 
 
-
-# model =keras.Sequential()
-# model.add(keras.layers.Dense(500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-# model.add(keras.layers.Dense(475, activation='relu'))
-# model.add(keras.layers.Dense(375, activation='relu'))
-# model.add(keras.layers.Dense(300, activation='relu'))
-# model.add(keras.layers.Dense(270, activation='relu'))
-# model.add(keras.layers.Dense(140, activation='relu'))
-# model.add(keras.layers.Dense(120, activation='relu'))
-# model.add(keras.layers.Dense(1, activation='linear'))
-# model.compile(loss='MSE', optimizer='adam')
 
 
 model =keras.Sequential()
@@ -313,35 +330,81 @@ plt.show()
 ### Feature importance
 
 # shap_values = shap.DeepExplainer(model=model, data=X_test)
+if generate_test_data:
+	test_predictions = model.predict(X_test)
+	test_predictions = test_predictions.ravel()
 
+	rescaled_test_predictions = []
+	test_predictions_list = test_predictions.tolist()
+
+	for pred in test_predictions_list:
+		descaled_p = pred * train_labels_std + train_labels_mean
+		rescaled_test_predictions.append(float(descaled_p))
+
+	test_errors = []
+	for predicted, true in zip(rescaled_test_predictions, keff_test):
+		test_errors.append((predicted - true) * 1e5)
+		print(f'TEST - SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+	sorted_test_errors = sorted(test_errors)
+	absolute_test_errors = [abs(x) for x in sorted_test_errors]
+	print(f'\nAverage absolute test error: {np.mean(absolute_test_errors)} +- {np.std(absolute_test_errors)}')
+
+	print(f'Max -ve error: {sorted_test_errors[0]} pcm, Max +ve error: {sorted_test_errors[-1]} pcm')
+
+	print(f"Smallest absolute error: {min(absolute_errors)} pcm")
+	acceptable_predictions = []
+	borderline_predictions = []
+	fifteen_pcm_predictions = []
+	twenty_pcm_predictions = []
+	for x in absolute_errors:
+		if x <= 5.0:
+			acceptable_predictions.append(x)
+		if x <= 10.0:
+			borderline_predictions.append(x)
+		if x <= 15.0:
+			fifteen_pcm_predictions.append(x)
+		if x <= 20.0:
+			twenty_pcm_predictions.append(x)
+
+	print(
+		f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
+	print(
+		f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
+	print(
+		f' {len(fifteen_pcm_predictions)} ({len(fifteen_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 15 pcm error)')
+	print(
+		f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+
+	print('#### End test ####')
 
 ### register errors
 
-dump_directory = input('Dump directory: ')
-RUNCODE = int(input('Run code: '))
-for error, prediction, file in tqdm.tqdm(zip(errors, predictions, val_files), total=len(errors)):
-
-
-	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
-	df2 = data_df.copy()
-	iterator = list(range(0, len(df2)))
-
-	pu9_index = int(file.split('_')[4])
-	pu0_index = int(file.split('_')[6])
-	pu1_index = int(file.split('_')[8].split('.')[0])
-
-	index_list_pu9 = [pu9_index for i in iterator]
-	index_list_pu0 = [pu0_index for i in iterator]
-	index_list_pu1 = [pu1_index for i in iterator]
-
-	error_data_list = [error for i in iterator]
-	prediction_list = [prediction for i in iterator]
-
-	df2['prediction'] = prediction_list
-	df2['ml_error'] = error_data_list
-	df2['pu239_index'] = index_list_pu9
-	df2['pu240_index'] = index_list_pu0
-	df2['pu241_index'] = index_list_pu1
-
-	df2.to_parquet(f'{dump_directory}/diagnosis_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}_runcode-{RUNCODE}.parquet',
-				   engine='pyarrow')
+# dump_directory = input('Dump directory: ')
+# RUNCODE = int(input('Run code: '))
+# for error, prediction, file in tqdm.tqdm(zip(errors, predictions, val_files), total=len(errors)):
+#
+#
+# 	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
+# 	df2 = data_df.copy()
+# 	iterator = list(range(0, len(df2)))
+#
+# 	pu9_index = int(file.split('_')[4])
+# 	pu0_index = int(file.split('_')[6])
+# 	pu1_index = int(file.split('_')[8].split('.')[0])
+#
+# 	index_list_pu9 = [pu9_index for i in iterator]
+# 	index_list_pu0 = [pu0_index for i in iterator]
+# 	index_list_pu1 = [pu1_index for i in iterator]
+#
+# 	error_data_list = [error for i in iterator]
+# 	prediction_list = [prediction for i in iterator]
+#
+# 	df2['prediction'] = prediction_list
+# 	df2['ml_error'] = error_data_list
+# 	df2['pu239_index'] = index_list_pu9
+# 	df2['pu240_index'] = index_list_pu0
+# 	df2['pu241_index'] = index_list_pu1
+#
+# 	df2.to_parquet(f'{dump_directory}/diagnosis_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}_runcode-{RUNCODE}.parquet',
+# 				   engine='pyarrow')
