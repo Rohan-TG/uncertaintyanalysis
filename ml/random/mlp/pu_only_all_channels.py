@@ -56,6 +56,8 @@ for file in all_parquets:
 
 if generate_test_data == 'y':
 	test_directory = input('\nTest data directory: ')
+	mask = float(input('\nMask (x skip): '))
+
 	test_files = os.listdir(test_directory)
 else:
 	print("\nSkipping test...")
@@ -330,6 +332,11 @@ plt.show()
 
 # shap_values = shap.DeepExplainer(model=model, data=X_test)
 if generate_test_data == 'y':
+
+	if mask != 'x':
+		masking_value = 0
+		X_test[np.abs(X_test) >= float(mask)] = masking_value
+
 	test_predictions = model.predict(X_test)
 	test_predictions = test_predictions.ravel()
 
