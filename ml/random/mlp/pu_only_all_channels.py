@@ -56,8 +56,10 @@ for file in all_parquets:
 
 if generate_test_data == 'y':
 	test_directory = input('\nTest data directory: ')
-	mask = float(input('\nMask (x skip): '))
-
+	try:
+		mask = float(input('\nMask (x skip): '))
+	except:
+		mask = 'x'
 	test_files = os.listdir(test_directory)
 else:
 	print("\nSkipping test...")
