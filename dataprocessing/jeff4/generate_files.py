@@ -12,14 +12,14 @@ from groupEnergies import Pu239, Pu240, Pu241, Ga69, Ga71
 
 
 # lib_name = "JEFF_4"
-nucl = Pu240.ZA * 10
-filename = f"n_94-Pu-240g.jeff"
+nucl = Pu241.ZA * 10
+filename = f"n_94-Pu-241g.jeff"
 
 endf6 = sandy.Endf6.from_file(filename)
 
 pendf = endf6.get_pendf(err=0.0001)
-pendf.to_file('94240_-1.pendf')
+pendf.to_file('94241_-1.pendf')
 
 outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True, pendf=pendf)
-with open(f"94240_-1.03c", mode="w") as f:
+with open(f"94241_-1.03c", mode="w") as f:
 	f.write(outs["ace"])
