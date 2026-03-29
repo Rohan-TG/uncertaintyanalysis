@@ -27,7 +27,6 @@ import time
 import tensorflow as tf
 import datetime
 
-from scone_benchmarks.capture.eccogroups.g1.run_scone_g1_ngamma import end_time
 
 print(tf.config.list_physical_devices('GPU'))
 
