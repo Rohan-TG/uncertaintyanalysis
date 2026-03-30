@@ -31,7 +31,15 @@ import time
 
 data_directory = input('\n\nData directory: ')
 generate_test_data = input('\nGenerate test data (y/n): ')
-
+if generate_test_data == 'y':
+	test_directory = input('\nTest data directory: ')
+	try:
+		mask = float(input('\nMask (x skip): '))
+	except:
+		mask = 'x'
+	test_files = os.listdir(test_directory)
+else:
+	print("\nSkipping test...")
 data_processes = 6
 # data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/0-4999/xserg_data'
 
@@ -54,15 +62,7 @@ for file in all_parquets:
 	if file not in training_files:
 		val_files.append(file)
 
-if generate_test_data == 'y':
-	test_directory = input('\nTest data directory: ')
-	try:
-		mask = float(input('\nMask (x skip): '))
-	except:
-		mask = 'x'
-	test_files = os.listdir(test_directory)
-else:
-	print("\nSkipping test...")
+
 
 print('\nFetching training data...')
 
