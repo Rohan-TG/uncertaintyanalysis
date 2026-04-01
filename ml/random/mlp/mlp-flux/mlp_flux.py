@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 
 
 xs_directory = input('XS directory: ')
+flux_data_directory = input('Flux data directory: ')
 test_data_directory = input('Test data directory (x for set to val): ')
 patience = int(input('Patience: '))
 # flux_data_directory = input('Flux data directory: ')
