@@ -33,6 +33,9 @@ print(tf.config.list_physical_devices('GPU'))
 
 data_directory = input('\n\nData directory: ')
 
+test_directory = input('\nTest directory (x set to val): ')
+test_files = os.listdir(test_directory)
+
 # data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/0-4999/xserg_data'
 
 all_parquets = os.listdir(data_directory)
@@ -50,11 +53,13 @@ while len(training_files) < n_training_samples:
 	if choice not in training_files:
 		training_files.append(choice)
 
-test_files = []
+val_files = []
 for file in all_parquets:
 	if file not in training_files:
-		test_files.append(file)
+		val_files.append(file)
 
+if test_directory == 'x':
+	test_files = val_files
 print('\nFetching training data...')
 
 start_time = time.time()
@@ -154,10 +159,10 @@ scaled_columns_xtrain = np.array(scaled_columns_xtrain)
 X_train = scaled_columns_xtrain.transpose()
 
 
-XS_test = []
-keff_test = []
+XS_val = []
+keff_val = []
 
-print('\nFetching test data...')
+print('\nFetching val data...')
 
 
 
@@ -165,42 +170,42 @@ pu9_val_indices = []
 pu0_val_indices = []
 pu1_val_indices = []
 
-for test_file in tqdm.tqdm(test_files, total=len(test_files)):
-	xs_values_test, keff_value_test = fetch_data(test_file)
-	XS_test.append(xs_values_test)
-	keff_test.append(keff_value_test)
+for val_file in tqdm.tqdm(val_files, total=len(val_files)):
+	xs_values_val, keff_value_val = fetch_data(val_file)
+	XS_val.append(xs_values_val)
+	keff_val.append(keff_value_val)
 
-	pu9_val_index = int(test_file.split('_')[4])
+	pu9_val_index = int(val_file.split('_')[4])
 	pu9_val_indices.append(pu9_val_index)
 
-	pu0_val_index = int(test_file.split('_')[6])
+	pu0_val_index = int(val_file.split('_')[6])
 	pu0_val_indices.append(pu0_val_index)
 
-	pu1_val_index = int(test_file.split('_')[8].split('.')[0])
+	pu1_val_index = int(val_file.split('_')[8].split('.')[0])
 	pu1_val_indices.append(pu1_val_index)
 
-XS_test = np.array(XS_test)
-# keff_mean = np.mean(keff_test)
-# keff_std = np.std(keff_test)
-y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+XS_val = np.array(XS_val)
+# keff_mean = np.mean(keff_val)
+# keff_std = np.std(keff_val)
+y_val = (np.array(keff_val) - train_labels_mean) / train_labels_std
 
-scaling_matrix_xtest = XS_test.transpose()
+scaling_matrix_xval = XS_val.transpose()
 
-scaled_columns_xtest = []
-print('\nScaling test data...')
-for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
+scaled_columns_xval = []
+print('\nScaling val data...')
+for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xval[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xval[le_bound_index:-1])):
 	# scaled_column = zscore(column)
 
 	scaled_column = (np.array(column) - c_mean) / c_std
-	scaled_columns_xtest.append(scaled_column)
+	scaled_columns_xval.append(scaled_column)
 
-scaled_columns_xtest = np.array(scaled_columns_xtest)
-X_test = scaled_columns_xtest.transpose()
+scaled_columns_xval = np.array(scaled_columns_xval)
+X_val = scaled_columns_xval.transpose()
 
 
-# test_mask = ~np.isnan(X_test).any(axis=0)
-# X_test = X_test[:, test_mask]
-X_test = np.nan_to_num(X_test, nan=0.0)
+# val_mask = ~np.isnan(X_val).any(axis=0)
+# X_val = X_val[:, val_mask]
+X_val = np.nan_to_num(X_val, nan=0.0)
 
 # train_mask = ~np.isnan(X_train).any(axis=0)
 # X_train = X_train[:, train_mask]
@@ -236,8 +241,8 @@ def build_model():
 
 model_list = []
 
-prediction_matrix = [[] for i in range(len(y_test))]
-error_matrix = [[] for i in range(len(y_test))]
+prediction_matrix = [[] for i in range(len(y_val))]
+error_matrix = [[] for i in range(len(y_val))]
 
 for num in tqdm.tqdm(range(n_models)):
 	keras.backend.clear_session()
@@ -252,12 +257,12 @@ for num in tqdm.tqdm(range(n_models)):
 						epochs=3000,
 						batch_size=32,
 						callbacks=callback,
-						validation_data=(X_test, y_test),
+						validation_data=(X_val, y_val),
 						verbose=1)
 
 	train_end = time.time()
 	print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-	predictions = temp_model.predict(X_test)
+	predictions = temp_model.predict(X_val)
 	predictions = predictions.ravel()
 
 
@@ -269,7 +274,7 @@ for num in tqdm.tqdm(range(n_models)):
 		rescaled_predictions.append(float(descaled_p))
 
 	errors = []
-	for predicted, true in zip(rescaled_predictions, keff_test):
+	for predicted, true in zip(rescaled_predictions, keff_val):
 		errors.append((predicted - true) * 1e5)
 		# print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
@@ -332,7 +337,7 @@ for num in tqdm.tqdm(range(n_models)):
 			skew_negative.append(x)
 
 	# plt.figure()
-	# plt.plot(keff_test, errors, 'x')
+	# plt.plot(keff_val, errors, 'x')
 	# plt.grid()
 	# plt.title(f'Session {num} Distribution of errors')
 	# plt.xlabel('True k_eff')
@@ -354,7 +359,7 @@ with open(f"predictions_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(prediction_matrix, f)
 
 with open(f"labels_{overall_run}.pkl", "wb") as f:
-	pickle.dump(keff_test, f)
+	pickle.dump(keff_val, f)
 
 training_indices_df = pd.DataFrame({'Pu239': pu9_train_indices, 'Pu240': pu0_train_indices, 'Pu241': pu1_train_indices})
 training_indices_df.to_csv(f'training_indices_df_{overall_run}_averaging_model.csv')
