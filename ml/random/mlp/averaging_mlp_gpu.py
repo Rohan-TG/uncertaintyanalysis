@@ -60,6 +60,8 @@ print('\nFetching training data...')
 start_time = time.time()
 
 
+average_performance_list = []
+pcm10_performance_list = []
 
 def fetch_data(datafile):
 
@@ -281,6 +283,7 @@ for num in tqdm.tqdm(range(n_models)):
 	sorted_errors = sorted(errors)
 	absolute_errors = [abs(x) for x in sorted_errors]
 	print(f'\nAverage absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
+	average_performance_list.append(np.mean(absolute_errors))
 
 	print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
 
@@ -299,7 +302,7 @@ for num in tqdm.tqdm(range(n_models)):
 			fifteen_pcm_predictions.append(x)
 		if x <= 20.0:
 			twenty_pcm_predictions.append(x)
-
+	pcm10_performance_list.append(len(borderline_predictions) / len(absolute_errors) * 100)
 
 	print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
 	print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
