@@ -345,7 +345,7 @@ for num in tqdm.tqdm(range(n_models)):
 	gc.collect()
 
 
-overall_run = "2500_eV_truncated"
+overall_run = "2500_eV_truncated_cycle_2"
 
 with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(error_matrix, f)
