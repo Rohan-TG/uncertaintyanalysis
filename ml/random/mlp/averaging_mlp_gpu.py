@@ -34,9 +34,10 @@ print(tf.config.list_physical_devices('GPU'))
 data_directory = input('\n\nData directory: ')
 
 test_directory = input('\nTest directory (x set to val): ')
-test_files = os.listdir(test_directory)
+if test_directory != 'x':
+	test_files = os.listdir(test_directory)
 
-# data_directory = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pu-only/all-channels/0-4999/xserg_data'
+
 
 all_parquets = os.listdir(data_directory)
 
@@ -66,6 +67,7 @@ start_time = time.time()
 
 
 average_performance_list = []
+average_performance_list_test = []
 pcm10_performance_list = []
 
 def fetch_data(datafile):
@@ -164,8 +166,6 @@ keff_val = []
 
 print('\nFetching val data...')
 
-
-
 pu9_val_indices = []
 pu0_val_indices = []
 pu1_val_indices = []
@@ -185,8 +185,6 @@ for val_file in tqdm.tqdm(val_files, total=len(val_files)):
 	pu1_val_indices.append(pu1_val_index)
 
 XS_val = np.array(XS_val)
-# keff_mean = np.mean(keff_val)
-# keff_std = np.std(keff_val)
 y_val = (np.array(keff_val) - train_labels_mean) / train_labels_std
 
 scaling_matrix_xval = XS_val.transpose()
@@ -203,6 +201,49 @@ scaled_columns_xval = np.array(scaled_columns_xval)
 X_val = scaled_columns_xval.transpose()
 
 
+
+print('\nFetching test data...')
+
+keff_test = []
+XS_test = []
+pu9_test_indices = []
+pu0_test_indices = []
+pu1_test_indices = []
+for test_file in tqdm.tqdm(test_files, total=len(test_files)):
+	xs_values, keff_value = fetch_data(test_file)
+
+	XS_test.append(xs_values)
+	keff_test.append(keff_value)
+
+	pu9_test_index = int(test_file.split('_')[4])
+	pu9_test_indices.append(pu9_test_index)
+
+	pu0_test_index = int(test_file.split('_')[6])
+	pu0_test_indices.append(pu0_test_index)
+
+	pu1_test_index = int(test_file.split('_')[8].split('.')[0])
+	pu1_test_indices.append(pu1_test_index)
+
+
+XS_test = np.array(XS_test)
+y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+
+scaling_matrix_xtest = XS_test.transpose()
+
+scaled_columns_xtest = []
+print('\nScaling test data...')
+for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
+	scaled_column = (np.array(column) - c_mean) / c_std
+	scaled_columns_xtest.append(scaled_column)
+
+scaled_columns_xtest = np.array(scaled_columns_xtest)
+X_test = scaled_columns_xtest.transpose()
+
+
+
+
+
+
 # val_mask = ~np.isnan(X_val).any(axis=0)
 # X_val = X_val[:, val_mask]
 X_val = np.nan_to_num(X_val, nan=0.0)
@@ -211,7 +252,7 @@ X_val = np.nan_to_num(X_val, nan=0.0)
 # X_train = X_train[:, train_mask]
 X_train = np.nan_to_num(X_train, nan=0.0)
 
-
+X_test = np.nan_to_num(X_test, nan=0.0)
 
 
 
@@ -244,6 +285,9 @@ model_list = []
 prediction_matrix = [[] for i in range(len(y_val))]
 error_matrix = [[] for i in range(len(y_val))]
 
+prediction_matrix_test = [[] for i in range(len(y_test))]
+error_matrix_test = [[] for i in range(len(y_test))]
+
 for num in tqdm.tqdm(range(n_models)):
 	keras.backend.clear_session()
 
@@ -262,6 +306,33 @@ for num in tqdm.tqdm(range(n_models)):
 
 	train_end = time.time()
 	print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+
+	##################################### Predictions on test data #####################################################
+	predictions_test = temp_model.predict(X_test)
+	predictions_test = predictions_test.ravel()
+	rescaled_predictions_test = []
+	predictions_list_test = predictions_test.tolist()
+	for p in predictions_list_test:
+		descaled_p = p * train_labels_std + train_labels_mean
+		rescaled_predictions_test.append(float(descaled_p))
+
+
+	errors_test = []
+	for predicted, true in zip(rescaled_predictions_test, keff_test):
+		errors_test.append((predicted - true) * 1e5)
+
+	for p_i, p in enumerate(rescaled_predictions_test):
+		prediction_matrix_test[p_i].append(p)
+
+	for err_index, err in enumerate(errors_test):
+		error_matrix_test[err_index].append(err)
+
+
+	absolute_errors_test = [abs(x) for x in errors_test]
+	average_performance_list_test.append(np.mean(absolute_errors_test))
+
+	####################################################################################################################
+
 	predictions = temp_model.predict(X_val)
 	predictions = predictions.ravel()
 
@@ -350,7 +421,7 @@ for num in tqdm.tqdm(range(n_models)):
 	gc.collect()
 
 
-overall_run = "2500_eV_truncated_cycle_2"
+overall_run = "2500_eV_truncated_cycle_3"
 
 with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(error_matrix, f)
@@ -367,6 +438,11 @@ training_indices_df.to_csv(f'training_indices_df_{overall_run}_averaging_model.c
 val_indices_df = pd.DataFrame({'Pu239': pu9_val_indices, 'Pu240': pu0_val_indices, 'Pu241': pu1_val_indices})
 val_indices_df.to_csv(f'val_indices_df_{overall_run}_averaging_model.csv')
 
+with open(f"predictions_test_matrix_{overall_run}_averaging_model.pkl", "wb") as fpmt:
+	pickle.dump(prediction_matrix_test, fpmt)
+
+with open(f"errors_matrix_test_{overall_run}.pkl", "wb") as femt:
+	pickle.dump(error_matrix_test, femt)
 
 end_time = time.time()
 import datetime
