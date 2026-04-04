@@ -45,6 +45,7 @@ training_fraction = float(input('\nEnter training data fraction: '))
 lower_energy_bound = float(input('\nEnter lower energy bound in eV: '))
 patience = float(input('\nEnter patience: '))
 n_models = int(input('\nN. models: '))
+keep_n = int(input('\nKeep n. models: '))
 
 n_training_samples = int(training_fraction * len(all_parquets))
 
@@ -447,3 +448,41 @@ with open(f"errors_matrix_test_{overall_run}.pkl", "wb") as femt:
 end_time = time.time()
 import datetime
 print(f'\nTotal runtime: {datetime.timedelta(seconds = (end_time - start_time))}')
+
+
+def select_best_models(error_matrix, keep_n_models):
+	"""error_matrix: the error matrix
+	keep_n_models: the number of models to keep"""
+
+	truncated_count_10 = 0
+	em = np.array(error_matrix)
+	em_trans = np.transpose(em)
+
+	model_averages = []
+	for model_ in em_trans:
+		model_averages.append(np.mean(np.abs(model_)))
+
+	sorted_models = [[-1,100]]
+	for i, val in enumerate(model_averages):
+		for j, saved in enumerate(sorted_models):
+			if val < saved[-1]:
+				sorted_models.insert(j, [i,val])
+				break
+
+	accepable_models = []
+	for x in sorted_models[:keep_n_models]:
+		accepable_models.append(x[0])
+
+
+	for sample in em:
+		working_list = []
+		for model_index, value in enumerate(sample):
+			if model_index in accepable_models:
+				working_list.append(value)
+			if np.mean(working_list) <= 10:
+				truncated_count_10 +=1
+
+
+	return accepable_models, truncated_count_10
+
+select_best_models(error_matrix, keep_n)
