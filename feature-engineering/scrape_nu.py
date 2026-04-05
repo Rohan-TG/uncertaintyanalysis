@@ -11,8 +11,21 @@ pendf = open('/Users/rntg/PycharmProjects/uncertaintyanalysis/ml/mldata/baseline
 
 lines = pendf.readlines()
 
-nu_section = ENDF6.find_section(lines, MF=1, MT=Reactions.nubar)
-nu_energy, nu_values = ENDF6.read_table(nu_section)
+
 
 # nu_prompt_section = ENDF6.find_section(lines, MF=1, MT=Reactions.nu_prompt)
 
+def fetch_nu(nuclide_file):
+	"nuclide_file: ENDF-6 File address and name"
+	file = open(nuclide_file, 'r')
+	readlines = file.readlines()
+
+	nu_section = ENDF6.find_section(readlines, MF=1, MT=Reactions.nubar)
+	nu_energy, nu_values = ENDF6.read_table(nu_section)
+
+	return nu_energy, nu_values
+
+
+
+def calculate_eta():
+	pass
