@@ -12,19 +12,20 @@ num_samples = 10  # number of samples
 processes = 5
 
 
-cli = f"{filename}  --processes {processes}  --samples {num_samples}  --mf 35  --temperatures 300  --acer  --debug"
-sandy.sampling.run(cli.split())
+# cli = f"{filename}  --processes {processes}  --samples {num_samples}  --mf 35  --temperatures 300  --acer  --debug"
+# sandy.sampling.run(cli.split())
 
-#
-# samples = endf6.get_perturbations(
-# 	num_samples,
-# 	njoy_kws=dict(
-# 		err=0.0001,
-# 		chi=False,
-# 		mubar=False,
-# 		xs=False,
-# 		nubar=False,
-# 		verbose=True,
-# 	),
-# )
+
+samples = endf6.get_perturbations(
+	num_samples,
+	njoy_kws=dict(
+		err=0.0001,
+		chi=True,
+		mubar=False,
+		xs=False,
+		nubar=False,
+		verbose=True,
+		to_file=True,
+	),
+)
 
