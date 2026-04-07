@@ -6,6 +6,7 @@ za = 94239
 
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 filename = '942390.ENDFB8_0'
+endf6.to_file(filename)
 
 num_samples = 10  # number of samples
 processes = 5
