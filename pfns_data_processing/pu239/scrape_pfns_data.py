@@ -22,6 +22,8 @@ for i, set in enumerate(mat.section_data[5, 18]['subsections'][0]['distribution'
 	y_values = mat.section_data[5, 18]['subsections'][0]['distribution']['g'][i].y
 	y_matrix.append(y_values)
 
+	x = mat.section_data[5, 18]['subsections'][0]['distribution']['g'][i].x
+
 
 
 facecolors = plt.colormaps['viridis_r'](np.linspace(0, 1, len(lambdas)))
