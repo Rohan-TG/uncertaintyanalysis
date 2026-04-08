@@ -469,21 +469,22 @@ def select_best_models(error_matrix, keep_n_models):
 				sorted_models.insert(j, [i,val])
 				break
 
-	accepable_models = []
+	acceptable_models = []
 	for x in sorted_models[:keep_n_models]:
-		accepable_models.append(x[0])
+		acceptable_models.append(x[0])
 
 
 	for sample in em:
 		working_list = []
 		for model_index, value in enumerate(sample):
-			if model_index in accepable_models:
+			if model_index in acceptable_models:
 				working_list.append(value)
-			if np.mean(working_list) <= 10:
-				truncated_count_10 +=1
+
+		if np.mean(working_list) <= 10:
+			truncated_count_10 +=1
 
 
-	return accepable_models, truncated_count_10
+	return acceptable_models, truncated_count_10
 
-best_models_errors, best_models_count10 = select_best_models(error_matrix, keep_n)
+best_models, best_models_count10 = select_best_models(error_matrix_test, keep_n)
 print(best_models_count10 / len(keff_test) * 100)
