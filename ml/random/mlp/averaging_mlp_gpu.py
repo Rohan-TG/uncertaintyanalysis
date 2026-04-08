@@ -71,9 +71,9 @@ average_performance_list = []
 average_performance_list_test = []
 pcm10_performance_list = []
 
-def fetch_data(datafile):
+def fetch_data(datafile, dir = data_directory):
 
-	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	temp_df = pd.read_parquet(f'{dir}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
 	keff_value = float(temp_df['keff'].values[0])
@@ -211,7 +211,7 @@ pu9_test_indices = []
 pu0_test_indices = []
 pu1_test_indices = []
 for test_file in tqdm.tqdm(test_files, total=len(test_files)):
-	xs_values, keff_value = fetch_data(test_file)
+	xs_values, keff_value = fetch_data(test_file, dir=test_directory)
 
 	XS_test.append(xs_values)
 	keff_test.append(keff_value)
