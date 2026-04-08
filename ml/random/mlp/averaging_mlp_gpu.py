@@ -485,4 +485,5 @@ def select_best_models(error_matrix, keep_n_models):
 
 	return accepable_models, truncated_count_10
 
-select_best_models(error_matrix, keep_n)
+best_models_errors, best_models_count10 = select_best_models(error_matrix, keep_n)
+print(best_models_count10 / len(keff_test) * 100)
