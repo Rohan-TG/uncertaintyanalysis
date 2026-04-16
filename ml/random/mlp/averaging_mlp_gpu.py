@@ -284,7 +284,7 @@ def build_model():
 model_list = []
 
 prediction_matrix = [[] for i in range(len(y_val))]
-error_matrix = [[] for i in range(len(y_val))]
+error_matrix_val = [[] for i in range(len(y_val))]
 
 prediction_matrix_test = [[] for i in range(len(y_test))]
 error_matrix_test = [[] for i in range(len(y_test))]
@@ -355,7 +355,7 @@ for num in tqdm.tqdm(range(n_models)):
 		prediction_matrix[p_index].append(p)
 
 	for err_index, err in enumerate(errors):
-		error_matrix[err_index].append(err)
+		error_matrix_val[err_index].append(err)
 
 	sorted_errors = sorted(errors)
 	absolute_errors = [abs(x) for x in sorted_errors]
@@ -425,7 +425,7 @@ for num in tqdm.tqdm(range(n_models)):
 overall_run = "2500_eV_truncated_cycle_3"
 
 with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
-	pickle.dump(error_matrix, f)
+	pickle.dump(error_matrix_val, f)
 
 with open(f"predictions_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(prediction_matrix, f)
@@ -450,11 +450,11 @@ import datetime
 print(f'\nTotal runtime: {datetime.timedelta(seconds = (end_time - start_time))}')
 
 
-def select_best_models(error_matrix, keep_n_models):
+def select_best_models(error_matrix, keep_n_models, threshold=10):
 	"""error_matrix: the error matrix
 	keep_n_models: the number of models to keep"""
 
-	truncated_count_10 = 0
+	truncated_count_threshold = 0
 	em = np.array(error_matrix)
 	em_trans = np.transpose(em)
 
@@ -473,18 +473,19 @@ def select_best_models(error_matrix, keep_n_models):
 	for x in sorted_models[:keep_n_models]:
 		acceptable_models.append(x[0])
 
+	emt = np.array(error_matrix_test)
 
-	for sample in em:
+	for sample in emt:
 		working_list = []
 		for model_index, value in enumerate(sample):
 			if model_index in acceptable_models:
 				working_list.append(value)
 
-		if np.mean(working_list) <= 10:
-			truncated_count_10 +=1
+		if np.mean(working_list) <= threshold:
+			truncated_count_threshold +=1
 
 
-	return acceptable_models, truncated_count_10
+	return acceptable_models, truncated_count_threshold
 
-best_models, best_models_count10 = select_best_models(error_matrix_test, keep_n)
+best_models, best_models_count10 = select_best_models(error_matrix_val, keep_n)
 print(best_models_count10 / len(keff_test) * 100)
