@@ -422,7 +422,7 @@ for num in tqdm.tqdm(range(n_models)):
 	gc.collect()
 
 
-overall_run = "2500_eV_truncated_cycle_3"
+overall_run = "full_energy_cycle_4"
 
 with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(error_matrix_val, f)
@@ -475,6 +475,8 @@ def select_best_models(error_matrix, keep_n_models, threshold=10):
 
 	emt = np.array(error_matrix_test)
 
+	best_averaged_errors = []
+
 	for sample in emt:
 		working_list = []
 		for model_index, value in enumerate(sample):
@@ -484,8 +486,10 @@ def select_best_models(error_matrix, keep_n_models, threshold=10):
 		if np.mean(working_list) <= threshold:
 			truncated_count_threshold +=1
 
+		best_averaged_errors.append(np.mean(working_list))
 
-	return acceptable_models, truncated_count_threshold
 
-best_models, best_models_count10 = select_best_models(error_matrix_val, keep_n)
+	return acceptable_models, truncated_count_threshold, best_averaged_errors
+
+best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_val, keep_n)
 print(best_models_count10 / len(keff_test) * 100)
