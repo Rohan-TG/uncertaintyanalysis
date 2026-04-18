@@ -1,6 +1,7 @@
 import sandy
 import os
 import numpy as np
+import subprocess
 
 za = 94239
 
@@ -28,15 +29,20 @@ mf5_samples = endf6.get_perturbations(
 )
 
 
-# mf5_outs = endf6.apply_perturbations( # generates the PENDFs only
-# 	mf5_samples,
-# 	processes=processes,
-# 	njoy_kws=dict(err=0.0001),  # low error
-# 	to_file=True,
-# 	verbose=True,
-# )
-#
-#
+mf5_outs = endf6.apply_perturbations( # generates the PENDFs only
+	mf5_samples,
+	processes=processes,
+	njoy_kws=dict(err=0.0001),  # low error
+	to_file=True,
+	verbose=True,
+)
+
+
+filelist = os.listdir(os.getcwd())
+if 'endf6_directory' not in filelist:
+	subprocess.run('mkdir endf6_directory', shell=True)
+
+subprocess.run('mv *.endf6 endf6_directory', shell=True)
 # ace_outs = endf6.apply_perturbations(
 # 	samples,
 # 	processes=processes,
