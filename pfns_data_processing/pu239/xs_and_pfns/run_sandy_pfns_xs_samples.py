@@ -58,6 +58,8 @@ num_xs_samples = 1
 # perturb MF=3
 for perturbed_endf6 in tqdm.tqdm(perturbed_mf5_endf6_files, total=len(perturbed_mf5_endf6_files)):
 
+	file_index = perturbed_endf6.split('_')[-1].split('.')[0]
+
 	perturbed_endf6_object = sandy.Endf6.from_file(f'endf6_directory/{perturbed_endf6}')
 
 	mf3_samples = perturbed_endf6_object.get_perturbations(
@@ -80,6 +82,8 @@ for perturbed_endf6 in tqdm.tqdm(perturbed_mf5_endf6_files, total=len(perturbed_
 		to_file = True,
 		verbose = True,
 	)
+
+	subprocess.run(f'mv {za}_0.pendf {za}_{file_index}.pendf', shell=True)
 
 subprocess.run('mv *.pendf pendf_directory', shell=True)
 
