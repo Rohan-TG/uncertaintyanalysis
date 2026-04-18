@@ -422,7 +422,7 @@ for num in tqdm.tqdm(range(n_models)):
 	gc.collect()
 
 
-overall_run = "full_energy_cycle_4"
+overall_run = "training_fraction_0.5"
 
 with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(error_matrix_val, f)
