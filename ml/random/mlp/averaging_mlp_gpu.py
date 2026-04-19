@@ -289,6 +289,9 @@ error_matrix_val = [[] for i in range(len(y_val))]
 prediction_matrix_test = [[] for i in range(len(y_test))]
 error_matrix_test = [[] for i in range(len(y_test))]
 
+
+save_models = []
+
 for num in tqdm.tqdm(range(n_models)):
 	keras.backend.clear_session()
 
@@ -417,6 +420,8 @@ for num in tqdm.tqdm(range(n_models)):
 	# # plt.savefig('errors_as_function_of_keff.png', dpi = 300)
 	# plt.show()
 
+	save_models.append(temp_model)
+
 	del history
 	del temp_model
 	gc.collect()
@@ -493,3 +498,10 @@ def select_best_models(error_matrix, keep_n_models, threshold=10):
 
 best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_val, keep_n)
 print(best_models_count10 / len(keff_test) * 100)
+
+selected_best_models = []
+for k, model in enumerate(save_models):
+	if k in best_models:
+		selected_best_models.append(model)
+
+del save_models
