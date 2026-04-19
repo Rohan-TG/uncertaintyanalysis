@@ -317,6 +317,9 @@ error_matrix_val = [[] for i in range(len(y_val))]
 prediction_matrix_test = [[] for i in range(len(y_test))]
 error_matrix_test = [[] for i in range(len(y_test))]
 
+pct_matrix_val = [[] for i in range(len(y_val))]
+pct_matrix_test = [[] for i in range(len(y_test))]
+
 
 
 for num in tqdm.tqdm(range(n_models)):
@@ -363,6 +366,11 @@ for num in tqdm.tqdm(range(n_models)):
 		over_limit_pct = (count / len(pct_deviation)) * 100
 		over_limit_list.append(over_limit_pct)
 		# print(f'{idx} - {over_limit_pct:0.1f}% Points over limit, Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
+
+		prediction_matrix_test[idx].append(rescaled_predictions)
+		pct_matrix_val[idx].append(pct_deviation)
+
+
 	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
 print(f'Mean R2: {np.mean(r2s):0.5f}')
