@@ -427,7 +427,7 @@ for num in tqdm.tqdm(range(n_models)):
 	gc.collect()
 
 
-overall_run = "training_fraction_0.5"
+overall_run = "saved_best_5"
 
 with open(f"errors_matrix_{overall_run}.pkl", "wb") as f:
 	pickle.dump(error_matrix_val, f)
