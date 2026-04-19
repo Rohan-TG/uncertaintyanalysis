@@ -60,7 +60,7 @@ average_performance_list_test = []
 
 
 
-def fetch_data(datafile):
+def fetch_data(datafile, flux_data_dir = flux_data_directory):
 
 	temp_df = pd.read_parquet(f'{xs_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
@@ -100,7 +100,7 @@ def fetch_data(datafile):
 	# Now fetch spectrum data labels
 
 	flux_file = f'Flux_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}.parquet'
-	flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
+	flux_read_obj = pd.read_parquet(f'{flux_data_dir}/{flux_file}', engine='pyarrow')
 	flux_data = flux_read_obj['flux'].values
 	flux_error = flux_read_obj['flux_errror']
 
@@ -219,7 +219,7 @@ if test_data_directory != 'x':
 	flux_test = []
 	flux_test_error = []
 	with ProcessPoolExecutor(max_workers=data_processes) as executor:
-		futures_test = [executor.submit(fetch_data, test_file) for test_file in test_files]
+		futures_test = [executor.submit(fetch_data, test_file, test_data_directory) for test_file in test_files]
 
 		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
 			xs_values_test, flux_value_test, flux_test_err = future_test.result()
