@@ -1,7 +1,7 @@
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
-
+import datetime
 # 1D CNN
 
 computer = os.uname().nodename
@@ -18,14 +18,16 @@ import tqdm
 import keras
 import time
 import matplotlib.pyplot as plt
-
+import pickle
+from sklearn.metrics import r2_score
 
 
 xs_directory = input('XS directory: ')
 flux_data_directory = input('Flux data directory: ')
 test_data_directory = input('Test data directory (x for set to val): ')
 patience = int(input('Patience: '))
-# flux_data_directory = input('Flux data directory: ')
+n_models = int(input('\nN. models: '))
+keep_n = int(input('\nKeep n. models: '))
 
 
 # data_processes = int(input('Num. data processors: '))
@@ -52,6 +54,8 @@ for file in all_parquets:
 
 print('Fetching training data...')
 
+average_performance_list = []
+average_performance_list_test = []
 
 
 
@@ -277,82 +281,88 @@ def process_data_mlp(XS_train, XS_test):
 
 
 
-
-
-
-
-
-
 if test_data_directory == 'x':
 	XS_test = XS_val
 	y_test = y_val
 
-
-
-
-callback = keras.callbacks.EarlyStopping(monitor='val_loss',
-										 # min_delta=0.005,
-										 patience=patience,
-										 mode='min',
-										 start_from_epoch=3,
-										 restore_best_weights=True)
-
-
 X_train, X_val = process_data_mlp(XS_train, XS_val)
 
-model =keras.Sequential()
-model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(900, activation='relu'))
-model.add(keras.layers.Dense(750, activation='relu'))
-model.add(keras.layers.Dense(600, activation='relu'))
-model.add(keras.layers.Dense(540, activation='relu'))
-model.add(keras.layers.Dense(380, activation='relu'))
-model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
-model.compile(loss='MeanSquaredError', optimizer='adam')
+def build_model():
+	"""Returns a Keras Sequential model"""
+	callback = keras.callbacks.EarlyStopping(monitor='val_loss',
+											 # min_delta=0.005,
+											 patience=patience,
+											 mode='min',
+											 start_from_epoch=3,
+											 restore_best_weights=True)
+
+	model =keras.Sequential()
+	model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+	model.add(keras.layers.Dense(900, activation='relu'))
+	model.add(keras.layers.Dense(750, activation='relu'))
+	model.add(keras.layers.Dense(600, activation='relu'))
+	model.add(keras.layers.Dense(540, activation='relu'))
+	model.add(keras.layers.Dense(380, activation='relu'))
+	model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
+	model.compile(loss='MeanSquaredError', optimizer='adam')
+
+	return model, callback
 
 
-import datetime
-trainstart = time.time()
-history = model.fit(X_train,
-					y_train,
-					epochs=3000,
-					batch_size=32,
-					callbacks=callback,
-					validation_data=(X_val, y_val),
-					verbose=1)
+model_list = []
 
-train_end = time.time()
-print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-predictions = model.predict(X_val)
+prediction_matrix = [[] for i in range(len(y_val))]
+error_matrix_val = [[] for i in range(len(y_val))]
 
-from sklearn.metrics import r2_score
-r2s = []
+prediction_matrix_test = [[] for i in range(len(y_test))]
+error_matrix_test = [[] for i in range(len(y_test))]
 
-rescaled_full_p = [] # contains predictions
-rescaled_y_val = [] # contains labels
-pct_list = []
-over_limit_list = []
-for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
-	rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
-	rescaled_full_p.append(rescaled_predictions)
 
-	rescaled_true_set = descaler(true_set, means=scaling_means, stds=scaling_stds)
-	rescaled_y_val.append(rescaled_true_set)
 
-	true_percentage_errors = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_true_set))
+for num in tqdm.tqdm(range(n_models)):
+	keras.backend.clear_session()
+	temp_model, callback = build_model()
 
-	ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
-	pct_deviation = (ratios - 1.0) * 100
-	pct_list.append(pct_deviation)
+	trainstart = time.time()
+	history = temp_model.fit(X_train,
+						y_train,
+						epochs=3000,
+						batch_size=32,
+						callbacks=callback,
+						validation_data=(X_val, y_val),
+						verbose=1)
 
-	count = 0
-	for point_ml_error, point_real_error in zip(pct_deviation, true_percentage_errors):
-		if abs(point_ml_error) > abs(point_real_error * 2):
-			count += 1
+	train_end = time.time()
+	print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 
-	over_limit_pct = (count / len(pct_deviation)) * 100
-	over_limit_list.append(over_limit_pct)
-	print(f'{idx} - {over_limit_pct:0.1f}% Points over limit, Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
+	predictions_val = temp_model.predict(X_val)
+	r2s = []
+
+	rescaled_full_p = [] # contains predictions
+	rescaled_y_val = [] # contains labels
+	pct_list = []
+	over_limit_list = []
+	for idx, (p_set, true_set) in enumerate(zip(predictions_val, y_val)):
+		rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
+		rescaled_full_p.append(rescaled_predictions)
+
+		rescaled_true_set = descaler(true_set, means=scaling_means, stds=scaling_stds)
+		rescaled_y_val.append(rescaled_true_set)
+
+		true_percentage_errors = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_true_set))
+
+		ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
+		pct_deviation = (ratios - 1.0) * 100
+		pct_list.append(pct_deviation)
+
+		count = 0
+		for point_ml_error, point_real_error in zip(pct_deviation, true_percentage_errors):
+			if abs(point_ml_error) > abs(point_real_error * 2):
+				count += 1
+
+		over_limit_pct = (count / len(pct_deviation)) * 100
+		over_limit_list.append(over_limit_pct)
+		# print(f'{idx} - {over_limit_pct:0.1f}% Points over limit, Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
 	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
 print(f'Mean R2: {np.mean(r2s):0.5f}')
