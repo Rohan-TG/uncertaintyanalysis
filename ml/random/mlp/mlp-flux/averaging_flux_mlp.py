@@ -22,12 +22,12 @@ import pickle
 from sklearn.metrics import r2_score
 
 
-xs_directory = input('XS directory: ')
+xs_directory = input('\nXS directory: ')
 flux_data_directory = input('Flux data directory: ')
 
-test_xs_directory = input('Test XS directory: ')
+test_xs_directory = input('\nTest XS directory: ')
 test_flux_data_directory = input('Test flux data directory (x for set to val): ')
-patience = int(input('Patience: '))
+patience = int(input('\nPatience: '))
 n_models = int(input('\nN. models: '))
 keep_n = int(input('\nKeep n. models: '))
 
@@ -36,8 +36,8 @@ keep_n = int(input('\nKeep n. models: '))
 data_processes = 6
 all_parquets = os.listdir(xs_directory)
 
-training_fraction = float(input('Enter training data fraction: '))
-lower_energy_bound = float(input('Enter lower energy bound in eV: '))
+training_fraction = float(input('\nEnter training data fraction: '))
+lower_energy_bound = float(input('\nEnter lower energy bound in eV: '))
 
 n_training_samples = int(training_fraction * len(all_parquets))
 
@@ -54,7 +54,7 @@ for file in all_parquets:
 
 
 
-print('Fetching training data...')
+print('\nFetching training data...')
 
 average_performance_list = []
 average_performance_list_test = []
@@ -194,7 +194,7 @@ y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train,
 XS_val = []
 flux_val = []
 flux_val_error = []
-print('Fetching val data...')
+print('\nFetching val data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
@@ -214,7 +214,7 @@ y_val = np.array(y_val)
 flux_errors_val = np.array(flux_errors_val)
 
 if test_flux_data_directory != 'x':
-	print('Fetching test data...')
+	print('\nFetching test data...')
 	test_files = os.listdir(test_flux_data_directory)
 
 	XS_test = []
@@ -233,7 +233,7 @@ if test_flux_data_directory != 'x':
 	y_test, flux_errors_test = scale_flux(flux_test, flux_error_array=flux_test_error, train_mode=False, means=scaling_means, stds=scaling_stds)
 
 
-print('Scaling training data...')
+print('\nScaling training data...')
 
 
 le_bound_index = 1 # filters out NaNs
@@ -338,7 +338,7 @@ for num in tqdm.tqdm(range(n_models)):
 						verbose=1)
 
 	train_end = time.time()
-	print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
+	print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 
 	predictions_val = temp_model.predict(X_val)
 	r2s = []
@@ -375,7 +375,7 @@ for num in tqdm.tqdm(range(n_models)):
 
 	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
-print(f'Mean R2: {np.mean(r2s):0.5f}')
+print(f'\nMean R2: {np.mean(r2s):0.5f}')
 print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}% over limit')
 
 # d1, d2, d3 = fetch_data(all_parquets[0])
