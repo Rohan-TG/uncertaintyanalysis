@@ -60,7 +60,7 @@ average_performance_list_test = []
 
 
 
-def fetch_data(datafile, flux_data_dir = flux_data_directory):
+def fetch_data(datafile, flux_data_dir):
 
 	temp_df = pd.read_parquet(f'{xs_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
@@ -122,7 +122,7 @@ XS_train = []
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
+	futures = [executor.submit(fetch_data, train_file, flux_data_directory) for train_file in training_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		xs_values, flux_values, flux_error = future.result()
@@ -196,7 +196,7 @@ print('Fetching val data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, val_file) for val_file in val_files]
+	futures = [executor.submit(fetch_data, val_file, flux_data_directory) for val_file in val_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		xs_values_val, flux_value_val, flux_error_val = future.result()
@@ -376,21 +376,21 @@ for num in tqdm.tqdm(range(n_models)):
 print(f'Mean R2: {np.mean(r2s):0.5f}')
 print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}% over limit')
 
-d1, d2, d3 = fetch_data(all_parquets[0])
-
-grid = []
-for i in flux_lower_bounds:
-	grid.append(float(i))
-
-for j in flux_upper_bounds:
-	grid.append(float(j))
-
-grid.sort()
-edges = []
-for i in grid:
-	if i not in edges:
-		edges.append(i)
-widths = np.diff(edges)
+# d1, d2, d3 = fetch_data(all_parquets[0])
+#
+# grid = []
+# for i in flux_lower_bounds:
+# 	grid.append(float(i))
+#
+# for j in flux_upper_bounds:
+# 	grid.append(float(j))
+#
+# grid.sort()
+# edges = []
+# for i in grid:
+# 	if i not in edges:
+# 		edges.append(i)
+# widths = np.diff(edges)
 
 
 
