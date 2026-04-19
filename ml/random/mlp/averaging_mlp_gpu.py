@@ -205,42 +205,100 @@ X_val = scaled_columns_xval.transpose()
 
 print('\nFetching test data...')
 
-keff_test = []
-XS_test = []
-pu9_test_indices = []
-pu0_test_indices = []
-pu1_test_indices = []
-for test_file in tqdm.tqdm(test_files, total=len(test_files)):
-	xs_values, keff_value = fetch_data(test_file, dir=test_directory)
+def generate_test_data(test_data_directory, mask=None, masking_value=0, truncate=False):
+	files = os.listdir(test_data_directory)
 
-	XS_test.append(xs_values)
-	keff_test.append(keff_value)
+	limiter = 795
 
-	pu9_test_index = int(test_file.split('_')[4])
-	pu9_test_indices.append(pu9_test_index)
+	keff_test = []
+	XS_test = []
+	pu9_test_indices = []
+	pu0_test_indices = []
+	pu1_test_indices = []
+	for test_file in tqdm.tqdm(files, total=len(files)):
+		xs_values, keff_value = fetch_data(test_file, dir=test_data_directory)
 
-	pu0_test_index = int(test_file.split('_')[6])
-	pu0_test_indices.append(pu0_test_index)
-
-	pu1_test_index = int(test_file.split('_')[8].split('.')[0])
-	pu1_test_indices.append(pu1_test_index)
-
-
-XS_test = np.array(XS_test)
-y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
-
-scaling_matrix_xtest = XS_test.transpose()
-
-scaled_columns_xtest = []
-print('\nScaling test data...')
-for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
-	scaled_column = (np.array(column) - c_mean) / c_std
-	scaled_columns_xtest.append(scaled_column)
-
-scaled_columns_xtest = np.array(scaled_columns_xtest)
-X_test = scaled_columns_xtest.transpose()
+		if truncate:
+			ticker = 0
+			for val_index, val in enumerate(xs_values):
+				if ticker < 1248:
+					ticker += 1
+				elif ticker >= 1248:
+					ticker = 0
+				if ticker < limiter:
+					xs_values[val_index] = 0
 
 
+		XS_test.append(xs_values)
+		keff_test.append(keff_value)
+
+		pu9_test_index = int(test_file.split('_')[4])
+		pu9_test_indices.append(pu9_test_index)
+
+		pu0_test_index = int(test_file.split('_')[6])
+		pu0_test_indices.append(pu0_test_index)
+
+		pu1_test_index = int(test_file.split('_')[8].split('.')[0])
+		pu1_test_indices.append(pu1_test_index)
+
+	XS_test = np.array(XS_test)
+	y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+
+	scaling_matrix_xtest = XS_test.transpose()
+
+	scaled_columns_xtest = []
+	print('\nScaling test data...')
+	for column, c_mean, c_std in tqdm.tqdm(
+			zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds),
+			total=len(scaling_matrix_xtest[le_bound_index:-1])):
+		scaled_column = (np.array(column) - c_mean) / c_std
+		scaled_columns_xtest.append(scaled_column)
+
+	scaled_columns_xtest = np.array(scaled_columns_xtest)
+	X_test = scaled_columns_xtest.transpose()
+	X_test = np.nan_to_num(X_test, nan=0.0)
+
+	if mask is not None:
+		X_test[np.abs(X_test) >= float(mask)] = masking_value
+
+	return(X_test, y_test, keff_test)
+
+# keff_test = []
+# XS_test = []
+# pu9_test_indices = []
+# pu0_test_indices = []
+# pu1_test_indices = []
+# for test_file in tqdm.tqdm(test_files, total=len(test_files)):
+# 	xs_values, keff_value = fetch_data(test_file, dir=test_directory)
+#
+# 	XS_test.append(xs_values)
+# 	keff_test.append(keff_value)
+#
+# 	pu9_test_index = int(test_file.split('_')[4])
+# 	pu9_test_indices.append(pu9_test_index)
+#
+# 	pu0_test_index = int(test_file.split('_')[6])
+# 	pu0_test_indices.append(pu0_test_index)
+#
+# 	pu1_test_index = int(test_file.split('_')[8].split('.')[0])
+# 	pu1_test_indices.append(pu1_test_index)
+#
+#
+# XS_test = np.array(XS_test)
+# y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+#
+# scaling_matrix_xtest = XS_test.transpose()
+#
+# scaled_columns_xtest = []
+# print('\nScaling test data...')
+# for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds), total=len(scaling_matrix_xtest[le_bound_index:-1])):
+# 	scaled_column = (np.array(column) - c_mean) / c_std
+# 	scaled_columns_xtest.append(scaled_column)
+#
+# scaled_columns_xtest = np.array(scaled_columns_xtest)
+# X_test = scaled_columns_xtest.transpose()
+
+X_test, y_test, keff_test = generate_test_data(test_data_directory=test_directory)
 
 
 
@@ -505,3 +563,14 @@ for k, model in enumerate(save_models):
 		selected_best_models.append(model)
 
 del save_models
+
+
+def evaluate_model(MODEL, X_matrix):
+
+	model_predictions = MODEL.predict(X_matrix)
+	model_predictions = model_predictions.ravel()
+	rescaled_model_predictions = []
+	for x in model_predictions:
+		rescaled_model_predictions.append(x * train_labels_std + train_labels_mean)
+
+	return rescaled_model_predictions
