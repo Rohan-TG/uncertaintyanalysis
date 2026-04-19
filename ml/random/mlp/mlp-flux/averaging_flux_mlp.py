@@ -24,7 +24,7 @@ from sklearn.metrics import r2_score
 
 xs_directory = input('XS directory: ')
 flux_data_directory = input('Flux data directory: ')
-test_data_directory = input('Test data directory (x for set to val): ')
+test_flux_data_directory = input('Test flux data directory (x for set to val): ')
 patience = int(input('Patience: '))
 n_models = int(input('\nN. models: '))
 keep_n = int(input('\nKeep n. models: '))
@@ -211,15 +211,15 @@ y_val = np.array(y_val)
 
 flux_errors_val = np.array(flux_errors_val)
 
-if test_data_directory != 'x':
+if test_flux_data_directory != 'x':
 	print('Fetching test data...')
-	test_files = os.listdir(test_data_directory)
+	test_files = os.listdir(test_flux_data_directory)
 
 	XS_test = []
 	flux_test = []
 	flux_test_error = []
 	with ProcessPoolExecutor(max_workers=data_processes) as executor:
-		futures_test = [executor.submit(fetch_data, test_file, test_data_directory) for test_file in test_files]
+		futures_test = [executor.submit(fetch_data, test_file, test_flux_data_directory) for test_file in test_files]
 
 		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
 			xs_values_test, flux_value_test, flux_test_err = future_test.result()
@@ -281,7 +281,7 @@ def process_data_mlp(XS_train, XS_test):
 
 
 
-if test_data_directory == 'x':
+if test_flux_data_directory == 'x':
 	XS_test = XS_val
 	y_test = y_val
 
