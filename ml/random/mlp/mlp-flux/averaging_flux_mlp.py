@@ -215,7 +215,7 @@ flux_errors_val = np.array(flux_errors_val)
 
 if test_flux_data_directory != 'x':
 	print('\nFetching test data...')
-	test_files = os.listdir(test_flux_data_directory)
+	test_files = os.listdir(test_xs_directory)
 
 	XS_test = []
 	flux_test = []
