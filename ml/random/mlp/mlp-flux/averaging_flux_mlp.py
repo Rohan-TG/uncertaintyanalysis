@@ -24,6 +24,8 @@ from sklearn.metrics import r2_score
 
 xs_directory = input('XS directory: ')
 flux_data_directory = input('Flux data directory: ')
+
+test_xs_directory = input('Test XS directory: ')
 test_flux_data_directory = input('Test flux data directory (x for set to val): ')
 patience = int(input('Patience: '))
 n_models = int(input('\nN. models: '))
@@ -60,9 +62,9 @@ average_performance_list_test = []
 
 
 
-def fetch_data(datafile, flux_data_dir):
+def fetch_data(datafile, xs_dir, flux_data_dir):
 
-	temp_df = pd.read_parquet(f'{xs_directory}/{datafile}', engine='pyarrow')
+	temp_df = pd.read_parquet(f'{xs_dir}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
 	pu9_index = int(datafile.split('_')[4])
@@ -122,7 +124,7 @@ XS_train = []
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, train_file, flux_data_directory) for train_file in training_files]
+	futures = [executor.submit(fetch_data, train_file, xs_directory, flux_data_directory) for train_file in training_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		xs_values, flux_values, flux_error = future.result()
@@ -196,7 +198,7 @@ print('Fetching val data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
-	futures = [executor.submit(fetch_data, val_file, flux_data_directory) for val_file in val_files]
+	futures = [executor.submit(fetch_data, val_file, xs_directory, flux_data_directory) for val_file in val_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		xs_values_val, flux_value_val, flux_error_val = future.result()
@@ -219,7 +221,7 @@ if test_flux_data_directory != 'x':
 	flux_test = []
 	flux_test_error = []
 	with ProcessPoolExecutor(max_workers=data_processes) as executor:
-		futures_test = [executor.submit(fetch_data, test_file, test_flux_data_directory) for test_file in test_files]
+		futures_test = [executor.submit(fetch_data, test_file, test_xs_directory, test_flux_data_directory) for test_file in test_files]
 
 		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
 			xs_values_test, flux_value_test, flux_test_err = future_test.result()
@@ -394,36 +396,36 @@ print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}%
 
 
 
-def plot_index(sample_idx):
-
-	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
-
-	sigma_2_upper = 2* true_pct_error
-	sigma_2_lower = -2 * true_pct_error
-
-
-
-	plt.figure()
-	plt.bar(edges[:-1], rescaled_full_p[sample_idx], width=widths, label='Prediction')
-	plt.bar(edges[:-1], rescaled_y_val[sample_idx], width=widths, label = "True")
-	plt.grid()
-	plt.legend()
-	plt.xlabel('Energy / MeV')
-	plt.ylabel('Normalised flux')
-	plt.xscale('log')
-	plt.ylim(0,0.015)
-	plt.savefig(f'{sample_idx}_bar_mlp.png')
-
-
-	scale_log = input('Log scale? (y): ')
-	plt.figure()
-	plt.bar(edges[:-1], pct_list[sample_idx], width=widths, label = 'ML error')
-	plt.plot(edges[:-1], true_pct_error, label='MC Error')
-	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$')
-	plt.xlabel('Energy / Mev')
-	plt.ylabel('% Deviation')
-	if scale_log == 'y':
-		plt.xscale('log')
-	plt.grid()
-	plt.legend()
-	plt.savefig(f'{sample_idx}_val_pct_error_bar_mlp.png')
+# def plot_index(sample_idx):
+#
+# 	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
+#
+# 	sigma_2_upper = 2* true_pct_error
+# 	sigma_2_lower = -2 * true_pct_error
+#
+#
+#
+# 	plt.figure()
+# 	plt.bar(edges[:-1], rescaled_full_p[sample_idx], width=widths, label='Prediction')
+# 	plt.bar(edges[:-1], rescaled_y_val[sample_idx], width=widths, label = "True")
+# 	plt.grid()
+# 	plt.legend()
+# 	plt.xlabel('Energy / MeV')
+# 	plt.ylabel('Normalised flux')
+# 	plt.xscale('log')
+# 	plt.ylim(0,0.015)
+# 	plt.savefig(f'{sample_idx}_bar_mlp.png')
+#
+#
+# 	scale_log = input('Log scale? (y): ')
+# 	plt.figure()
+# 	plt.bar(edges[:-1], pct_list[sample_idx], width=widths, label = 'ML error')
+# 	plt.plot(edges[:-1], true_pct_error, label='MC Error')
+# 	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$')
+# 	plt.xlabel('Energy / Mev')
+# 	plt.ylabel('% Deviation')
+# 	if scale_log == 'y':
+# 		plt.xscale('log')
+# 	plt.grid()
+# 	plt.legend()
+# 	plt.savefig(f'{sample_idx}_val_pct_error_bar_mlp.png')
