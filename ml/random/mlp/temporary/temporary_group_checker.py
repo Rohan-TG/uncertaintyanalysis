@@ -59,17 +59,29 @@ for file in all_parquets:
 
 
 print('\nFetching training data...')
-groupfile = ''
+groupdir = '/home/rnt26/uncertaintyanalysis/ml/random/mlp/temporary/groupfiles'
+groupfiles = os.listdir(data_directory)
 
+groupfile = f'{groupdir}/Pu-239_g3_-0.011_MT18.parquet'
 
 def fetch_data(datafile, data_dir=data_directory):
 
 	temp_df = pd.read_parquet(f'{data_dir}/{datafile}', engine='pyarrow')
+	energies = temp_df['ERG'].values
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
 	keff_value = float(temp_df['keff'].values[0])
 
+
 	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
+
+	if data_dir == test_directory:
+		df = pd.read_parquet(groupfile, engine='pyarrow')
+		group_reduction = np.interp(energies, df['ERG'].values, df['94239_MT18_XS'].values)
+
+		pu9_mt18xs = group_reduction
+		keff_value = df['keff'].values[0]
+
 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
 	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
 
@@ -171,38 +183,36 @@ for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xval[le_bound_index:-1
 scaled_columns_xval = np.array(scaled_columns_xval)
 X_val = scaled_columns_xval.transpose()
 
-#####
-if generate_test_data == 'y':
-	print("\nFetching test data")
-	XS_test = []
-	keff_test = []
+print("\nFetching test data")
+XS_test = []
+keff_test = []
 
-	with ProcessPoolExecutor(max_workers=data_processes) as executor:
-		futures = [executor.submit(fetch_data, test_file, test_directory) for test_file in test_files]
+with ProcessPoolExecutor(max_workers=data_processes) as executor:
+	futures = [executor.submit(fetch_data, test_file, test_directory) for test_file in test_files]
 
-		for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-			xs_values_test, keff_value_test = future.result()
-			XS_test.append(xs_values_test)
-			keff_test.append(keff_value_test)
+	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+		xs_values_test, keff_value_test = future.result()
+		XS_test.append(xs_values_test)
+		keff_test.append(keff_value_test)
 
-	XS_test = np.array(XS_test)
-	y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+XS_test = np.array(XS_test)
+y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
 
-	scaling_matrix_xtest = XS_test.transpose()
+scaling_matrix_xtest = XS_test.transpose()
 
-	scaled_columns_xtest = []
-	print('\nScaling test data...')
-	for column, c_mean, c_std in tqdm.tqdm(
-			zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds),
-			total=len(scaling_matrix_xtest[le_bound_index:-1])):
+scaled_columns_xtest = []
+print('\nScaling test data...')
+for column, c_mean, c_std in tqdm.tqdm(
+		zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds),
+		total=len(scaling_matrix_xtest[le_bound_index:-1])):
 
-		scaled_column = (np.array(column) - c_mean) / c_std
-		scaled_columns_xtest.append(scaled_column)
+	scaled_column = (np.array(column) - c_mean) / c_std
+	scaled_columns_xtest.append(scaled_column)
 
-	scaled_columns_xtest = np.array(scaled_columns_xtest)
-	X_test = scaled_columns_xtest.transpose()
+scaled_columns_xtest = np.array(scaled_columns_xtest)
+X_test = scaled_columns_xtest.transpose()
 
-	X_test = np.nan_to_num(X_test, nan=0.0)
+X_test = np.nan_to_num(X_test, nan=0.0)
 
 X_val = np.nan_to_num(X_val, nan=0.0)
 X_train = np.nan_to_num(X_train, nan=0.0)
@@ -327,54 +337,54 @@ plt.show()
 ### Feature importance
 
 # shap_values = shap.DeepExplainer(model=model, data=X_test)
-if generate_test_data == 'y':
 
-	if mask != 'x':
-		masking_value = 0
-		X_test[np.abs(X_test) >= float(mask)] = masking_value
 
-	test_predictions = model.predict(X_test)
-	test_predictions = test_predictions.ravel()
+# if mask != 'x':
+# 	masking_value = 0
+# 	X_test[np.abs(X_test) >= float(mask)] = masking_value
 
-	rescaled_test_predictions = []
-	test_predictions_list = test_predictions.tolist()
+test_predictions = model.predict(X_test)
+test_predictions = test_predictions.ravel()
 
-	for pred in test_predictions_list:
-		descaled_p = pred * train_labels_std + train_labels_mean
-		rescaled_test_predictions.append(float(descaled_p))
+rescaled_test_predictions = []
+test_predictions_list = test_predictions.tolist()
 
-	test_errors = []
-	for predicted, true in zip(rescaled_test_predictions, keff_test):
-		test_errors.append((predicted - true) * 1e5)
-		print(f'TEST - SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+for pred in test_predictions_list:
+	descaled_p = pred * train_labels_std + train_labels_mean
+	rescaled_test_predictions.append(float(descaled_p))
 
-	sorted_test_errors = sorted(test_errors)
-	absolute_test_errors = [abs(x) for x in sorted_test_errors]
-	print(f'\nAverage absolute test error: {np.mean(absolute_test_errors)} +- {np.std(absolute_test_errors)}')
+test_errors = []
+for predicted, true in zip(rescaled_test_predictions, keff_test):
+	test_errors.append((predicted - true) * 1e5)
+	print(f'TEST - SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
 
-	print(f'Max -ve error: {sorted_test_errors[0]} pcm, Max +ve error: {sorted_test_errors[-1]} pcm')
+sorted_test_errors = sorted(test_errors)
+absolute_test_errors = [abs(x) for x in sorted_test_errors]
+print(f'\nAverage absolute test error: {np.mean(absolute_test_errors)} +- {np.std(absolute_test_errors)}')
 
-	print(f"Smallest absolute error: {min(absolute_test_errors)} pcm")
-	acceptable_test_predictions = []
-	borderline_test_predictions = []
-	fifteen_pcm_test_predictions = []
-	twenty_pcm_test_predictions = []
-	for x in absolute_test_errors:
-		if x <= 5.0:
-			acceptable_test_predictions.append(x)
-		if x <= 10.0:
-			borderline_test_predictions.append(x)
-		if x <= 15.0:
-			fifteen_pcm_test_predictions.append(x)
-		if x <= 20.0:
-			twenty_pcm_test_predictions.append(x)
+print(f'Max -ve error: {sorted_test_errors[0]} pcm, Max +ve error: {sorted_test_errors[-1]} pcm')
 
-	print(f' {len(acceptable_test_predictions)} ({len(acceptable_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 5 pcm error')
-	print(f' {len(borderline_test_predictions)} ({len(borderline_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 10 pcm error')
-	print(f' {len(fifteen_pcm_test_predictions)} ({len(fifteen_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 15 pcm error)')
-	print(f' {len(twenty_pcm_test_predictions)} ({len(twenty_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+print(f"Smallest absolute error: {min(absolute_test_errors)} pcm")
+acceptable_test_predictions = []
+borderline_test_predictions = []
+fifteen_pcm_test_predictions = []
+twenty_pcm_test_predictions = []
+for x in absolute_test_errors:
+	if x <= 5.0:
+		acceptable_test_predictions.append(x)
+	if x <= 10.0:
+		borderline_test_predictions.append(x)
+	if x <= 15.0:
+		fifteen_pcm_test_predictions.append(x)
+	if x <= 20.0:
+		twenty_pcm_test_predictions.append(x)
 
-	print('#### End test ####')
+print(f' {len(acceptable_test_predictions)} ({len(acceptable_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 5 pcm error')
+print(f' {len(borderline_test_predictions)} ({len(borderline_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 10 pcm error')
+print(f' {len(fifteen_pcm_test_predictions)} ({len(fifteen_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 15 pcm error)')
+print(f' {len(twenty_pcm_test_predictions)} ({len(twenty_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+
+print('#### End test ####')
 
 ### register errors
 
