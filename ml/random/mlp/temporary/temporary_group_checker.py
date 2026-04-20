@@ -77,7 +77,7 @@ def fetch_data(datafile, data_dir=data_directory):
 
 	if data_dir == test_directory:
 		df = pd.read_parquet(groupfile, engine='pyarrow')
-		group_reduction = np.interp(energies, df['ERG'].values, df['94239_MT18_XS'].values)
+		group_reduction = np.interp(energies, df['ERG'].values, df['XS'].values)
 
 		pu9_mt18xs = group_reduction
 		keff_value = df['keff'].values[0]
