@@ -79,7 +79,7 @@ def fetch_data(datafile, data_dir=data_directory):
 		df = pd.read_parquet(groupfile, engine='pyarrow')
 		group_reduction = np.interp(energies, df['ERG'].values, df['XS'].values)
 
-		pu9_mt18xs = group_reduction
+		pu9_mt18xs = group_reduction.tolist()
 		keff_value = df['keff'].values[0]
 
 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
