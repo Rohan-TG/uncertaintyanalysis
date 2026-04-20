@@ -513,7 +513,7 @@ import datetime
 print(f'\nTotal runtime: {datetime.timedelta(seconds = (end_time - start_time))}')
 
 
-def select_best_models(error_matrix, keep_n_models, threshold=10):
+def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 	"""error_matrix: the error matrix
 	keep_n_models: the number of models to keep"""
 
@@ -536,7 +536,10 @@ def select_best_models(error_matrix, keep_n_models, threshold=10):
 	for x in sorted_models[:keep_n_models]:
 		acceptable_models.append(x[0])
 
-	emt = np.array(error_matrix_test)
+	if mode == 'test':
+		emt = np.array(error_matrix_test)
+	else:
+		emt = np.array(error_matrix_val)
 
 	best_averaged_errors = []
 
