@@ -13,7 +13,10 @@ endf6.to_file(filename)
 num_samples = 5  # number of samples
 processes = 5
 
+import time
+import datetime
 
+start= time.time()
 
 mf3_and_mf5_samples = endf6.get_perturbations(
 	num_samples,
@@ -46,3 +49,7 @@ mf3_and_mf5_ace_outs = endf6.apply_perturbations(
 	verbose=True,
 	to_file=True,
 	)
+
+
+end = time.time()
+print(f'Completed in {datetime.timedelta(seconds=(end - start))}')
