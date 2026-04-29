@@ -62,7 +62,7 @@ print('\nFetching training data...')
 groupdir = '/home/rnt26/uncertaintyanalysis/ml/random/mlp/temporary/groupfiles'
 groupfiles = os.listdir(data_directory)
 
-groupfile = f'{groupdir}/Pu-239_g4_0.004_MT18.parquet'
+groupfile = f'{groupdir}/Pu-239_g4_0.000_MT18.parquet'
 
 def fetch_data(datafile, data_dir=data_directory):
 
