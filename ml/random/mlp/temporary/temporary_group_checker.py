@@ -67,8 +67,8 @@ groupfile = f'{groupdir}/Pu-239_g4_0.000_MT18.parquet'
 def fetch_data(datafile, data_dir=data_directory):
 
 	temp_df = pd.read_parquet(f'{data_dir}/{datafile}', engine='pyarrow')
-	energies = temp_df['ERG'].values
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
+	energies = temp_df['ERG'].values
 
 	keff_value = float(temp_df['keff'].values[0])
 
