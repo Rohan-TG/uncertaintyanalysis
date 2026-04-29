@@ -62,7 +62,7 @@ print('\nFetching training data...')
 groupdir = '/home/rnt26/uncertaintyanalysis/ml/random/mlp/temporary/groupfiles'
 groupfiles = os.listdir(data_directory)
 
-groupfile = f'{groupdir}/Pu-239_g3_-0.011_MT18.parquet'
+groupfile = f'{groupdir}/Pu-239_g3_0.004_MT18.parquet'
 
 def fetch_data(datafile, data_dir=data_directory):
 
@@ -213,6 +213,10 @@ scaled_columns_xtest = np.array(scaled_columns_xtest)
 X_test = scaled_columns_xtest.transpose()
 
 X_test = np.nan_to_num(X_test, nan=0.0)
+
+mask = 200
+X_test[np.abs(X_test) >= float(mask)] = 0
+
 
 X_val = np.nan_to_num(X_val, nan=0.0)
 X_train = np.nan_to_num(X_train, nan=0.0)
