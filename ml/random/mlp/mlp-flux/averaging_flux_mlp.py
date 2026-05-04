@@ -313,7 +313,7 @@ def build_model():
 
 model_list = []
 
-prediction_matrix = [[] for i in range(len(y_val))]
+prediction_matrix_val = [[] for i in range(len(y_val))]
 error_matrix_val = [[] for i in range(len(y_val))]
 
 prediction_matrix_test = [[] for i in range(len(y_test))]
@@ -322,8 +322,10 @@ error_matrix_test = [[] for i in range(len(y_test))]
 pct_matrix_val = [[] for i in range(len(y_val))]
 pct_matrix_test = [[] for i in range(len(y_test))]
 
+percentage_error_matrix_val = []
 
 
+# Run training N times with new models and same data
 for num in tqdm.tqdm(range(n_models)):
 	keras.backend.clear_session()
 	temp_model, callback = build_model()
@@ -342,6 +344,7 @@ for num in tqdm.tqdm(range(n_models)):
 
 	predictions_val = temp_model.predict(X_val)
 	r2s = []
+
 
 	rescaled_full_p = [] # contains predictions
 	rescaled_y_val = [] # contains labels
@@ -369,7 +372,8 @@ for num in tqdm.tqdm(range(n_models)):
 		over_limit_list.append(over_limit_pct)
 		# print(f'{idx} - {over_limit_pct:0.1f}% Points over limit, Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
 
-		prediction_matrix_test[idx].append(rescaled_predictions)
+		prediction_matrix_val[idx].append(rescaled_predictions)
+
 		pct_matrix_val[idx].append(pct_deviation)
 
 
@@ -377,6 +381,35 @@ for num in tqdm.tqdm(range(n_models)):
 
 print(f'\nMean R2: {np.mean(r2s):0.5f}')
 print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}% over limit')
+
+
+
+
+
+def count_outliers(prediction_list, labels, flux_errors_list):
+	"""prediction_list: normal scale predictions
+	labels: unscaled (e.g. y_val)"""
+	pct_list = []
+	exceeded_limit_list = []
+	for idx, (p_set, true_set) in enumerate(zip(prediction_list, labels)):
+
+		rescaled_labels = descaler(true_set, means=scaling_means, stds=scaling_stds)
+
+		label_pct_errors = 100 * (np.array(flux_errors_list[idx]) / np.array(p_set))
+
+		ratios = np.array(p_set) / np.array(rescaled_labels)
+
+		pct_deviation = (ratios - 1.0) * 100
+		pct_list.append(pct_deviation)
+
+		count = 0
+		for point_ml_err, point_real_err in zip(pct_deviation, label_pct_errors):
+			if abs(point_ml_err) > abs(point_real_err * 2):
+				count += 1
+
+		exceeded_limit_pct = (count / len(pct_deviation)) * 100
+		exceeded_limit_list.append(exceeded_limit_pct)
+
 
 # d1, d2, d3 = fetch_data(all_parquets[0])
 #
