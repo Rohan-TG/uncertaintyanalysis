@@ -397,8 +397,8 @@ def plot_index(sample_idx):
 	scale_log = input('Log scale? (y): ')
 	plt.figure()
 	plt.bar(edges[:-1], pct_list[sample_idx], width=widths, label = 'ML error')
-	plt.plot(edges[:-1], true_pct_error, label='MC Error')
-	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$')
+	# plt.plot(edges[:-1], true_pct_error, label='MC Error')
+	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$ MC uncertainty')
 	plt.xlabel('Energy / Mev')
 	plt.ylabel('% Deviation')
 	if scale_log == 'y':
