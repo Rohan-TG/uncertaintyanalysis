@@ -131,20 +131,26 @@ flux_train = np.array(flux_train) # matrix
 flux_train_error = np.array(flux_train_error)
 
 
-def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None):
+def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
+
 
 	normalised_flux_array = []
 	normalised_flux_error_array = []
-	for flux_set, flux_error_set in zip(flux_array, flux_error_array):
-		area = np.sum(flux_set)
-		norm_flux_vector = np.array(flux_set) / area
-		norm_flux_error = np.array(flux_error_set) / area
-		normalised_flux_array.append(norm_flux_vector)
-		normalised_flux_error_array.append(norm_flux_error)
+	if normalise:
+		for flux_set, flux_error_set in zip(flux_array, flux_error_array):
+			area = np.sum(flux_set)
+			norm_flux_vector = np.array(flux_set) / area
+			norm_flux_error = np.array(flux_error_set) / area
+			normalised_flux_array.append(norm_flux_vector)
+			normalised_flux_error_array.append(norm_flux_error)
 
-	normalised_flux_array = np.array(normalised_flux_array)
-	normalised_flux_error_array = np.array(normalised_flux_error_array)
+		normalised_flux_array = np.array(normalised_flux_array)
+		normalised_flux_error_array = np.array(normalised_flux_error_array)
+
+	else:
+		normalised_flux_array = flux_array
+		normalised_flux_error_array = flux_error_array
 
 	transposed_flux_array = normalised_flux_array.transpose()
 	if train_mode:
@@ -183,7 +189,7 @@ def descaler(scaled_flux_array, means, stds):
 	rescaled_flux_array = rescaled_flux_array
 	return rescaled_flux_array
 
-y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True)
+y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True, normalise=False)
 
 XS_val = []
 flux_val = []
@@ -202,7 +208,7 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 
 XS_val = np.array(XS_val)
 
-y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds)
+y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=False)
 y_val = np.array(y_val)
 
 flux_errors_val = np.array(flux_errors_val)
@@ -224,7 +230,7 @@ if test_data_directory != 'x':
 			flux_test_error.append(flux_test_err)
 
 	XS_test = np.array(XS_test)
-	y_test, flux_errors_test = scale_flux(flux_test, flux_error_array=flux_test_error, train_mode=False, means=scaling_means, stds=scaling_stds)
+	y_test, flux_errors_test = scale_flux(flux_test, flux_error_array=flux_test_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=False)
 
 
 print('Scaling training data...')
