@@ -149,8 +149,8 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 		normalised_flux_error_array = np.array(normalised_flux_error_array)
 
 	else:
-		normalised_flux_array = flux_array
-		normalised_flux_error_array = flux_error_array
+		normalised_flux_array = np.array(flux_array)
+		normalised_flux_error_array = np.array(flux_error_array)
 
 	transposed_flux_array = normalised_flux_array.transpose()
 	if train_mode:
