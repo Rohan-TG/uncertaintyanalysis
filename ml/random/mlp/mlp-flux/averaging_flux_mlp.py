@@ -106,10 +106,6 @@ def fetch_data(datafile, xs_dir, flux_data_dir):
 	flux_data = flux_read_obj['flux'].values
 	flux_error = flux_read_obj['flux_errror']
 
-	global flux_lower_bounds, flux_upper_bounds
-	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
-	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
-
 	return(XS_obj,
 		   flux_data,
 		   flux_error,
@@ -410,6 +406,11 @@ def count_outliers(prediction_list, labels, flux_errors_list):
 		exceeded_limit_pct = (count / len(pct_deviation)) * 100
 		exceeded_limit_list.append(exceeded_limit_pct)
 
+
+flux_file = 'Flux_data_Pu-239_9173_Pu-240_9113_Pu-241_9675.parquet'
+flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
+flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
+flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 # d1, d2, d3 = fetch_data(all_parquets[0])
 #
