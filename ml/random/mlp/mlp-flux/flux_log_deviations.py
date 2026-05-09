@@ -152,7 +152,7 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 		normalised_flux_error_array = np.array(normalised_flux_error_array)
 
 	else:
-		flux_differences = np.log(np.array(flux_array) - base_flux)
+		flux_differences = np.log(np.array(flux_array) / base_flux)
 		normalised_flux_array = flux_differences
 
 		normalised_flux_error_array = np.array(flux_error_array)
