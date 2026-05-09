@@ -130,8 +130,11 @@ XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per cha
 flux_train = np.array(flux_train) # matrix
 flux_train_error = np.array(flux_train_error)
 
+base_flux_file = pd.read_parquet('data/Flux_data_Pu-239_-3_Pu-240_-3_Pu-241_-3.parquet', engine='pyarrow')
+base_flux = np.array(base_flux_file['flux'].values)
 
-def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
+
+def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = False):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
 
 
@@ -149,7 +152,9 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 		normalised_flux_error_array = np.array(normalised_flux_error_array)
 
 	else:
-		normalised_flux_array = np.array(flux_array)
+		flux_differences = np.log(np.array(flux_array) - base_flux)
+		normalised_flux_array = flux_differences
+
 		normalised_flux_error_array = np.array(flux_error_array)
 
 	transposed_flux_array = normalised_flux_array.transpose()
@@ -178,6 +183,9 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 		return scaled_flux_array, normalised_flux_error_array
 	# return normalised_flux_array
 
+def delogger(logged_array):
+	return np.exp(np.array(logged_array))
+
 def descaler(scaled_flux_array, means, stds):
 	transposed_flux_array = scaled_flux_array.transpose()
 	rescaled_flux_array = []
@@ -186,7 +194,9 @@ def descaler(scaled_flux_array, means, stds):
 
 	rescaled_flux_array = np.array(rescaled_flux_array)
 	rescaled_flux_array = rescaled_flux_array.transpose()
-	rescaled_flux_array = rescaled_flux_array
+	rescaled_flux_array = delogger(rescaled_flux_array)
+
+
 	return rescaled_flux_array
 
 y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True, normalise=False)
