@@ -153,8 +153,8 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 		normalised_flux_error_array = np.array(normalised_flux_error_array)
 
 	else:
-		# flux_differences = np.log(np.array(flux_array) / base_flux)
-		flux_differences = np.array(flux_array) / base_flux
+		flux_differences = np.log(np.array(flux_array) / base_flux)
+		# flux_differences = np.array(flux_array) / base_flux
 		normalised_flux_array = flux_differences
 
 		normalised_flux_error_array = np.array(flux_error_array)
@@ -185,8 +185,8 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 		return scaled_flux_array, normalised_flux_error_array
 	# return normalised_flux_array
 
-# def delogger(logged_array):
-# 	return np.exp(np.array(logged_array))
+def delogger(logged_array):
+	return np.exp(np.array(logged_array))
 
 def descaler(scaled_flux_array, means, stds):
 	transposed_flux_array = scaled_flux_array.transpose()
@@ -196,7 +196,7 @@ def descaler(scaled_flux_array, means, stds):
 
 	rescaled_flux_array = np.array(rescaled_flux_array)
 	rescaled_flux_array = rescaled_flux_array.transpose()
-	# rescaled_flux_array = delogger(rescaled_flux_array)
+	rescaled_flux_array = delogger(rescaled_flux_array)
 
 
 	return rescaled_flux_array
@@ -325,7 +325,7 @@ model.add(keras.layers.Dense(750, activation='relu'))
 model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(540, activation='relu'))
 model.add(keras.layers.Dense(380, activation='relu'))
-model.add(keras.layers.Dense(y_val.shape[1], activation='softmax'))
+model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
 
