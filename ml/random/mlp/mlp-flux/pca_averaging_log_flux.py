@@ -20,6 +20,7 @@ import time
 import matplotlib.pyplot as plt
 import pickle
 from sklearn.metrics import r2_score
+from sklearn.decomposition import PCA
 
 
 xs_directory = input('\nXS directory: ')
@@ -62,9 +63,9 @@ average_performance_list_test = []
 
 
 
-def fetch_data(datafile, xs_dir, flux_data_dir):
+def fetch_data(datafile):
 
-	temp_df = pd.read_parquet(f'{xs_dir}/{datafile}', engine='pyarrow')
+	temp_df = pd.read_parquet(f'{xs_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
 	pu9_index = int(datafile.split('_')[4])
@@ -102,9 +103,13 @@ def fetch_data(datafile, xs_dir, flux_data_dir):
 	# Now fetch spectrum data labels
 
 	flux_file = f'Flux_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}.parquet'
-	flux_read_obj = pd.read_parquet(f'{flux_data_dir}/{flux_file}', engine='pyarrow')
+	flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
 	flux_data = flux_read_obj['flux'].values
 	flux_error = flux_read_obj['flux_errror']
+
+	global flux_lower_bounds, flux_upper_bounds
+	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
+	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 	return(XS_obj,
 		   flux_data,
@@ -133,20 +138,36 @@ flux_train = np.array(flux_train) # matrix
 flux_train_error = np.array(flux_train_error)
 
 
-def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None):
+# Base flux scraping
+base_flux_file = pd.read_parquet('data/Flux_data_Pu-239_-3_Pu-240_-3_Pu-241_-3.parquet', engine='pyarrow')
+base_flux = np.array(base_flux_file['flux'].values)
+normalised_base_flux = base_flux / (np.sum(base_flux))
+
+def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
 
 	normalised_flux_array = []
 	normalised_flux_error_array = []
-	for flux_set, flux_error_set in zip(flux_array, flux_error_array):
-		area = np.sum(flux_set)
-		norm_flux_vector = np.array(flux_set) / area
-		norm_flux_error = np.array(flux_error_set) / area
-		normalised_flux_array.append(norm_flux_vector)
-		normalised_flux_error_array.append(norm_flux_error)
+	if normalise:
+		for flux_set, flux_error_set in zip(flux_array, flux_error_array):
+			area = np.sum(flux_set)
+			norm_flux_vector = np.array(flux_set) / area
+			norm_flux_error = np.array(flux_error_set) / area
 
-	normalised_flux_array = np.array(normalised_flux_array)
-	normalised_flux_error_array = np.array(normalised_flux_error_array)
+			norm_flux_differences = np.log(norm_flux_vector / normalised_base_flux)
+
+			normalised_flux_array.append(norm_flux_differences)
+			normalised_flux_error_array.append(norm_flux_error)
+
+		normalised_flux_array = np.array(normalised_flux_array)
+		normalised_flux_error_array = np.array(normalised_flux_error_array)
+
+	else:
+		flux_differences = np.log(np.array(flux_array) / base_flux)
+		# flux_differences = np.array(flux_array) / base_flux
+		normalised_flux_array = flux_differences
+
+		normalised_flux_error_array = np.array(flux_error_array)
 
 	transposed_flux_array = normalised_flux_array.transpose()
 	if train_mode:
@@ -174,6 +195,9 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 		return scaled_flux_array, normalised_flux_error_array
 	# return normalised_flux_array
 
+def delogger(logged_array):
+	return np.exp(np.array(logged_array))
+
 def descaler(scaled_flux_array, means, stds):
 	transposed_flux_array = scaled_flux_array.transpose()
 	rescaled_flux_array = []
@@ -182,10 +206,15 @@ def descaler(scaled_flux_array, means, stds):
 
 	rescaled_flux_array = np.array(rescaled_flux_array)
 	rescaled_flux_array = rescaled_flux_array.transpose()
-	rescaled_flux_array = rescaled_flux_array
+	rescaled_flux_array = delogger(rescaled_flux_array)
+
 	return rescaled_flux_array
 
-y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True)
+
+y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True, normalise=True)
+pca = PCA(n_components=0.999, svd_solver='full')
+Z_train = pca.fit_transform(y_train)
+
 
 XS_val = []
 flux_val = []
@@ -204,8 +233,9 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 
 XS_val = np.array(XS_val)
 
-y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds)
+y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=True)
 y_val = np.array(y_val)
+Z_val = pca.transform(y_val)
 
 flux_errors_val = np.array(flux_errors_val)
 
@@ -301,10 +331,7 @@ def build_model():
 	model.add(keras.layers.Dense(600, activation='relu'))
 	model.add(keras.layers.Dense(540, activation='relu'))
 	model.add(keras.layers.Dense(380, activation='relu'))
-	model.add(keras.layers.Dense(280, activation='relu'))
-	model.add(keras.layers.Dense(150, activation='relu'))
-	model.add(keras.layers.Dense(100, activation='relu'))
-	model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
+	model.add(keras.layers.Dense(Z_val.shape[1], activation='linear'))
 	model.compile(loss='MeanSquaredError', optimizer='adam')
 
 	return model, callback
@@ -321,7 +348,11 @@ error_matrix_test = [[] for i in range(len(y_test))]
 pct_matrix_val = [[] for i in range(len(y_val))]
 pct_matrix_test = [[] for i in range(len(y_test))]
 
+over_limit_val_matrix = []
+
 percentage_error_matrix_val = []
+
+true_percentage_uncertainty_matrix_val = [] # matrix containing all the values of the monte carlo uncertainty. used to compare to the averaged predictions post-training loop
 
 
 # Run training N times with new models and same data
@@ -341,7 +372,8 @@ for num in tqdm.tqdm(range(n_models)):
 	train_end = time.time()
 	print(f'\nTraining completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
 
-	predictions_val = temp_model.predict(X_val)
+	predictions_val_pca = temp_model.predict(X_val)
+	predictions_val = pca.inverse_transform(predictions_val_pca)
 	r2s = []
 
 
@@ -356,29 +388,55 @@ for num in tqdm.tqdm(range(n_models)):
 		rescaled_true_set = descaler(true_set, means=scaling_means, stds=scaling_stds)
 		rescaled_y_val.append(rescaled_true_set)
 
-		true_percentage_errors = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_true_set))
+		# true_percentage_errors = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_true_set))
+		norm_flux_val = flux_val[idx] / np.sum(flux_val[idx])
+		true_pct_uncertainty = 100 * (np.array(flux_errors_val[idx]) / np.array(norm_flux_val))
+		true_percentage_uncertainty_matrix_val.append(true_pct_uncertainty)
 
 		ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
 		pct_deviation = (ratios - 1.0) * 100
 		pct_list.append(pct_deviation)
 
 		count = 0
-		for point_ml_error, point_real_error in zip(pct_deviation, true_percentage_errors):
+		for point_ml_error, point_real_error in zip(pct_deviation, true_pct_uncertainty):
 			if abs(point_ml_error) > abs(point_real_error * 2):
 				count += 1
 
 		over_limit_pct = (count / len(pct_deviation)) * 100
 		over_limit_list.append(over_limit_pct)
+
+		over_limit_val_matrix.append(over_limit_list)
 		# print(f'{idx} - {over_limit_pct:0.1f}% Points over limit, Mean: {np.mean(ratios):0.4f} Max: {max(ratios):0.4f} Min: {min(ratios):0.4f} R2: {r2_score(rescaled_predictions, rescaled_true_set):0.5f}')
 
 		prediction_matrix_val[idx].append(rescaled_predictions)
 
-		pct_matrix_val[idx].append(pct_deviation)
-
+		pct_matrix_val[idx].append(pct_deviation) # working with this
 
 	r2s.append(r2_score(rescaled_predictions, rescaled_true_set))
 
-print(f'\nMean R2: {np.mean(r2s):0.5f}')
+# pct_matrix_val has shape (n_samples, n_models, 300)
+print('\nEvaluating averaged predictions...')
+averaged_predictions_val = []
+
+for post_idx, (sample, mc_uncertainties) in enumerate(zip(pct_matrix_val, true_percentage_uncertainty_matrix_val)):
+	transposed_sample = np.array(sample).transpose()
+	averaged_sample_prediction = []
+	for energy_point_vector in transposed_sample:
+		mean_pct_deviation = np.mean(energy_point_vector)
+		averaged_sample_prediction.append(mean_pct_deviation)
+
+	averaged_predictions_val.append(averaged_sample_prediction)
+
+	avg_count = 0
+	for pred_point, true_uncert in zip(averaged_sample_prediction, mc_uncertainties):
+		if abs(pred_point) > abs(true_uncert * 2):
+			avg_count += 1
+
+	avg_limit_pct = (avg_count / len(mc_uncertainties)) * 100
+	print(f'{post_idx} - {avg_limit_pct:0.1f}% Points over limit')
+
+
+print(f'\n\nMean R2: {np.mean(r2s):0.5f}')
 print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}% over limit')
 
 
@@ -410,10 +468,10 @@ def count_outliers(prediction_list, labels, flux_errors_list):
 		exceeded_limit_list.append(exceeded_limit_pct)
 
 
-flux_file = 'Flux_data_Pu-239_9173_Pu-240_9113_Pu-241_9675.parquet'
-flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
-flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
-flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
+# flux_file = 'Flux_data_Pu-239_9173_Pu-240_9113_Pu-241_9675.parquet'
+# flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
+# flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
+# flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 # d1, d2, d3 = fetch_data(all_parquets[0])
 #
