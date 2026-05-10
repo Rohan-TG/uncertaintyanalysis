@@ -132,7 +132,7 @@ flux_train = np.array(flux_train) # matrix
 flux_train_error = np.array(flux_train_error)
 
 base_flux_file = pd.read_parquet('data/Flux_data_Pu-239_-3_Pu-240_-3_Pu-241_-3.parquet', engine='pyarrow')
-base_flux = np.array(base_flux_file['flux'].values)
+base_flux = np.array(base_flux_file['flux'].values[107:])
 
 
 def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = False):
