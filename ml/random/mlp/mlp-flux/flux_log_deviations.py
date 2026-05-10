@@ -142,7 +142,6 @@ normalised_base_flux = base_flux / (np.sum(base_flux))
 def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
 
-
 	normalised_flux_array = []
 	normalised_flux_error_array = []
 	if normalise:
@@ -400,7 +399,8 @@ for i in grid:
 widths = np.diff(edges)
 def plot_index(sample_idx):
 
-	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(flux_val[sample_idx]))
+	norm_flux_val = flux_val[sample_idx] / np.sum(flux_val[sample_idx])
+	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(norm_flux_val))
 
 	sigma_2_upper = 2* true_pct_error
 	sigma_2_lower = -2 * true_pct_error
