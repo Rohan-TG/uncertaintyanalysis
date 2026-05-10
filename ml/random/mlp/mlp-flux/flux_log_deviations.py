@@ -136,6 +136,8 @@ flux_train_error = np.array(flux_train_error)
 base_flux_file = pd.read_parquet('data/Flux_data_Pu-239_-3_Pu-240_-3_Pu-241_-3.parquet', engine='pyarrow')
 base_flux = np.array(base_flux_file['flux'].values)
 
+normalised_base_flux = base_flux / (np.sum(base_flux))
+
 
 def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
@@ -148,7 +150,10 @@ def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, s
 			area = np.sum(flux_set)
 			norm_flux_vector = np.array(flux_set) / area
 			norm_flux_error = np.array(flux_error_set) / area
-			normalised_flux_array.append(norm_flux_vector)
+
+			norm_flux_differences = np.log(norm_flux_vector / normalised_base_flux)
+
+			normalised_flux_array.append(norm_flux_differences)
 			normalised_flux_error_array.append(norm_flux_error)
 
 		normalised_flux_array = np.array(normalised_flux_array)
@@ -321,9 +326,7 @@ callback = keras.callbacks.EarlyStopping(monitor='val_loss',
 X_train, X_val = process_data_mlp(XS_train, XS_val)
 
 model =keras.Sequential()
-model.add(keras.layers.Dense(1500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-model.add(keras.layers.Dense(1300, activation='relu'))
-model.add(keras.layers.Dense(1100, activation='relu'))
+model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 model.add(keras.layers.Dense(900, activation='relu'))
 model.add(keras.layers.Dense(750, activation='relu'))
 model.add(keras.layers.Dense(600, activation='relu'))
