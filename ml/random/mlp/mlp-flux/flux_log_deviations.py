@@ -19,6 +19,7 @@ import keras
 import time
 import matplotlib.pyplot as plt
 from scipy.special import softmax
+from sklearn.decomposition import PCA
 
 
 # lower_truncation_index = 0
