@@ -98,12 +98,12 @@ def fetch_data(datafile):
 
 	flux_file = f'Flux_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}.parquet'
 	flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
-	flux_data = flux_read_obj['flux'].values
-	flux_error = flux_read_obj['flux_errror']
+	flux_data = flux_read_obj['flux'].values[107:]
+	flux_error = flux_read_obj['flux_errror'][107:]
 
 	global flux_lower_bounds, flux_upper_bounds
-	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
-	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
+	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values[107:]
+	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values[107:]
 
 	return(XS_obj,
 		   flux_data,
