@@ -204,7 +204,6 @@ def descaler(scaled_flux_array, means, stds):
 	rescaled_flux_array = rescaled_flux_array.transpose()
 	rescaled_flux_array = delogger(rescaled_flux_array)
 
-
 	return rescaled_flux_array
 
 y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True, normalise=True)
@@ -363,14 +362,17 @@ for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	rescaled_true_set = descaler(true_set, means=scaling_means, stds=scaling_stds)
 	rescaled_y_val.append(rescaled_true_set)
 
-	true_percentage_errors = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_true_set))
+	# true_percentage_errors = 100 * (np.array(flux_errors_val[idx]) / np.array(rescaled_true_set))
+
+	norm_flux_val = flux_val[idx] / np.sum(flux_val[idx])
+	true_pct_error = 100 * (np.array(flux_errors_val[idx]) / np.array(norm_flux_val))
 
 	ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
 	pct_deviation = (ratios - 1.0) * 100
 	pct_list.append(pct_deviation)
 
 	count = 0
-	for point_ml_error, point_real_error in zip(pct_deviation, true_percentage_errors):
+	for point_ml_error, point_real_error in zip(pct_deviation, true_pct_error):
 		if abs(point_ml_error) > abs(point_real_error * 2):
 			count += 1
 
