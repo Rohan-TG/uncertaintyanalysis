@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 from scipy.special import softmax
 
 
+# lower_truncation_index = 0
 
 xs_directory = input('XS directory: ')
 flux_data_directory = input('Flux data directory: ')
@@ -98,12 +99,12 @@ def fetch_data(datafile):
 
 	flux_file = f'Flux_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}.parquet'
 	flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
-	flux_data = flux_read_obj['flux'].values[107:]
-	flux_error = flux_read_obj['flux_errror'][107:]
+	flux_data = flux_read_obj['flux'].values
+	flux_error = flux_read_obj['flux_errror']
 
 	global flux_lower_bounds, flux_upper_bounds
-	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values[107:]
-	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values[107:]
+	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
+	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 	return(XS_obj,
 		   flux_data,
@@ -132,10 +133,10 @@ flux_train = np.array(flux_train) # matrix
 flux_train_error = np.array(flux_train_error)
 
 base_flux_file = pd.read_parquet('data/Flux_data_Pu-239_-3_Pu-240_-3_Pu-241_-3.parquet', engine='pyarrow')
-base_flux = np.array(base_flux_file['flux'].values[107:])
+base_flux = np.array(base_flux_file['flux'].values)
 
 
-def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = False):
+def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
 
 
@@ -201,7 +202,7 @@ def descaler(scaled_flux_array, means, stds):
 
 	return rescaled_flux_array
 
-y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True, normalise=False)
+y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True, normalise=True)
 
 XS_val = []
 flux_val = []
@@ -220,7 +221,7 @@ with ProcessPoolExecutor(max_workers=data_processes) as executor:
 
 XS_val = np.array(XS_val)
 
-y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=False)
+y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=True)
 y_val = np.array(y_val)
 
 flux_errors_val = np.array(flux_errors_val)
@@ -242,7 +243,7 @@ if test_data_directory != 'x':
 			flux_test_error.append(flux_test_err)
 
 	XS_test = np.array(XS_test)
-	y_test, flux_errors_test = scale_flux(flux_test, flux_error_array=flux_test_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=False)
+	y_test, flux_errors_test = scale_flux(flux_test, flux_error_array=flux_test_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=True)
 
 
 print('Scaling training data...')
