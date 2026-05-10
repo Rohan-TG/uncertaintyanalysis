@@ -26,7 +26,7 @@ from sklearn.decomposition import PCA
 xs_directory = input('\nXS directory: ')
 flux_data_directory = input('Flux data directory: ')
 
-test_xs_directory = input('\nTest XS directory: ')
+test_xs_directory = input('\nTest XS directory (x for set to val): ')
 test_flux_data_directory = input('Test flux data directory (x for set to val): ')
 patience = int(input('\nPatience: '))
 n_models = int(input('\nN. models: '))
@@ -63,7 +63,7 @@ average_performance_list_test = []
 
 
 
-def fetch_data(datafile):
+def fetch_data(datafile, xs_directory, flux_data_directory):
 
 	temp_df = pd.read_parquet(f'{xs_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
