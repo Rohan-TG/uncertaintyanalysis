@@ -208,6 +208,9 @@ def descaler(scaled_flux_array, means, stds):
 
 y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True, normalise=True)
 
+pca = PCA(n_components=0.999, svd_solver='full')
+Z_train = pca.fit_transform(y_train)
+
 XS_val = []
 flux_val = []
 flux_val_error = []
@@ -227,6 +230,8 @@ XS_val = np.array(XS_val)
 
 y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=True)
 y_val = np.array(y_val)
+
+Z_val = pca.transform(y_val)
 
 flux_errors_val = np.array(flux_errors_val)
 
@@ -330,18 +335,18 @@ model.add(keras.layers.Dense(750, activation='relu'))
 model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(540, activation='relu'))
 model.add(keras.layers.Dense(380, activation='relu'))
-model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
+model.add(keras.layers.Dense(Z_val.shape[1], activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
 
 import datetime
 trainstart = time.time()
 history = model.fit(X_train,
-					y_train,
+					Z_train,
 					epochs=1000,
 					batch_size=32,
 					callbacks=callback,
-					validation_data=(X_val, y_val),
+					validation_data=(X_val, Z_val),
 					verbose=1)
 
 train_end = time.time()
@@ -355,7 +360,10 @@ rescaled_full_p = [] # contains predictions
 rescaled_y_val = [] # contains labels
 pct_list = []
 over_limit_list = []
-for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
+for idx, (pca_p_set, true_set) in enumerate(zip(predictions, y_val)):
+
+	p_set = pca.inverse_transform(pca_p_set)
+
 	rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
 	rescaled_full_p.append(rescaled_predictions)
 
