@@ -393,7 +393,7 @@ for i in grid:
 widths = np.diff(edges)
 def plot_index(sample_idx):
 
-	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(rescaled_y_val[sample_idx]))
+	true_pct_error = 100 * (np.array(flux_errors_val[sample_idx]) / np.array(flux_val[sample_idx]))
 
 	sigma_2_upper = 2* true_pct_error
 	sigma_2_lower = -2 * true_pct_error
@@ -412,15 +412,14 @@ def plot_index(sample_idx):
 	plt.savefig(f'{sample_idx}_bar_mlp.png')
 
 
-	scale_log = input('Log scale? (y): ')
+	# scale_log = input('Log scale? (y): ')
 	plt.figure()
 	plt.bar(edges[:-1], pct_list[sample_idx], width=widths, label = 'ML error')
 	# plt.plot(edges[:-1], true_pct_error, label='MC Error')
 	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$ MC uncertainty')
 	plt.xlabel('Energy / Mev')
 	plt.ylabel('% Deviation')
-	if scale_log == 'y':
-		plt.xscale('log')
+	plt.xscale('log')
 	plt.grid()
 	plt.legend()
 	plt.savefig(f'{sample_idx}_val_pct_error_bar_mlp.png')
