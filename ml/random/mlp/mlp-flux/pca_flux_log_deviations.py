@@ -18,7 +18,6 @@ import tqdm
 import keras
 import time
 import matplotlib.pyplot as plt
-from scipy.special import softmax
 from sklearn.decomposition import PCA
 
 
@@ -351,7 +350,9 @@ history = model.fit(X_train,
 
 train_end = time.time()
 print(f'Training completed in {datetime.timedelta(seconds=(train_end - trainstart))}')
-predictions = model.predict(X_val)
+predictions_pca = model.predict(X_val)
+
+predictions = pca.inverse_transform(predictions_pca)
 
 from sklearn.metrics import r2_score
 r2s = []
@@ -360,9 +361,7 @@ rescaled_full_p = [] # contains predictions
 rescaled_y_val = [] # contains labels
 pct_list = []
 over_limit_list = []
-for idx, (pca_p_set, true_set) in enumerate(zip(predictions, y_val)):
-
-	p_set = pca.inverse_transform(pca_p_set)
+for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 
 	rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
 	rescaled_full_p.append(rescaled_predictions)
@@ -392,7 +391,7 @@ for idx, (pca_p_set, true_set) in enumerate(zip(predictions, y_val)):
 print(f'Mean R2: {np.mean(r2s):0.5f}')
 print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}% over limit')
 
-d1, d2, d3 = fetch_data(all_parquets[0])
+# d1, d2, d3 = fetch_data(all_parquets[0])
 
 grid = []
 for i in flux_lower_bounds:
