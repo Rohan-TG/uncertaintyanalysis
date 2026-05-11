@@ -389,26 +389,25 @@ def plot_index(sample_idx):
 
 
 	plt.figure()
+	plt.bar(edges[:-1], rescaled_y_val[sample_idx], width=widths, label="True")
 	plt.bar(edges[:-1], rescaled_full_p[sample_idx], width=widths, label='Prediction')
-	plt.bar(edges[:-1], rescaled_y_val[sample_idx], width=widths, label = "True")
 	plt.grid()
 	plt.legend()
 	plt.xlabel('Energy / MeV')
 	plt.ylabel('Normalised flux')
 	plt.xscale('log')
-	plt.ylim(0,0.015)
+	# plt.ylim(0,0.015)
 	plt.savefig(f'{sample_idx}_bar_mlp.png')
 
 
-	scale_log = input('Log scale? (y): ')
+	# scale_log = input('Log scale? (y): ')
 	plt.figure()
 	plt.bar(edges[:-1], pct_list[sample_idx], width=widths, label = 'ML error')
 	# plt.plot(edges[:-1], true_pct_error, label='MC Error')
 	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label = '2$\sigma$ MC uncertainty')
 	plt.xlabel('Energy / Mev')
 	plt.ylabel('% Deviation')
-	if scale_log == 'y':
-		plt.xscale('log')
+	plt.xscale('log')
 	plt.grid()
 	plt.legend()
 	plt.savefig(f'{sample_idx}_val_pct_error_bar_mlp.png')
