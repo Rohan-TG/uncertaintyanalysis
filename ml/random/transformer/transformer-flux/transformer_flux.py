@@ -27,11 +27,17 @@ import time
 print(f'\nGPU availability: {torch.cuda.is_available()}')
 
 
-data_directory = input('Data directory: ')
-data_processes = int(input('Num. data processors: '))
+xs_directory = input('XS directory: ')
+test_data_directory = input('Test data directory (x for set to val): ')
 max_epochs = int(input('Max epochs: '))
-all_parquets = os.listdir(data_directory)
 patience = int(input('Patience: '))
+flux_data_directory = input('Flux data directory: ')
+
+
+# data_processes = int(input('Num. data processors: '))
+data_processes = 6
+all_parquets = os.listdir(xs_directory)
+
 training_fraction = float(input('Enter training data fraction: '))
 lower_energy_bound = float(input('Enter lower energy bound in eV: '))
 
@@ -48,16 +54,25 @@ for file in all_parquets:
 	if file not in training_files:
 		val_files.append(file)
 
-print('\nFetching training data...')
+
+
+print('Fetching training data...')
+
+
 
 
 
 def fetch_data(datafile):
-	"""Retrieves data from the parquet file and returns it as a matrix"""
-	temp_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+
+	temp_df = pd.read_parquet(f'{xs_directory}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
-	keff_value = float(temp_df['keff'].values[0])
+	pu9_index = int(datafile.split('_')[4])
+	pu0_index = int(datafile.split('_')[6])
+	pu1_index = int(datafile.split('_')[8].split('.')[0])
+
+
+	# keff_value = float(temp_df['keff'].values[0])
 
 	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
@@ -79,66 +94,164 @@ def fetch_data(datafile):
 	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
 	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
 
-	# xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
-	#
-	# XS_obj = xsobject
-
 	XS_obj = [pu9_mt2xs, pu9_mt4xs, pu9_mt16xs, pu9_mt18xs, pu9_mt102xs,
 				pu0_mt2xs, pu0_mt4xs, pu0_mt16xs, pu0_mt18xs, pu0_mt102xs,
 				pu1_mt2xs, pu1_mt4xs, pu1_mt16xs, pu1_mt18xs, pu1_mt102xs,]
 
-	return(XS_obj, keff_value)
+
+	# Now fetch spectrum data labels
+
+	flux_file = f'Flux_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}.parquet'
+	flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
+	flux_data = flux_read_obj['flux'].values
+	flux_error = flux_read_obj['flux_errror']
+
+	pct_flux_error = np.array(flux_error) / np.array(flux_data)
+
+	global flux_lower_bounds, flux_upper_bounds
+	flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
+	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
+
+	return(XS_obj,
+		   flux_data,
+		   flux_error,
+		   )
 
 
 
-keff_train = [] # k_eff labels
+flux_train = [] # flux labels
+flux_train_error = []
 XS_train = []
+
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, train_file) for train_file in training_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values, keff_value = future.result()
+		xs_values, flux_values, flux_error = future.result()
 		XS_train.append(xs_values)
-		keff_train.append(keff_value)
+		flux_train.append(flux_values)
+		flux_train_error.append(flux_error)
 
 XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per channel)
+flux_train = np.array(flux_train) # matrix
+flux_train_error = np.array(flux_train_error)
 
-keff_train_mean = np.mean(keff_train)
-keff_train_std = np.std(keff_train)
-y_train = zscore(keff_train)
+
+def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None):
+	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
+
+	normalised_flux_array = []
+	normalised_flux_error_array = []
+	for flux_set, flux_error_set in zip(flux_array, flux_error_array):
+		area = np.sum(flux_set)
+		norm_flux_vector = np.array(flux_set) / area
+		norm_flux_error = np.array(flux_error_set) / area
+		normalised_flux_array.append(norm_flux_vector)
+		normalised_flux_error_array.append(norm_flux_error)
+
+	normalised_flux_array = np.array(normalised_flux_array)
+	normalised_flux_error_array = np.array(normalised_flux_error_array)
+
+	transposed_flux_array = normalised_flux_array.transpose()
+	if train_mode:
+		scaling_columns = []
+		scaling_column_means = []
+		scaling_column_stds = []
+		for energy_column in transposed_flux_array:
+			scaling_columns.append(zscore(energy_column))
+			scaling_column_means.append(np.mean(energy_column))
+			scaling_column_stds.append(np.std(energy_column))
+
+		scaling_column_stds = np.array(scaling_column_stds)
+		scaling_column_means = np.array(scaling_column_means)
+		scaled_transposed_flux_array = np.array(scaling_columns)
+		scaled_flux_array = scaled_transposed_flux_array.transpose()
+		return scaled_flux_array, scaling_column_means, scaling_column_stds, normalised_flux_error_array
+
+	else:
+		scaling_columns = []
+		for energy_column, mean, std in zip(transposed_flux_array, means, stds):
+			scaling_columns.append((np.array(energy_column) - mean) / std)
+
+		scaled_transposed_flux_array = np.array(scaling_columns)
+		scaled_flux_array = scaled_transposed_flux_array.transpose()
+		return scaled_flux_array, normalised_flux_error_array
+	# return normalised_flux_array
+
+def descaler(scaled_flux_array, means, stds):
+	transposed_flux_array = scaled_flux_array.transpose()
+	rescaled_flux_array = []
+	for energy_column, mean, std in zip(transposed_flux_array, means, stds):
+		rescaled_flux_array.append(energy_column * std + mean)
+
+	rescaled_flux_array = np.array(rescaled_flux_array)
+	rescaled_flux_array = rescaled_flux_array.transpose()
+	rescaled_flux_array = rescaled_flux_array
+	return rescaled_flux_array
+
+y_train, scaling_means, scaling_stds, flux_errors_train = scale_flux(flux_train, flux_error_array=flux_train_error, train_mode=True)
 
 XS_val = []
-keff_val = []
-
-print('\nFetching validation data...')
+flux_val = []
+flux_val_error = []
+print('Fetching val data...')
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
 	futures = [executor.submit(fetch_data, val_file) for val_file in val_files]
 
 	for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
-		xs_values_val, keff_value_val = future.result()
+		xs_values_val, flux_value_val, flux_error_val = future.result()
 		XS_val.append(xs_values_val)
-		keff_val.append(keff_value_val)
+		flux_val.append(flux_value_val)
+		flux_val_error.append(flux_error_val)
 
 XS_val = np.array(XS_val)
-y_val = (np.array(keff_val) - keff_train_mean) / keff_train_std
+
+y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds)
+y_val = np.array(y_val)
+
+flux_errors_val = np.array(flux_errors_val)
+
+if test_data_directory != 'x':
+	print('Fetching test data...')
+	test_files = os.listdir(test_data_directory)
+
+	XS_test = []
+	flux_test = []
+	flux_test_error = []
+	with ProcessPoolExecutor(max_workers=data_processes) as executor:
+		futures_test = [executor.submit(fetch_data, test_file) for test_file in test_files]
+
+		for future_test in tqdm.tqdm(as_completed(futures_test), total=len(futures_test)):
+			xs_values_test, flux_value_test, flux_test_err = future_test.result()
+			XS_test.append(xs_values_test)
+			flux_test.append(flux_value_test)
+			flux_test_error.append(flux_test_err)
+
+	XS_test = np.array(XS_test)
+	y_test, flux_errors_test = scale_flux(flux_test, flux_error_array=flux_test_error, train_mode=False, means=scaling_means, stds=scaling_stds)
 
 
-print('\nScaling training and validation data...')
+print('Scaling training data...')
 
 
 # le_bound_index = 1 # filters out NaNs
 
-def process_data(XS_train, XS_val):
+def process_data(XS_train, XS_val, XS_test):
 
 
 	channel_matrix_train = [[] for i in range(len(XS_train[0]))] # each element is a matrix of only one channel, e.g. channel_matrix[0] is all the lists containing
 	channel_matrix_val = [[] for i in range(len(XS_val[0]))]
+	channel_matrix_test = [[] for i in range(len(XS_test[0]))]
+
+
 	# Pu-239 (n,el)
 	scaled_channel_matrix_train = []
 	scaled_channel_matrix_val = []
+	scaled_channel_matrix_test = []
+
 
 	for matrix in tqdm.tqdm(XS_train, total =len(XS_train)):
 		# Each matrix has shape (num channels, points per channel)
@@ -151,14 +264,20 @@ def process_data(XS_train, XS_val):
 		for channel_index, channel in enumerate(matrix):
 			channel_matrix_val[channel_index].append(channel)
 
+	for matrix in tqdm.tqdm(XS_test, total =len(XS_test)):
+		for channel_index, channel in enumerate(matrix):
+			channel_matrix_test[channel_index].append(channel)
+
 	#################################################################################################################################################################
-	for channel_data_train, channel_data_val in zip(channel_matrix_train, channel_matrix_val): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
+	for channel_data_train, channel_data_val, channel_data_test in zip(channel_matrix_train, channel_matrix_val, channel_matrix_test): # each iterative variable is the tensor of one specific channel e.g. Pu-239 fission, for all samples
 		transposed_matrix_train = np.transpose(channel_data_train) # shape (energy points per sample, num samples)
 		transposed_matrix_val = np.transpose(channel_data_val)
+		transposed_matrix_test = np.transpose(channel_data_test)
 
 		transposed_scaled_channel_train = []
 		transposed_scaled_channel_val = []
-		for energy_point_train, energy_point_val in zip(transposed_matrix_train[:-1], transposed_matrix_val[:-1]): # each point on the unionised energy grid
+		transposed_scaled_channel_test = []
+		for energy_point_train, energy_point_val, energy_point_test in zip(transposed_matrix_train[:-1], transposed_matrix_val[:-1], transposed_matrix_test[:-1]): # each point on the unionised energy grid
 
 			train_mean = np.mean(energy_point_train)
 			train_std = np.std(energy_point_train)
@@ -169,6 +288,9 @@ def process_data(XS_train, XS_val):
 			scaled_point_val = (np.array(energy_point_val) - train_mean) / train_std
 			transposed_scaled_channel_val.append(scaled_point_val)
 
+			scaled_point_test = (np.array(energy_point_test) - train_mean) / train_std
+			transposed_scaled_channel_test.append(scaled_point_test)
+
 		scaled_channel_train = np.array(transposed_scaled_channel_train)
 		scaled_channel_train = scaled_channel_train.transpose()
 		scaled_channel_matrix_train.append(scaled_channel_train)
@@ -177,10 +299,15 @@ def process_data(XS_train, XS_val):
 		scaled_channel_val = scaled_channel_val.transpose()
 		scaled_channel_matrix_val.append(scaled_channel_val)
 
+		scaled_channel_test = np.array(transposed_scaled_channel_test)
+		scaled_channel_test = scaled_channel_test.transpose()
+		scaled_channel_matrix_test.append(scaled_channel_test)
+
 	###################################################################################################################################################################
 	# print('Forming scaled training data...')
 	X_matrix_train = [[] for i in range(XS_train.shape[0])] # number of samples
 	X_matrix_val = [[] for i in range(XS_val.shape[0])]
+	X_matrix_test = [[] for i in range(XS_test.shape[0])]
 
 	for scaled_observable in scaled_channel_matrix_train:
 		for sample_index, channel_sample in enumerate(scaled_observable):
@@ -190,17 +317,39 @@ def process_data(XS_train, XS_val):
 		for sample_index, channel_sample in enumerate(scaled_observable):
 			X_matrix_val[sample_index].append(channel_sample)
 
+	for scaled_observable in scaled_channel_matrix_test:
+		for sample_index, channel_sample in enumerate(scaled_observable):
+			X_matrix_test[sample_index].append(channel_sample)
+
 	X_matrix_train = np.array(X_matrix_train)
 	X_matrix_train[np.isnan(X_matrix_train)] = 0
 
 	X_matrix_val = np.array(X_matrix_val)
 	X_matrix_val[np.isnan(X_matrix_val)] = 0 # changes nans to 0
 
-	return X_matrix_train, X_matrix_val
+	X_matrix_test = np.array(X_matrix_test)
+	X_matrix_test[np.isnan(X_matrix_test)] = 0
 
-X_train, X_val = process_data(XS_train, XS_val)
+	return X_matrix_train, X_matrix_val, X_matrix_test
 
 
+if test_data_directory == 'x':
+	XS_test = XS_val
+	y_test = y_val
+
+X_train, X_val, X_test = process_data(XS_train, XS_val, XS_test)
+
+
+
+
+
+
+
+
+
+
+
+# Begin pytorch prep/conversion
 # From here on we switch from numpy matrices to torch tensors
 print('\nConverting arrays to tensors...')
 
@@ -500,36 +649,3 @@ with torch.no_grad():  # improve compute cost disable gradient tracking
 
 out, timing = timed_eval(model, X_val)
 
-rescaled_predictions = []
-predictions_list = predictions.tolist()
-
-for pred in predictions_list:
-	descaled_p = pred * keff_train_std + keff_train_mean
-	rescaled_predictions.append(float(descaled_p))
-
-errors = []
-for predicted, true in zip(rescaled_predictions, keff_val):
-	errors.append((predicted - true) * 1e5)
-	print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
-
-sorted_errors = sorted(errors)
-absolute_errors = [abs(x) for x in sorted_errors]
-print(f'Average absolute error: {np.mean(absolute_errors)} +- {np.std(absolute_errors)}')
-
-print(f'Max -ve error: {sorted_errors[0]} pcm, Max +ve error: {sorted_errors[-1]} pcm')
-
-print(f"Smallest absolute error: {min(absolute_errors)} pcm")
-acceptable_predictions = []
-borderline_predictions = []
-twenty_pcm_predictions = []
-for x in absolute_errors:
-	if x <= 5.0:
-		acceptable_predictions.append(x)
-	if x <= 10.0:
-		borderline_predictions.append(x)
-	if x <= 20.0:
-		twenty_pcm_predictions.append(x)
-
-print(f' {len(acceptable_predictions)} ({len(acceptable_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 5 pcm error')
-print(f' {len(borderline_predictions)} ({len(borderline_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 10 pcm error')
-print(f' {len(twenty_pcm_predictions)} ({len(twenty_pcm_predictions) / len(absolute_errors) * 100:.2f}%) predictions <= 20 pcm error)')
