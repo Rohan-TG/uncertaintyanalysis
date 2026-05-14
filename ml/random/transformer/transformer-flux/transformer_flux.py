@@ -441,7 +441,7 @@ class RegressionTransformerFeatureRows(nn.Module):
 		self.regression_head = nn.Sequential(
 			nn.Linear(d_model, d_model),
 			nn.ReLU(),
-			nn.Linear(d_model, 1),
+			nn.Linear(d_model, y_val.shape),
 		)
 
 	def forward(self, x: torch.Tensor, src_key_padding_mask=None) -> torch.Tensor:
