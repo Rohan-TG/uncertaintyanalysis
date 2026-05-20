@@ -54,8 +54,8 @@ print('Fetching training data...')
 
 
 
-flux_truncation_lower_index = 190
-flux_truncation_upper_index = 192
+flux_truncation_lower_index = 0
+flux_truncation_upper_index = 300
 
 def fetch_data(datafile):
 
@@ -135,7 +135,7 @@ flux_train_error = np.array(flux_train_error)
 flux_train_error = np.array(flux_train_error)
 sigma_rel_train = []
 for raw_uncert, flux_train_value in zip(flux_train_error, flux_train):
-	sigma_rel_train.append((np.array(raw_uncert) / np.array(flux_train_value)) * 100)
+	sigma_rel_train.append((np.array(raw_uncert) / np.array(flux_train_value)))
 
 def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
@@ -220,7 +220,7 @@ y_val = np.array(y_val)
 flux_val_error = np.array(flux_val_error)
 sigma_rel_val = []
 for raw_uncert, flux_val_value in zip(flux_val_error, flux_val):
-	sigma_rel_val.append((np.array(raw_uncert) / np.array(flux_val_value)) * 100)
+	sigma_rel_val.append((np.array(raw_uncert) / np.array(flux_val_value)))
 
 if test_data_directory != 'x':
 	print('Fetching test data...')
@@ -314,9 +314,11 @@ def weighted_log_mse(y_true_with_sigma, y_pred):
 	y_true = y_true_with_sigma[..., 0]
 	rel_sigma = y_true_with_sigma[..., 1]
 
-	log_resid = tf.math.log(y_pred + eps) - tf.math.log(y_true + eps)
+	# log_resid = tf.math.log(y_pred + eps) - tf.math.log(y_true + eps)
 
-	z = log_resid / (rel_sigma + eps)
+	# z = log_resid / (rel_sigma + eps)
+	resid = y_pred - y_true
+	z = resid / rel_sigma
 
 	return tf.reduce_mean(tf.square(z))
 
