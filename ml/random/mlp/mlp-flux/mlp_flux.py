@@ -54,8 +54,8 @@ print('Fetching training data...')
 
 
 
-flux_truncation_lower_index = 190
-flux_truncation_upper_index = 192
+flux_truncation_lower_index = 0
+flux_truncation_upper_index = 300
 
 def fetch_data(datafile):
 
@@ -340,6 +340,7 @@ rescaled_full_p = [] # contains predictions
 rescaled_y_val = [] # contains labels
 pct_list = []
 over_limit_list = []
+true_pct_errors_list = []
 for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	rescaled_predictions = descaler(p_set, means=scaling_means, stds=scaling_stds)
 	rescaled_full_p.append(rescaled_predictions)
@@ -352,6 +353,7 @@ for idx, (p_set, true_set) in enumerate(zip(predictions, y_val)):
 	ratios = np.array(rescaled_predictions) / np.array(rescaled_true_set)
 	pct_deviation = (ratios - 1.0) * 100
 	pct_list.append(pct_deviation)
+	true_pct_errors_list.append(true_percentage_errors)
 
 	count = 0
 	for point_ml_error, point_real_error in zip(pct_deviation, true_percentage_errors):
