@@ -106,8 +106,8 @@ def fetch_data(datafile):
 	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 	return(XS_obj,
-		   flux_data[flux_truncation_lower_index, flux_truncation_upper_index],
-		   flux_error[flux_truncation_lower_index, flux_truncation_upper_index],
+		   flux_data[flux_truncation_lower_index:flux_truncation_upper_index],
+		   flux_error[flux_truncation_lower_index:flux_truncation_upper_index],
 		   )
 
 
