@@ -324,7 +324,7 @@ trainstart = time.time()
 history = model.fit(X_train,
 					y_train,
 					epochs=1000,
-					batch_size=16,
+					batch_size=32,
 					callbacks=callback,
 					validation_data=(X_val, y_val),
 					verbose=1)
