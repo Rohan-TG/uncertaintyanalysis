@@ -18,7 +18,7 @@ import tqdm
 import keras
 import time
 import matplotlib.pyplot as plt
-
+import tensorflow as tf
 
 
 xs_directory = input('XS directory: ')
@@ -132,6 +132,10 @@ XS_train = np.array(XS_train) # shape (num_samples, num_channels, points per cha
 flux_train = np.array(flux_train) # matrix
 flux_train_error = np.array(flux_train_error)
 
+flux_train_error = np.array(flux_train_error)
+sigma_rel_train = []
+for raw_uncert, flux_train_value in zip(flux_train_error, flux_train):
+	sigma_rel_train.append((np.array(raw_uncert) / np.array(flux_train_value)) * 100)
 
 def scale_flux(flux_array, flux_error_array, train_mode = False, means = None, stds = None, normalise = True):
 	"""setting train_mode to True just makes this function return the means and stds. Otherwise not returned"""
@@ -213,7 +217,10 @@ XS_val = np.array(XS_val)
 y_val, flux_errors_val = scale_flux(flux_val, flux_error_array=flux_val_error, train_mode=False, means=scaling_means, stds=scaling_stds, normalise=False)
 y_val = np.array(y_val)
 
-flux_errors_val = np.array(flux_errors_val)
+flux_val_error = np.array(flux_val_error)
+sigma_rel_val = []
+for raw_uncert, flux_val_value in zip(flux_val_error, flux_val):
+	sigma_rel_val.append((np.array(raw_uncert) / np.array(flux_val_value)) * 100)
 
 if test_data_directory != 'x':
 	print('Fetching test data...')
@@ -296,6 +303,22 @@ if test_data_directory == 'x':
 	y_test = y_val
 
 
+def weighted_log_mse(y_true_with_sigma, y_pred):
+	"""
+	y_true_with_sigma[..., 0] = true spectrum value
+	y_true_with_sigma[..., 1] = 1-sigma relative uncertainty, e.g. 0.00025 for 0.025%
+	y_pred = predicted spectrum value
+	"""
+	eps = tf.keras.backend.epsilon()
+
+	y_true = y_true_with_sigma[..., 0]
+	rel_sigma = y_true_with_sigma[..., 1]
+
+	log_resid = tf.math.log(y_pred + eps) - tf.math.log(y_true + eps)
+
+	z = log_resid / (rel_sigma + eps)
+
+	return tf.reduce_mean(tf.square(z))
 
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
@@ -316,17 +339,20 @@ model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(540, activation='relu'))
 model.add(keras.layers.Dense(380, activation='relu'))
 model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
-model.compile(loss='MeanSquaredError', optimizer='adam')
+model.compile(loss=weighted_log_mse, optimizer='adam')
 
+
+y_train_with_sigma = np.stack([y_train, sigma_rel_train], axis=-1)
+y_val_with_sigma   = np.stack([y_val, sigma_rel_val], axis=-1)
 
 import datetime
 trainstart = time.time()
 history = model.fit(X_train,
-					y_train,
+					y_train_with_sigma,
 					epochs=1000,
 					batch_size=32,
 					callbacks=callback,
-					validation_data=(X_val, y_val),
+					validation_data=(X_val, y_val_with_sigma),
 					verbose=1)
 
 train_end = time.time()
