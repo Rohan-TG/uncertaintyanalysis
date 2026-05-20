@@ -55,7 +55,7 @@ print('Fetching training data...')
 
 
 flux_truncation_lower_index = 190
-flux_truncation_upper_index = 200
+flux_truncation_upper_index = 192
 
 def fetch_data(datafile):
 
