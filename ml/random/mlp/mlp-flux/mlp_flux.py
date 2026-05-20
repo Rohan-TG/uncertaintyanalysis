@@ -54,7 +54,8 @@ print('Fetching training data...')
 
 
 
-
+flux_truncation_lower_index = 190
+flux_truncation_upper_index = 200
 
 def fetch_data(datafile):
 
@@ -105,8 +106,8 @@ def fetch_data(datafile):
 	flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
 
 	return(XS_obj,
-		   flux_data,
-		   flux_error,
+		   flux_data[flux_truncation_lower_index, flux_truncation_upper_index],
+		   flux_error[flux_truncation_lower_index, flux_truncation_upper_index],
 		   )
 
 
@@ -115,6 +116,7 @@ def fetch_data(datafile):
 flux_train = [] # flux labels
 flux_train_error = []
 XS_train = []
+
 
 
 with ProcessPoolExecutor(max_workers=data_processes) as executor:
