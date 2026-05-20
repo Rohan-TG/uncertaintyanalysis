@@ -303,24 +303,46 @@ if test_data_directory == 'x':
 	y_test = y_val
 
 
-def weighted_log_mse(y_true_with_sigma, y_pred):
-	"""
-	y_true_with_sigma[..., 0] = true spectrum value
-	y_true_with_sigma[..., 1] = 1-sigma relative uncertainty, e.g. 0.00025 for 0.025%
-	y_pred = predicted spectrum value
-	"""
+# def weighted_log_mse(y_true_with_sigma, y_pred):
+# 	"""
+# 	y_true_with_sigma[..., 0] = true spectrum value
+# 	y_true_with_sigma[..., 1] = 1-sigma relative uncertainty, e.g. 0.00025 for 0.025%
+# 	y_pred = predicted spectrum value
+# 	"""
+# 	eps = tf.keras.backend.epsilon()
+#
+# 	y_true = y_true_with_sigma[..., 0]
+# 	rel_sigma = y_true_with_sigma[..., 1]
+#
+# 	# log_resid = tf.math.log(y_pred + eps) - tf.math.log(y_true + eps)
+#
+# 	# z = log_resid / (rel_sigma + eps)
+# 	resid = y_pred - y_true
+# 	z = resid / rel_sigma
+#
+# 	return tf.reduce_mean(tf.square(z))
+
+def weighted_huber(y_true_with_sigma, y_pred):
 	eps = tf.keras.backend.epsilon()
 
 	y_true = y_true_with_sigma[..., 0]
 	rel_sigma = y_true_with_sigma[..., 1]
 
 	# log_resid = tf.math.log(y_pred + eps) - tf.math.log(y_true + eps)
-
 	# z = log_resid / (rel_sigma + eps)
+
 	resid = y_pred - y_true
 	z = resid / rel_sigma
 
-	return tf.reduce_mean(tf.square(z))
+	delta = 2.0  # 2 sigma
+	abs_z = tf.abs(z)
+
+	quadratic = tf.minimum(abs_z, delta)
+	linear = abs_z - quadratic
+
+	huber = 0.5 * tf.square(quadratic) + delta * linear
+
+	return tf.reduce_mean(huber)
 
 
 callback = keras.callbacks.EarlyStopping(monitor='val_loss',
@@ -341,7 +363,7 @@ model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(540, activation='relu'))
 model.add(keras.layers.Dense(380, activation='relu'))
 model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
-model.compile(loss=weighted_log_mse, optimizer='adam')
+model.compile(loss=weighted_huber, optimizer='adam')
 
 
 y_train_with_sigma = np.stack([y_train, sigma_rel_train], axis=-1)
