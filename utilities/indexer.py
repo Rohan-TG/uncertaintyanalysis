@@ -19,7 +19,7 @@ new_upper_index = int(input('Enter new upper index: '))
 
 new_indices = list(range(new_lower_index, new_upper_index))
 
-mode = input('Enter mode ace/pendf: ')
+mode = input('Enter mode ace/pendf/endf6: ')
 
 if mode == 'ace':
 	ace_dir = os.getcwd()
@@ -52,3 +52,11 @@ if mode == 'fix':
 
 		subprocess.run(f'mv {pendf_dir}/{old_pendf_filename} {pendf_dir}/{new_pendf_filename}', shell=True)
 
+if mode == 'endf6':
+	endf6_dir = os.getcwd()
+	endf6s = os.listdir(endf6_dir)
+	for old_i, new_i in tqdm.tqdm(zip(original_indices, new_indices), total=len(original_indices)):
+		new_endf6_filename = f'{ZA}_{new_i}.endf6'
+		old_endf6_filename = f'{ZA}_{old_i}.endf6'
+
+		subprocess.run(f'mv {endf6_dir}/{old_endf6_filename} {endf6_dir}/{new_endf6_filename}', shell=True)
