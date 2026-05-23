@@ -11,7 +11,7 @@ filename = '94241_master_file.ENDFB8_0'
 endf6.to_file(filename)
 
 num_samples = 1000  # number of samples
-processes = 6
+processes = 3
 
 import time
 import datetime
