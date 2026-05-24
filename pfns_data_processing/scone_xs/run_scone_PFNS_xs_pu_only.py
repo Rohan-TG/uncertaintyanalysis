@@ -30,7 +30,7 @@ idxt = current_dir.find(target_dir)
 default_Jezebel = 'Jezebel'
 
 target_path = current_dir[:(idxt + len(target_dir))]
-libfilename = f'allobservables.xsfile'
+libfilename = f'all_pu_pfns.xsfile'
 
 subprocess.run(f"cp {target_path}/{default_xsfile} {libfilename}", shell=True)
 subprocess.run(f"cp {target_path}/{default_Jezebel} Jezebel", shell=True)
