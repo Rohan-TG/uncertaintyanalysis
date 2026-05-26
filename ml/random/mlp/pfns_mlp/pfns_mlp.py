@@ -30,8 +30,8 @@ import time
 
 
 data_directory = input('\n\nXS data directory: ')
-pu9_pfns_diretory = ''
-pu0_pfns_diretory = ''
+pu239_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu9'
+pu240_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu0'
 
 generate_test_data = input('\nGenerate test data (y/n): ')
 if generate_test_data == 'y':
@@ -76,8 +76,16 @@ def fetch_data(datafile, data_dir=data_directory):
 	temp_df = pd.read_parquet(f'{data_dir}/{datafile}', engine='pyarrow')
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
+	Pu239_file_index = int(datafile.split('_')[4])
+
+	Pu240_file_index = int(datafile.split('_')[6])
+
+	Pu241_file_index = int(datafile.split('_')[-1].split('.')[0])
+
+	# Retrieve k_eff value
 	keff_value = float(temp_df['keff'].values[0])
 
+	# Retrieve cross sections
 	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
 	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
@@ -98,12 +106,23 @@ def fetch_data(datafile, data_dir=data_directory):
 	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
 	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
 
+	# Retrieve MF=5, MT=18 data
+
+	pu_239_df = pd.read_parquet(f'{pu239_PFNS_directory}/94239_{Pu239_file_index}_MF5_data.parquet')
+	pu_239_flattened_pfns = list(pu_239_df.values.flatten())
+
+	pu_240_df = pd.read_parquet(f'{pu240_PFNS_directory}/94240_{Pu240_file_index}_MF5_data.parquet')
+	pu_240_flattened_pfns = list(pu_240_df.values.flatten())
+
+
 	# xsobject = pu9_mt2xs + pu9_mt4xs +  pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt18xs + pu1_mt102xs
-	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	input_object = (pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs
+					+ pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+					+ pu_239_flattened_pfns + pu_240_flattened_pfns)
 
-	XS_obj = xsobject
+	input_obj = input_object
 
-	return(XS_obj, keff_value)
+	return(input_obj, keff_value)
 
 
 
