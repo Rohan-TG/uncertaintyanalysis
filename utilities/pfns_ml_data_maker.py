@@ -23,7 +23,7 @@ pu9_endf6_directory = input("Pu-239 ENDF6 directory: ")
 pu0_endf6_directory = input("Pu-240 ENDF6 directory: ")
 pu1_endf6_directory = input("Pu-241 ENDF6 directory: ")
 
-pu9_target_dir = ''
+# pu9_target_dir = ''
 
 keff_list = []
 keff_error_list = []
@@ -78,13 +78,14 @@ print('\nReading PENDFs and forming dataframes...')
 def scrape_pfns(endf6_file, MT=18):
 	mat = endf.Material(endf6_file)
 
-	incident_energies = [1]
+	incident_energies = mat.section_data[5, MT]['subsections'][0]['distribution']['E']
 
 	y_matrix = []
-	y_values = mat.section_data[5, MT]['subsections'][0]['distribution']['g'].y
-	y_matrix.append(y_values)
+	for i, set in enumerate(mat.section_data[5, MT]['subsections'][0]['distribution']['g']):
+		y_values = mat.section_data[5, MT]['subsections'][0]['distribution']['g'][i].y
+		y_matrix.append(y_values)
 
-	x = mat.section_data[5, MT]['subsections'][0]['distribution']['g'].x
+		x = mat.section_data[5, MT]['subsections'][0]['distribution']['g'][i].x
 
 	return incident_energies, y_matrix, x
 
