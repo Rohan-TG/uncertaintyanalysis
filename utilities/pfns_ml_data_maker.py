@@ -114,9 +114,9 @@ def parquet_maker(outputfile):
 	pu0_df = pd.DataFrame(np.asarray(y_values_pu0).transpose(), columns = incident_energies_pu0)
 	pu1_df = pd.DataFrame(np.asarray(y_values_pu1).transpose(), columns = incident_energies_pu1)
 
-	pu9_df.to_parquet(pu9_savefilename)
-	pu0_df.to_parquet(pu0_savefilename)
-	pu1_df.to_parquet(pu1_savefilename)
+	pu9_df.to_parquet(f'{destination_directory}/{pu9_savefilename}', engine='pyarrow')
+	pu0_df.to_parquet(f'{destination_directory}/{pu0_savefilename}', engine='pyarrow')
+	pu1_df.to_parquet(f'{destination_directory}/ {pu1_savefilename}', engine='pyarrow')
 
 
 # run the whole thing
