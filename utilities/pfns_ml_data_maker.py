@@ -98,28 +98,28 @@ def parquet_maker(outputfile):
 
 	pu9_index = int(outputfile.split('.m')[0].split('_')[1])
 	pu0_index = int(outputfile.split('.m')[0].split('_')[3])
-	pu1_index = int(outputfile.split('.m')[0].split('_')[5])
+	# pu1_index = int(outputfile.split('.m')[0].split('_')[5])
 
 	pu9_endf6_file = f'{pu9_endf6_directory}/94239_{pu9_index}.endf6'
 	pu0_endf6_file = f'{pu0_endf6_directory}/94240_{pu0_index}.endf6'
-	pu1_endf6_file = f'{pu1_endf6_directory}/94241_{pu1_index}.endf6'
+	# pu1_endf6_file = f'{pu1_endf6_directory}/94241_{pu1_index}.endf6'
 
 	incident_energies_pu9, y_values_pu9, pfns_grid_pu9 = scrape_pfns(pu9_endf6_file)
 	incident_energies_pu0, y_values_pu0, pfns_grid_pu0 = scrape_pfns(pu0_endf6_file)
-	incident_energies_pu1, y_values_pu1, pfns_grid_pu1 = scrape_pfns(pu1_endf6_file)
+	# incident_energies_pu1, y_values_pu1, pfns_grid_pu1 = scrape_pfns(pu1_endf6_file)
 
 	pu9_savefilename = f'94239_{pu9_index}_MF5_data.parquet'
 	pu0_savefilename = f'94240_{pu0_index}_MF5_data.parquet'
-	pu1_savefilename = f'94241_{pu1_index}_MF5_data.parquet'
+	# pu1_savefilename = f'94241_{pu1_index}_MF5_data.parquet'
 
 
 	pu9_df = pd.DataFrame(np.asarray(y_values_pu9).transpose(), columns = incident_energies_pu9)
 	pu0_df = pd.DataFrame(np.asarray(y_values_pu0).transpose(), columns = incident_energies_pu0)
-	pu1_df = pd.DataFrame(np.asarray(y_values_pu1).transpose(), columns = incident_energies_pu1)
+	# pu1_df = pd.DataFrame(np.asarray(y_values_pu1).transpose(), columns = incident_energies_pu1)
 
 	pu9_df.to_parquet(f'{destination_directory_pu9}/{pu9_savefilename}', engine='pyarrow')
 	pu0_df.to_parquet(f'{destination_directory_pu0}/{pu0_savefilename}', engine='pyarrow')
-	pu1_df.to_parquet(f'{destination_directory_pu1}/ {pu1_savefilename}', engine='pyarrow')
+	# pu1_df.to_parquet(f'{destination_directory_pu1}/ {pu1_savefilename}', engine='pyarrow')
 
 
 # run the whole thing
