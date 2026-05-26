@@ -17,7 +17,9 @@ processes = int(input("Num. processes: "))
 outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
-destination_directory = os.getcwd()
+destination_directory_pu9 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/0-999/pu9'
+destination_directory_pu0 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/0-999/pu0'
+destination_directory_pu1 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/0-999/pu1'
 
 pu9_endf6_directory = input("Pu-239 ENDF6 directory: ")
 pu0_endf6_directory = input("Pu-240 ENDF6 directory: ")
@@ -115,9 +117,9 @@ def parquet_maker(outputfile):
 	pu0_df = pd.DataFrame(np.asarray(y_values_pu0).transpose(), columns = incident_energies_pu0)
 	pu1_df = pd.DataFrame(np.asarray(y_values_pu1).transpose(), columns = incident_energies_pu1)
 
-	pu9_df.to_parquet(f'{destination_directory}/{pu9_savefilename}', engine='pyarrow')
-	pu0_df.to_parquet(f'{destination_directory}/{pu0_savefilename}', engine='pyarrow')
-	pu1_df.to_parquet(f'{destination_directory}/ {pu1_savefilename}', engine='pyarrow')
+	pu9_df.to_parquet(f'{destination_directory_pu9}/{pu9_savefilename}', engine='pyarrow')
+	pu0_df.to_parquet(f'{destination_directory_pu0}/{pu0_savefilename}', engine='pyarrow')
+	pu1_df.to_parquet(f'{destination_directory_pu1}/ {pu1_savefilename}', engine='pyarrow')
 
 
 # run the whole thing
