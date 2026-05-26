@@ -17,9 +17,9 @@ processes = int(input("Num. processes: "))
 outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
-destination_directory_pu9 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/0-999/pu9'
-destination_directory_pu0 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/0-999/pu0'
-destination_directory_pu1 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/0-999/pu1'
+destination_directory_pu9 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/pu9'
+destination_directory_pu0 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/pu0'
+destination_directory_pu1 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/mldata/random/pfns_and_xs/pu1'
 
 pu9_endf6_directory = input("Pu-239 ENDF6 directory: ")
 pu0_endf6_directory = input("Pu-240 ENDF6 directory: ")
