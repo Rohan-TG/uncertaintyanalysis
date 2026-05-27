@@ -10,8 +10,8 @@ endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 filename = '94241_master_file.ENDFB8_0'
 endf6.to_file(filename)
 
-num_samples = 1000  # number of samples
-processes = 3
+num_samples = 2000  # number of samples
+processes = 6
 
 import time
 import datetime
@@ -22,7 +22,7 @@ mf3_and_mf5_samples = endf6.get_perturbations(
 	num_samples,
 	njoy_kws=dict(
 		err=0.0001,
-		chi=True,
+		chi=False,
 		mubar=False,
 		xs=True,
 		nubar=False,
