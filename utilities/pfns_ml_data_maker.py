@@ -23,7 +23,7 @@ destination_directory_pu1 = '/home/rnt26/PycharmProjects/uncertaintyanalysis/ml/
 
 pu9_endf6_directory = input("Pu-239 ENDF6 directory: ")
 pu0_endf6_directory = input("Pu-240 ENDF6 directory: ")
-pu1_endf6_directory = input("Pu-241 ENDF6 directory: ")
+# pu1_endf6_directory = input("Pu-241 ENDF6 directory: ")
 
 # pu9_target_dir = ''
 
