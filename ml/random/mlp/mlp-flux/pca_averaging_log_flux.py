@@ -433,15 +433,47 @@ for post_idx, (sample, mc_uncertainties) in enumerate(zip(pct_matrix_val, true_p
 			avg_count += 1
 
 	avg_limit_pct = (avg_count / len(mc_uncertainties)) * 100
-	print(f'{post_idx} - {avg_limit_pct:0.1f}% Points over limit')
+	print(f'{post_idx} - {avg_limit_pct:0.1f}% Points over limit. ')
 
 
 print(f'\n\nMean R2: {np.mean(r2s):0.5f}')
 print(f'Avg. {np.mean(over_limit_list):0.1f}% +- {np.std(over_limit_list):0.1f}% over limit')
 
+flux_file = 'Flux_data_Pu-239_9173_Pu-240_9113_Pu-241_9675.parquet'
+flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
+flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
+flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
+
+grid = []
+for i in flux_lower_bounds:
+	grid.append(float(i))
+
+for j in flux_upper_bounds:
+	grid.append(float(j))
+
+grid.sort()
+edges = []
+for i in grid:
+	if i not in edges:
+		edges.append(i)
+widths = np.diff(edges)
 
 
 
+def plot_index(i):
+	sigma_2_upper = 2 * true_percentage_uncertainty_matrix_val[i]
+	sigma_2_lower = -2 * true_percentage_uncertainty_matrix_val[i]
+
+	plt.figure()
+	plt.bar(edges[:-1], averaged_predictions_val[i], width=widths, label='ML error')
+	# plt.plot(edges[:-1], true_pct_error, label='MC Error')
+	plt.fill_between(edges[:-1], sigma_2_lower, sigma_2_upper, color='r', alpha=0.3, label='2$\sigma$ MC uncertainty')
+	plt.xlabel('Energy / Mev')
+	plt.ylabel('% Deviation')
+	plt.xscale('log')
+	plt.grid()
+	plt.legend()
+	plt.savefig(f'{i}_val_pct_error_bar_mlp.png')
 
 def count_outliers(prediction_list, labels, flux_errors_list):
 	"""prediction_list: normal scale predictions
@@ -468,10 +500,7 @@ def count_outliers(prediction_list, labels, flux_errors_list):
 		exceeded_limit_list.append(exceeded_limit_pct)
 
 
-# flux_file = 'Flux_data_Pu-239_9173_Pu-240_9113_Pu-241_9675.parquet'
-# flux_read_obj = pd.read_parquet(f'{flux_data_directory}/{flux_file}', engine='pyarrow')
-# flux_lower_bounds = flux_read_obj['low_erg_bounds'].values
-# flux_upper_bounds = flux_read_obj['high_erg_bounds'].values
+
 
 # d1, d2, d3 = fetch_data(all_parquets[0])
 #
