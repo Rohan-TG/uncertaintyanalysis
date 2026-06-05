@@ -31,7 +31,7 @@ import datetime
 print(tf.config.list_physical_devices('GPU'))
 
 
-data_directory = input('\n\nData directory: ')
+data_directory = input('\n\nXS Data directory: ')
 
 test_directory = input('\nTest directory (x set to val): ')
 if test_directory != 'x':
@@ -309,8 +309,12 @@ def generate_test_data(test_data_directory, mask=None, masking_value=0, truncate
 #
 # scaled_columns_xtest = np.array(scaled_columns_xtest)
 # X_test = scaled_columns_xtest.transpose()
-
-X_test, y_test, keff_test = generate_test_data(test_data_directory=test_directory)
+if test_directory != 'x':
+	X_test, y_test, keff_test = generate_test_data(test_data_directory=test_directory)
+else:
+	X_test = X_val
+	y_test = y_val
+	keff_test = keff_val
 
 
 
