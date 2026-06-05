@@ -110,12 +110,12 @@ def fetch_data(datafile, dir = data_directory):
 	pu_240_df = pd.read_parquet(f'{pu240_PFNS_directory}/94240_{Pu240_file_index}_MF5_data.parquet')
 	pu_240_flattened_pfns = list(pu_240_df.values.flatten())
 
-	# xsobject = pu9_mt2xs + pu9_mt4xs +  pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt18xs + pu1_mt102xs
-	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	input_object = (pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs
+					+ pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+					+ pu_239_flattened_pfns + pu_240_flattened_pfns)
+	input_obj = input_object
 
-	XS_obj = xsobject
-
-	return(XS_obj, keff_value)
+	return(input_obj, keff_value)
 
 
 
