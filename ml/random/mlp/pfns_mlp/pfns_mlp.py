@@ -80,8 +80,6 @@ def fetch_data(datafile, data_dir=data_directory):
 
 	Pu240_file_index = int(datafile.split('_')[6])
 
-	Pu241_file_index = int(datafile.split('_')[-1].split('.')[0])
-
 	# Retrieve k_eff value
 	keff_value = float(temp_df['keff'].values[0])
 
