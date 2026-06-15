@@ -77,7 +77,7 @@ def thin_relative_error_logx(x, y, rel_tol=tolerance, y_floor=None, max_points=N
 
 pfns_original_energies_df = pd.read_parquet(f'{original_directory}/{original_files[0]}')
 pfns_original_energies = pfns_outbound_energies
-pfns_original = pfns_original_energies_df['1.000000e-05'].values
+pfns_original = pfns_original_energies_df[1.000000e-05].values
 
 def thin_single_sample(dataframe):
 	pass
