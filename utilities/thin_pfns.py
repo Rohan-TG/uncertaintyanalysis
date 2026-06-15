@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 from scipy.interpolate import PchipInterpolator
 from groupEnergies import pfns_outbound_energies
+import tqdm
 
 isotope = input('Isotope: ')
 original_directory = input('\nOriginal directory: ')
@@ -108,7 +109,10 @@ def thin_single_sample(file):
 	# 																	  rel_tol=tolerance, )
 	# 	thinned_values.append(thinned_pfns)
 
-	new_df = pd.DataFrame(thinned_values, columns=incident_energy_columns)
+	thinned_values_T = np.array(thinned_values).transpose()
+	new_df = pd.DataFrame(thinned_values_T, columns=incident_energy_columns)
+
 	new_df.to_parquet(f'{new_directory}/{filename}_tolerance_{tolerance}.parquet')
 
-thin_single_sample(original_files[0])
+for f in tqdm.tqdm(original_files, total=len(original_files)):
+	thin_single_sample(f)
