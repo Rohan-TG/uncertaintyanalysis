@@ -107,10 +107,12 @@ def fetch_data(datafile, dir = data_directory):
 
 	Pu240_file_index = int(datafile.split('_')[6])
 
-	pu_239_df = pd.read_parquet(f'{pu239_PFNS_directory}/94239_{Pu239_file_index}_MF5_data.parquet')
+	# pu_239_df = pd.read_parquet(f'{pu239_PFNS_directory}/94239_{Pu239_file_index}_MF5_data.parquet')
+	pu_239_df = pd.read_parquet(f'{pu239_PFNS_directory}/94239_{Pu239_file_index}_MF5_data_tolerance_0.005.parquet')
 	pu_239_flattened_pfns = list(pu_239_df.values.flatten())
 
-	pu_240_df = pd.read_parquet(f'{pu240_PFNS_directory}/94240_{Pu240_file_index}_MF5_data.parquet')
+	# pu_240_df = pd.read_parquet(f'{pu240_PFNS_directory}/94240_{Pu240_file_index}_MF5_data.parquet')
+	pu_240_df = pd.read_parquet(f'{pu240_PFNS_directory}/94240_{Pu240_file_index}_MF5_data_tolerance_0.005.parquet')
 	pu_240_flattened_pfns = list(pu_240_df.values.flatten())
 
 	input_object = (pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs
