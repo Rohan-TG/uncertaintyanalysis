@@ -101,3 +101,4 @@ def thin_single_sample(file):
 	new_df = pd.DataFrame(thinned_values, columns=incident_energy_columns)
 	new_df.to_parquet(f'{new_directory}/{filename}_tolerance_{tolerance}.parquet')
 
+thin_single_sample(original_files[0])
