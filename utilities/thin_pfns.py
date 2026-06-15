@@ -81,6 +81,11 @@ pfns_original_energies = pfns_outbound_energies
 pfns_original = pfns_original_energies_df[1.000000e-05].values
 
 
+kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies[1:],
+																  y=pfns_original[1:],
+																  rel_tol=tolerance, )
+saved_energies_df = pd.DataFrame(thinned_energy)
+saved_energies_df.to_csv(f'Saved_MF5_energies_tolerance_{tolerance}_{isotope}.csv')
 
 def thin_single_sample(file):
 
@@ -89,14 +94,19 @@ def thin_single_sample(file):
 
 	incident_energy_columns = dataframe.columns
 	thinned_values = []
+
 	for column in dataframe:
 		original_pfns = dataframe[column].values
-		kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies[1:],
-																		  y=original_pfns[1:],
-																		  rel_tol=tolerance, )
-		thinned_values.append(thinned_pfns)
-	saved_energies_df= pd.DataFrame(thinned_energy)
-	saved_energies_df.to_csv(f'Saved_MF5_energies_tolerance_{tolerance}_{isotope}.csv')
+		thinned_incident_energy = []
+		for original_index, value in enumerate(original_pfns):
+			if original_index in kept_idx:
+				thinned_incident_energy.append(value)
+
+		thinned_values.append(thinned_incident_energy)
+	# 	kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies[1:],
+	# 																	  y=original_pfns[1:],
+	# 																	  rel_tol=tolerance, )
+	# 	thinned_values.append(thinned_pfns)
 
 	new_df = pd.DataFrame(thinned_values, columns=incident_energy_columns)
 	new_df.to_parquet(f'{new_directory}/{filename}_tolerance_{tolerance}.parquet')
