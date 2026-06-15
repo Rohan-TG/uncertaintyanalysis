@@ -10,6 +10,7 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 from groupEnergies import pfns_outbound_energies
 
+isotope = input('Isotope: ')
 original_directory = input('\nOriginal directory: ')
 original_files = os.listdir(original_directory)
 
@@ -79,9 +80,24 @@ pfns_original_energies_df = pd.read_parquet(f'{original_directory}/{original_fil
 pfns_original_energies = pfns_outbound_energies
 pfns_original = pfns_original_energies_df[1.000000e-05].values
 
-def thin_single_sample(dataframe):
-	pass
 
-kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies,
-																  y=pfns_original,
-																  rel_tol=tolerance,)
+
+def thin_single_sample(file):
+
+	filename = file.split('.')[0]
+	dataframe = pd.read_parquet(f'{original_directory}/{file}')
+
+	incident_energy_columns = dataframe.columns
+	thinned_values = []
+	for column in dataframe:
+		original_pfns = dataframe[column].values
+		kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies,
+																		  y=original_pfns,
+																		  rel_tol=tolerance, )
+		thinned_values.append(thinned_pfns)
+	saved_energies_df= pd.DataFrame(thinned_energy)
+	saved_energies_df.to_csv(f'Saved_MF5_energies_tolerance_{tolerance}_{isotope}.csv')
+
+	new_df = pd.DataFrame(thinned_values, columns=incident_energy_columns)
+	new_df.to_parquet(f'{new_directory}/{filename}_tolerance_{tolerance}.parquet')
+
