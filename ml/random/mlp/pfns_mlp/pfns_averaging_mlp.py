@@ -37,8 +37,11 @@ test_directory = input('\nTest directory (x set to val): ')
 if test_directory != 'x':
 	test_files = os.listdir(test_directory)
 
-pu239_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu9'
-pu240_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu0'
+# pu239_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu9'
+# pu240_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu0'
+
+pu239_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/tolerance_05pct_pu0'
+pu240_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/tolerance_05pct_pu0'
 
 all_parquets = os.listdir(data_directory)
 
