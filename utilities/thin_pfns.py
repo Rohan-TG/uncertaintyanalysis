@@ -1,8 +1,13 @@
+import os
+import sys
+computer = os.uname().nodename
+if computer == 'fermiac':
+	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
+elif computer == 'oppie' or computer == 'bethe':
+	sys.path.append('/home/rnt26/uncertaintyanalysis/')
 import pandas as pd
 import numpy as np
 from scipy.interpolate import PchipInterpolator
-import os
-
 from groupEnergies import pfns_outbound_energies
 
 original_directory = input('\nOriginal directory: ')
