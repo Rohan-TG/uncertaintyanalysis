@@ -91,8 +91,8 @@ def thin_single_sample(file):
 	thinned_values = []
 	for column in dataframe:
 		original_pfns = dataframe[column].values
-		kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies,
-																		  y=original_pfns,
+		kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies[1:],
+																		  y=original_pfns[1:],
 																		  rel_tol=tolerance, )
 		thinned_values.append(thinned_pfns)
 	saved_energies_df= pd.DataFrame(thinned_energy)
