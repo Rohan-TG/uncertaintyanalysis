@@ -3,6 +3,8 @@ import numpy as np
 from scipy.interpolate import PchipInterpolator
 import os
 
+from groupEnergies import pfns_outbound_energies
+
 original_directory = input('\nOriginal directory: ')
 original_files = os.listdir(original_directory)
 
@@ -69,7 +71,7 @@ def thin_relative_error_logx(x, y, rel_tol=tolerance, y_floor=None, max_points=N
 	return kept_idx, x[kept_idx_sorted], y[kept_idx_sorted]
 
 pfns_original_energies_df = pd.read_parquet(f'{original_directory}/{original_files[0]}')
-pfns_original_energies = pfns_original_energies_df['ERG'].values
+pfns_original_energies = pfns_outbound_energies
 pfns_original = pfns_original_energies_df['1.000000e-05'].values
 
 def thin_single_sample(dataframe):
