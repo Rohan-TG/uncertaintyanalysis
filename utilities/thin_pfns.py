@@ -114,5 +114,5 @@ def thin_single_sample(file):
 
 	new_df.to_parquet(f'{new_directory}/{filename}_tolerance_{tolerance}.parquet')
 
-for f in tqdm.tqdm(original_files, total=len(original_files)):
-	thin_single_sample(f)
+# for f in tqdm.tqdm(original_files, total=len(original_files)):
+# 	thin_single_sample(f)
