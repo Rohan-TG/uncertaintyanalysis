@@ -1,8 +1,11 @@
 import pandas as pd
 import numpy as np
 from scipy.interpolate import PchipInterpolator
+import os
 
 original_directory = input('\nOriginal directory: ')
+original_files = os.listdir(original_directory)
+
 new_directory = input('\nTarget: ')
 tolerance = float(input('\nTolerance: '))
 
@@ -64,3 +67,14 @@ def thin_relative_error_logx(x, y, rel_tol=tolerance, y_floor=None, max_points=N
 	kept_idx_sorted = np.nonzero(keep)[0]
 	kept_idx = idx[kept_idx_sorted]  # indices into original arrays
 	return kept_idx, x[kept_idx_sorted], y[kept_idx_sorted]
+
+pfns_original_energies_df = pd.read_parquet(f'{original_directory}/{original_files[0]}')
+pfns_original_energies = pfns_original_energies_df['ERG'].values
+pfns_original = pfns_original_energies_df['1.000000e-05'].values
+
+def thin_single_sample(dataframe):
+	pass
+
+kept_idx, thinned_energy, thinned_pfns = thin_relative_error_logx(x=pfns_original_energies,
+																  y=pfns_original,
+																  rel_tol=tolerance,)
