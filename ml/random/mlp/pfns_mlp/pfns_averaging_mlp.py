@@ -363,8 +363,8 @@ def build_model():
 	# model.compile(loss='MeanSquaredError', optimizer='adam')
 
 	model =keras.Sequential()
-	model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
-	model.add(keras.layers.Dense(900, activation='relu'))
+	model.add(keras.layers.Dense(1250, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+	model.add(keras.layers.Dense(1100, activation='relu'))
 	model.add(keras.layers.Dense(700, activation='relu'))
 	model.add(keras.layers.Dense(640, activation='relu'))
 	model.add(keras.layers.Dense(480, activation='relu'))
