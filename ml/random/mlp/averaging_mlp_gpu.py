@@ -557,7 +557,7 @@ def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 
 	return acceptable_models, truncated_count_threshold, best_averaged_errors
 
-best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_val, keep_n)
+best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_test, keep_n)
 print(best_models_count10 / len(keff_test) * 100)
 
 selected_best_models = []
