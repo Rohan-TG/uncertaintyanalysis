@@ -549,7 +549,7 @@ def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 			if model_index in acceptable_models:
 				working_list.append(value)
 
-		if np.mean(working_list) <= threshold:
+		if np.abs(np.mean(working_list)) <= threshold:
 			truncated_count_threshold +=1
 
 		best_averaged_errors.append(np.mean(working_list))
@@ -577,3 +577,11 @@ def evaluate_model(MODEL, X_matrix):
 		rescaled_model_predictions.append(x * train_labels_std + train_labels_mean)
 
 	return rescaled_model_predictions
+
+
+
+save_models_input = input('Save models y/n: ')
+if save_models_input == 'y':
+	model_save_destination = input('Model save directory: ')
+	for ix, mod in enumerate(selected_best_models):
+		mod.save(f'{model_save_destination}/Trained_MLP_{ix}_final.keras')
