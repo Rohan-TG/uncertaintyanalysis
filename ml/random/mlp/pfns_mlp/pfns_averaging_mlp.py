@@ -587,7 +587,7 @@ def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 			if model_index in acceptable_models:
 				working_list.append(value)
 
-		if np.mean(working_list) <= threshold:
+		if np.abs(np.mean(working_list)) <= threshold:
 			truncated_count_threshold +=1
 
 		best_averaged_errors.append(np.mean(working_list))
