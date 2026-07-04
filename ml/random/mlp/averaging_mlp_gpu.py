@@ -360,8 +360,8 @@ for num in tqdm.tqdm(range(n_models)):
 	trainstart = time.time()
 	history = temp_model.fit(X_train,
 						y_train,
-						epochs=5000,
-						batch_size=32,
+						epochs=10000,
+						batch_size=16,
 						callbacks=callback,
 						validation_data=(X_val, y_val),
 						verbose=1)
