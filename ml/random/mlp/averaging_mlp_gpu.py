@@ -325,7 +325,7 @@ def build_model():
 											 restore_best_weights=True)
 
 	model =keras.Sequential()
-	model.add(keras.layers.Dense(1500, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
+	model.add(keras.layers.Dense(1000, input_shape=(X_train.shape[1],), kernel_initializer='normal'))
 	model.add(keras.layers.Dense(900, activation='relu'))
 	model.add(keras.layers.Dense(750, activation='relu'))
 	model.add(keras.layers.Dense(600, activation='relu'))
