@@ -595,7 +595,7 @@ if save_models_input == 'y':
 	with open(f"{model_save_destination}/training_columns_means.pkl", "wb") as fcmean:
 		pickle.dump(training_column_means, fcmean)
 
-	with open(f"{model_save_destination}/training_columns_stds.-====pkl", "wb") as fcstd:
+	with open(f"{model_save_destination}/training_columns_stds.pkl", "wb") as fcstd:
 		pickle.dump(training_column_stds, fcstd)
 
 from scipy.stats import skew, probplot
