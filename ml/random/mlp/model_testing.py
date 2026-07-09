@@ -17,8 +17,14 @@ model_directory = input('\nModel directory: ')
 with open(f"{model_directory}/train_labels_std.pkl", "rb") as f:
 	train_labels_std = pickle.load(f)
 
-with open(f"{model_directory}/test_labels_mean.pkl", "rb") as f:
+with open(f"{model_directory}/train_labels_mean.pkl", "rb") as f:
 	train_labels_mean = pickle.load(f)
+
+with open(f"{model_directory}/training_columns_means.pkl", "rb") as f:
+	training_column_means = pickle.load(f)
+
+with open(f"{model_directory}/training_columns_stds.pkl", "rb") as f:
+	training_column_stds = pickle.load(f)
 
 data_directory = input('\n\nXS data directory: ')
 test_directory = input('\nTest directory (x set to val): ')
