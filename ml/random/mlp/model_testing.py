@@ -26,6 +26,13 @@ with open(f"{model_directory}/training_columns_means.pkl", "rb") as f:
 with open(f"{model_directory}/training_columns_stds.pkl", "rb") as f:
 	training_column_stds = pickle.load(f)
 
+
+contents = os.listdir(model_directory)
+models = []
+for object in contents:
+	if object.endswith(".keras"):
+		models.append(keras.models.load_model(f"{model_directory}/{object}"))
+
 data_directory = input('\n\nXS data directory: ')
 test_directory = input('\nTest directory (x set to val): ')
 if test_directory != 'x':
