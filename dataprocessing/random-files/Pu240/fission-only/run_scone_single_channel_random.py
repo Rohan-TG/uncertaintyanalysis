@@ -63,7 +63,7 @@ used_pu240_files = []
 used_pu241_files = []
 used_pu239_files = []
 
-for pu240_ace_file  in tqdm.tqdm(zip( Pu240_ACE_files), total=len(Pu240_ACE_files)):
+for pu240_ace_file  in tqdm.tqdm(Pu240_ACE_files, total=len(Pu240_ACE_files)):
 	# pu239_file_index = int(pu239_ace_file.split('.03c')[0].split('_')[1])
 	pu240_file_index = int(pu240_ace_file.split('.03c')[0].split('_')[1])
 	# pu241_file_index = int(pu241_ace_file.split('.03c')[0].split('_')[1])
