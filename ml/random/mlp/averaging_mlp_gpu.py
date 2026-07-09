@@ -585,3 +585,23 @@ if save_models_input == 'y':
 	model_save_destination = input('Model save directory: ')
 	for ix, mod in enumerate(selected_best_models):
 		mod.save(f'{model_save_destination}/Trained_MLP_{ix}_final.keras')
+
+	with open(f"{model_save_destination}/train_labels_mean.pkl", "wb") as flmean:
+		pickle.dump(train_labels_mean, flmean)
+
+	with open(f"{model_save_destination}/train_labels_std.pkl", "wb") as flstd:
+		pickle.dump(train_labels_std, flstd)
+
+	with open(f"{model_save_destination}/training_columns_means.pkl", "wb") as fcmean:
+		pickle.dump(training_column_means, fcmean)
+
+	with open(f"{model_save_destination}/training_columns_stds.-====pkl", "wb") as fcstd:
+		pickle.dump(training_column_stds, fcstd)
+
+from scipy.stats import skew, probplot
+
+s = skew(averaged_errors, bias=False)
+
+probplot(averaged_errors, dist="norm", plot=plt)
+plt.title("Q-Q plot against normal distribution")
+plt.show()
