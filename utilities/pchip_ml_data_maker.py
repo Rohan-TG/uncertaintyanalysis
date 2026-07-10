@@ -175,8 +175,8 @@ def parquet_maker(index_combination, full_thinned_erg=pchip_energies):
 	pu241_index = index_combination[2]
 
 	reduced_keff_df = keff_dataframe[keff_dataframe.pu239_file_index == pu239_index]
-	# reduced_keff_df = reduced_keff_df[reduced_keff_df.pu240_file_index == pu240_index]
-	# reduced_keff_df = reduced_keff_df[reduced_keff_df.pu241_file_index == pu241_index]
+	reduced_keff_df = reduced_keff_df[reduced_keff_df.pu240_file_index == pu240_index]
+	reduced_keff_df = reduced_keff_df[reduced_keff_df.pu241_file_index == pu241_index]
 
 	pu239_filename = f'94239_{pu239_index}.pendf'
 	pu240_filename = f'94240_{pu240_index}.pendf'
