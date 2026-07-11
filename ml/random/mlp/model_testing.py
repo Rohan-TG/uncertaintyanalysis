@@ -35,6 +35,7 @@ for object in contents:
 
 data_directory = input('\n\nXS data directory: ')
 test_directory = input('\nTest directory (x set to val): ')
+keep_n = int(input('\nN models: '))
 if test_directory != 'x':
 	test_files = os.listdir(test_directory)
 le_bound_index = 1 # filters out NaNs
@@ -81,7 +82,7 @@ def fetch_data(datafile, dir = data_directory):
 
 	return(XS_obj, keff_value)
 
-
+average_performance_list_test = []
 
 keff_test = []
 XS_test = []
@@ -94,14 +95,14 @@ for test_file in tqdm.tqdm(test_files, total=len(test_files)):
 	XS_test.append(xs_values)
 	keff_test.append(keff_value)
 
-	pu9_test_index = int(test_file.split('_')[4])
-	pu9_test_indices.append(pu9_test_index)
+	# pu9_test_index = int(test_file.split('_')[4])
+	# pu9_test_indices.append(pu9_test_index)
 
 	pu0_test_index = int(test_file.split('_')[6])
 	pu0_test_indices.append(pu0_test_index)
 
-	pu1_test_index = int(test_file.split('_')[8].split('.')[0])
-	pu1_test_indices.append(pu1_test_index)
+	# pu1_test_index = int(test_file.split('_')[8].split('.')[0])
+	# pu1_test_indices.append(pu1_test_index)
 
 
 XS_test = np.array(XS_test)
@@ -115,5 +116,82 @@ for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-
 	scaled_column = (np.array(column) - c_mean) / c_std
 	scaled_columns_xtest.append(scaled_column)
 
-# scaled_columns_xtest = np.array(scaled_columns_xtest)
-# X_test = scaled_columns_xtest.transpose()
+scaled_columns_xtest = np.array(scaled_columns_xtest)
+X_test = scaled_columns_xtest.transpose()
+
+prediction_matrix_test = [[] for i in range(len(y_test))]
+error_matrix_test = [[] for i in range(len(y_test))]
+
+for m in models:
+	predictions_test = m.predict(X_test)
+	predictions_test = predictions_test.ravel()
+	rescaled_predictions_test = []
+	predictions_list_test = predictions_test.tolist()
+	for p in predictions_list_test:
+		descaled_p = p * train_labels_std + train_labels_mean
+		rescaled_predictions_test.append(float(descaled_p))
+
+	errors_test = []
+	for predicted, true in zip(rescaled_predictions_test, keff_test):
+		errors_test.append((predicted - true) * 1e5)
+
+	for p_i, p in enumerate(rescaled_predictions_test):
+		prediction_matrix_test[p_i].append(p)
+
+	for err_index, err in enumerate(errors_test):
+		error_matrix_test[err_index].append(err)
+
+	absolute_errors_test = [abs(x) for x in errors_test]
+	average_performance_list_test.append(np.mean(absolute_errors_test))
+
+
+
+
+def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
+	"""error_matrix: the error matrix
+	keep_n_models: the number of models to keep"""
+
+	truncated_count_threshold = 0
+	em = np.array(error_matrix)
+	em_trans = np.transpose(em)
+
+	model_averages = []
+	for model_ in em_trans:
+		model_averages.append(np.mean(np.abs(model_)))
+
+	sorted_models = [[-1,100]]
+	for i, val in enumerate(model_averages):
+		for j, saved in enumerate(sorted_models):
+			if val < saved[-1]:
+				sorted_models.insert(j, [i,val])
+				break
+
+	acceptable_models = []
+	for x in sorted_models[:keep_n_models]:
+		acceptable_models.append(x[0])
+
+	if mode == 'test':
+		emt = np.array(error_matrix_test)
+	# else:
+		# emt = np.array(error_matrix_val)
+
+	best_averaged_errors = []
+
+	for sample in emt:
+		working_list = []
+		for model_index, value in enumerate(sample):
+			if model_index in acceptable_models:
+				working_list.append(value)
+
+		if np.abs(np.mean(working_list)) <= threshold:
+			truncated_count_threshold +=1
+
+		best_averaged_errors.append(np.mean(working_list))
+
+
+	return acceptable_models, truncated_count_threshold, best_averaged_errors
+
+
+
+best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_test, keep_n)
+print(best_models_count10 / len(keff_test) * 100)
