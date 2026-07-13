@@ -23,7 +23,7 @@ secondary_lower_bound = Groups.g6  # group 6
 secondary_upper_bound = Groups.g5  # group 5
 second_group_domain = [secondary_lower_bound, secondary_upper_bound]
 
-fission_perturbation_domain = []
+fission_perturbation_domain = np.linspace(-0.1, 0.1, 20)
 
 elastic_perturbation_domain = np.linspace(-0.1,0.1,20)
 
