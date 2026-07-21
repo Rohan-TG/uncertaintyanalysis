@@ -118,6 +118,7 @@ for column, c_mean, c_std in tqdm.tqdm(zip(scaling_matrix_xtest[le_bound_index:-
 
 scaled_columns_xtest = np.array(scaled_columns_xtest)
 X_test = scaled_columns_xtest.transpose()
+X_test = np.nan_to_num(X_test, nan=0.0)
 
 prediction_matrix_test = [[] for i in range(len(y_test))]
 error_matrix_test = [[] for i in range(len(y_test))]
