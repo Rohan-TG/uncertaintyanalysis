@@ -45,42 +45,75 @@ all_parquets = os.listdir(data_directory)
 lower_energy_bound = float(input('\nEnter lower energy bound in eV: '))
 
 
-def fetch_data(datafile, dir = data_directory):
+list_of_channels = ['94239_MT2_XS', '94239_MT4_XS', '94239_MT16_XS', '94239_MT18_XS', '94239_MT102_XS',
+					'94240_MT2_XS', '94240_MT4_XS', '94240_MT16_XS', '94240_MT18_XS', '94240_MT102_XS',
+					'94241_MT2_XS', '94241_MT4_XS', '94241_MT16_XS', '94241_MT18_XS', '94241_MT102_XS',]
 
-	temp_df = pd.read_parquet('/home/rnt26/uncertaintyanalysis/ml/mldata/baselines/endfbviii.0/endfbviii0_baseline_data_Pu-239_-1_Pu-240_-1_Pu-241_-1.parquet', engine='pyarrow')
-	testing_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+isolated_channels = []
 
-	testing_df = testing_df[testing_df['ERG'] >= lower_energy_bound]
-	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
-	keff_value = float(temp_df['keff'].values[0])
+def fetch_data(datafile, dir=data_directory):
+	baseline_df = pd.read_parquet(
+		'/home/rnt26/uncertaintyanalysis/ml/mldata/baselines/endfbviii.0/endfbviii0_baseline_data_Pu-239_-1_Pu-240_-1_Pu-241_-1.parquet',
+		engine='pyarrow')
 
-	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
-	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
-	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
+	isolated_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
 
-	pu9_mt2xs = testing_df['94239_MT2_XS'].values.tolist()
-	pu0_mt2xs = temp_df['94240_MT2_XS'].values.tolist()
-	pu1_mt2xs = temp_df['94241_MT2_XS'].values.tolist()
+	baseline_df = baseline_df[baseline_df['ERG'] >= lower_energy_bound] # Set energy domain
+	isolated_df = isolated_df[isolated_df['ERG'] >= lower_energy_bound]
 
-	pu9_mt4xs = temp_df['94239_MT4_XS'].values.tolist()
-	pu0_mt4xs = temp_df['94240_MT4_XS'].values.tolist()
-	pu1_mt4xs = temp_df['94241_MT4_XS'].values.tolist()
+	keff_value = float(isolated_df['keff'].values[0])
 
-	pu9_mt16xs = temp_df['94239_MT16_XS'].values.tolist()
-	pu0_mt16xs = temp_df['94240_MT16_XS'].values.tolist()
-	pu1_mt16xs = temp_df['94241_MT16_XS'].values.tolist()
+	unflattened_matrix = [[] for _ in list_of_channels] # initialise data matrix
 
-	pu9_mt102xs = temp_df['94239_MT102_XS'].values.tolist()
-	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
-	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
+	for channel_index, channel in enumerate(list_of_channels):
+		if channel not in isolated_channels: # check if data not being isolated
+			unflattened_matrix[channel_index] = baseline_df[channel].values.tolist()
+		else: # if data isolated then do this
+			unflattened_matrix[channel_index] = isolated_df[channel].values.tolist()
 
-	# xsobject = pu9_mt2xs + pu9_mt4xs +  pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt18xs + pu1_mt102xs
-	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+	XS_obj = np.array(unflattened_matrix).flatten() # turn into vector
 
-	XS_obj = xsobject
+	return XS_obj, keff_value
 
-	return(XS_obj, keff_value)
+
+
+# def fetch_data(datafile, dir = data_directory):
+#
+# 	temp_df = pd.read_parquet('/home/rnt26/uncertaintyanalysis/ml/mldata/baselines/endfbviii.0/endfbviii0_baseline_data_Pu-239_-1_Pu-240_-1_Pu-241_-1.parquet', engine='pyarrow')
+# 	testing_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+#
+# 	testing_df = testing_df[testing_df['ERG'] >= lower_energy_bound]
+# 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
+#
+# 	keff_value = float(temp_df['keff'].values[0])
+#
+# 	pu9_mt18xs = temp_df['94239_MT18_XS'].values.tolist()
+# 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
+# 	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
+#
+# 	pu9_mt2xs = testing_df['94239_MT2_XS'].values.tolist()
+# 	pu0_mt2xs = temp_df['94240_MT2_XS'].values.tolist()
+# 	pu1_mt2xs = temp_df['94241_MT2_XS'].values.tolist()
+#
+# 	pu9_mt4xs = temp_df['94239_MT4_XS'].values.tolist()
+# 	pu0_mt4xs = temp_df['94240_MT4_XS'].values.tolist()
+# 	pu1_mt4xs = temp_df['94241_MT4_XS'].values.tolist()
+#
+# 	pu9_mt16xs = temp_df['94239_MT16_XS'].values.tolist()
+# 	pu0_mt16xs = temp_df['94240_MT16_XS'].values.tolist()
+# 	pu1_mt16xs = temp_df['94241_MT16_XS'].values.tolist()
+#
+# 	pu9_mt102xs = temp_df['94239_MT102_XS'].values.tolist()
+# 	pu0_mt102xs = temp_df['94240_MT102_XS'].values.tolist()
+# 	pu1_mt102xs = temp_df['94241_MT102_XS'].values.tolist()
+#
+# 	# xsobject = pu9_mt2xs + pu9_mt4xs +  pu9_mt18xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt18xs + pu1_mt102xs
+# 	xsobject = pu9_mt2xs + pu9_mt4xs + pu9_mt16xs + pu9_mt18xs + pu9_mt102xs + pu0_mt2xs + pu0_mt4xs + pu0_mt16xs + pu0_mt18xs + pu0_mt102xs + pu1_mt2xs + pu1_mt2xs + pu1_mt4xs + pu1_mt16xs + pu1_mt18xs + pu1_mt102xs
+#
+# 	XS_obj = xsobject
+#
+# 	return(XS_obj, keff_value)
 
 average_performance_list_test = []
 
@@ -196,3 +229,17 @@ def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 
 best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_test, keep_n)
 print(best_models_count10 / len(keff_test) * 100)
+
+
+
+def k11():
+	"""2nd order term calculation for a1"""
+	pass
+
+def k22():
+	"""2nd order term calculation for a2"""
+	pass
+
+def k12():
+	"""2nd order joint term calculation for a1 and a2"""
+	pass
