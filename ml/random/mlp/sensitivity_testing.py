@@ -243,3 +243,4 @@ def k22():
 def k12():
 	"""2nd order joint term calculation for a1 and a2"""
 	pass
+
