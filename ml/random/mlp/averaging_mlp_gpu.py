@@ -346,6 +346,8 @@ error_matrix_val = [[] for i in range(len(y_val))]
 prediction_matrix_test = [[] for i in range(len(y_test))]
 error_matrix_test = [[] for i in range(len(y_test))]
 
+prediction_matrix_train = [[] for i in range(len(y_train))]
+error_matrix_train = [[] for i in range(len(y_train))]
 
 save_models = []
 
@@ -393,7 +395,28 @@ for num in tqdm.tqdm(range(n_models)):
 	average_performance_list_test.append(np.mean(absolute_errors_test))
 
 	####################################################################################################################
+	predictions_train = temp_model.predict(X_train)
+	predictions_train = predictions_train.ravel()
+	rescaled_predictions_train = []
+	predictions_list_train = predictions_train.tolist()
 
+	for predtrain in predictions_list_train:
+		descaled_p = predtrain * train_labels_std + train_labels_mean
+		rescaled_predictions_train.append(float(descaled_p))
+
+	errors_train = []
+	for predictedtrain, truetrain in zip(rescaled_predictions_train, keff_train):
+		errors_train.append((predictedtrain - truetrain) * 1e5)
+		# print(f'SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+	# Save data into matrices
+	for p_index, p in enumerate(rescaled_predictions_train):
+		prediction_matrix_train[p_index].append(p)
+
+	for err_index, err in enumerate(errors_train):
+		error_matrix_train[err_index].append(err)
+
+	####################################################################################################################
 	predictions = temp_model.predict(X_val)
 	predictions = predictions.ravel()
 
@@ -556,7 +579,7 @@ def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 
 	return acceptable_models, truncated_count_threshold, best_averaged_errors
 
-best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_val, keep_n)
+best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_val, keep_n, mode='normal')
 print(best_models_count10 / len(keff_val) * 100)
 
 selected_best_models = []
