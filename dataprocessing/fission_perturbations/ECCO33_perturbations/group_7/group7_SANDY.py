@@ -8,16 +8,16 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 import sys
 
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
-from groupEnergies import Groups, Pu239, Reactions
+from groupEnergies import Groups, Pu240, Reactions
 
 processes = int(input("Num. processes: "))
 
 start = time.time()
 
-za = Pu239.ZA
+za = Pu240.ZA
 group = 7
 
-perturbation_coefficients = np.arange(-0.500, 0.501, 0.001)
+perturbation_coefficients = [-0.005, 0.0, 0.005]
 
 # endf6 = sandy.Endf6.from_file('/home/rnt26/PycharmProjects/uncertaintyanalysis/n-094_Pu_239.endf')
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
@@ -32,7 +32,7 @@ upper_bound = Groups.g6
 domain = [lower_bound, upper_bound]
 
 
-mat = Pu239.MAT
+mat = Pu240.MAT
 mt = Reactions.fission
 
 
@@ -54,11 +54,11 @@ def run_sandy(coeff):
 						 verbose=True,
 						 pendf=pendf_pert)
 
-	savefilename = f"Pu239_g{group}_{coeff:0.3f}_MT{mt}.09c"
+	savefilename = f"Pu240_g{group}_{coeff:0.3f}_MT{mt}.09c"
 	with open(f"{savefilename}", mode="w") as f:
 		f.write(outs["ace"])
 
-	savefilependf = f"Pu239_g{group}_{coeff:0.3f}_MT{mt}.pendf"
+	savefilependf = f"Pu240_g{group}_{coeff:0.3f}_MT{mt}.pendf"
 	heated_pendf_pert.to_file(savefilependf)
 
 
