@@ -14,12 +14,20 @@ processes = int(input("Number of NJOY processes: "))
 start = time.time()
 za = Pu239.ZA
 
-perturbation_domain = np.arange(-0.25, 0.27, 0.02)
+# perturbation_domain = np.arange(-0.25, 0.27, 0.02)
 
-perturbation_pairs = []
-for i in perturbation_domain:
-	for j in perturbation_domain:
-		perturbation_pairs.append([i,j])
+pertlevel = 0.005
+perturbation_pairs = [[-pertlevel, -pertlevel],
+					  [pertlevel, pertlevel],
+					  [0.000, pertlevel],
+					  [0.000, -pertlevel],
+					  [pertlevel, 0.000],
+					  [-pertlevel, 0.000],
+					  [-pertlevel, pertlevel],
+					  [pertlevel, -pertlevel]]
+# for i in perturbation_domain:
+# 	for j in perturbation_domain:
+# 		perturbation_pairs.append([i,j])
 
 
 
