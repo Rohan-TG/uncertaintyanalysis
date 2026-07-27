@@ -298,7 +298,7 @@ def generate_test_data(test_data_directory, mask=None, masking_value=0, truncate
 # X_test = scaled_columns_xtest.transpose()
 
 X_test, y_test, keff_test = generate_test_data(test_data_directory=test_directory)
-
+X_test = np.nan_to_num(X_test, nan=0.0)
 
 
 
@@ -310,7 +310,7 @@ X_val = np.nan_to_num(X_val, nan=0.0)
 # X_train = X_train[:, train_mask]
 X_train = np.nan_to_num(X_train, nan=0.0)
 
-X_test = np.nan_to_num(X_test, nan=0.0)
+
 
 
 
@@ -587,7 +587,7 @@ for k, model in enumerate(save_models):
 	if k in best_models:
 		selected_best_models.append(model)
 
-del save_models
+
 
 
 def evaluate_model(MODEL, X_matrix):
