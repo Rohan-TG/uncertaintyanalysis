@@ -231,16 +231,25 @@ best_models, best_models_count10, averaged_errors = select_best_models(error_mat
 print(best_models_count10 / len(keff_test) * 100)
 
 
+knominal = 0.99980
 
-def k11():
+def s11(delta1, k_delta1_0, k_minus_delta1_0):
 	"""2nd order term calculation for a1"""
-	pass
+	denominator = knominal * delta1 ** 2
 
-def k22():
+	numerator = k_delta1_0 - 2* knominal + k_minus_delta1_0
+	return numerator / denominator
+
+def s22(delta2, k_delta2_0, k_minus_0_delta2):
 	"""2nd order term calculation for a2"""
-	pass
+	denominator = knominal * delta2 ** 2
 
-def k12():
+	numerator = k_delta2_0 - 2 * knominal + k_minus_0_delta2
+	return numerator / denominator
+
+def s12(kd1d2, kd1_minusd2, kminusd1_d2, kminusd1_minusd2, delta1, delta2):
 	"""2nd order joint term calculation for a1 and a2"""
-	pass
+	numerator = kd1d2 - kd1_minusd2- kminusd1_d2 + kminusd1_minusd2
+	denominator = 4 * knominal * delta1 * delta2
+	return numerator / denominator
 
