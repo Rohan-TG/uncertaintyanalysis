@@ -1,7 +1,7 @@
 import os
 import sys
 
-from dataprocessing.sensitivities.onepctpert_pu239_115_152.sandy_onepct_pu239 import second_group
+
 
 computer = os.uname().nodename
 if computer == 'fermiac':
