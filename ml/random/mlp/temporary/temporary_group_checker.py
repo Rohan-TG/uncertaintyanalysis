@@ -238,10 +238,10 @@ model.add(keras.layers.Dense(900, activation='relu'))
 model.add(keras.layers.Dense(750, activation='relu'))
 model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(540, activation='relu'))
+model.add(keras.layers.Dense(480, activation='relu'))
 model.add(keras.layers.Dense(380, activation='relu'))
-model.add(keras.layers.Dense(280, activation='relu'))
-model.add(keras.layers.Dense(150, activation='relu'))
-model.add(keras.layers.Dense(100, activation='relu'))
+model.add(keras.layers.Dense(250, activation='relu'))
+model.add(keras.layers.Dense(200, activation='relu'))
 model.add(keras.layers.Dense(1, activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
@@ -390,33 +390,3 @@ print(f' {len(twenty_pcm_test_predictions)} ({len(twenty_pcm_test_predictions) /
 
 print('#### End test ####')
 
-### register errors
-
-# dump_directory = input('Dump directory: ')
-# RUNCODE = int(input('Run code: '))
-# for error, prediction, file in tqdm.tqdm(zip(errors, predictions, val_files), total=len(errors)):
-#
-#
-# 	data_df = pd.read_parquet(f'{data_directory}/{file}', engine='pyarrow')
-# 	df2 = data_df.copy()
-# 	iterator = list(range(0, len(df2)))
-#
-# 	pu9_index = int(file.split('_')[4])
-# 	pu0_index = int(file.split('_')[6])
-# 	pu1_index = int(file.split('_')[8].split('.')[0])
-#
-# 	index_list_pu9 = [pu9_index for i in iterator]
-# 	index_list_pu0 = [pu0_index for i in iterator]
-# 	index_list_pu1 = [pu1_index for i in iterator]
-#
-# 	error_data_list = [error for i in iterator]
-# 	prediction_list = [prediction for i in iterator]
-#
-# 	df2['prediction'] = prediction_list
-# 	df2['ml_error'] = error_data_list
-# 	df2['pu239_index'] = index_list_pu9
-# 	df2['pu240_index'] = index_list_pu0
-# 	df2['pu241_index'] = index_list_pu1
-#
-# 	df2.to_parquet(f'{dump_directory}/diagnosis_data_Pu-239_{pu9_index}_Pu-240_{pu0_index}_Pu-241_{pu1_index}_runcode-{RUNCODE}.parquet',
-# 				   engine='pyarrow')
