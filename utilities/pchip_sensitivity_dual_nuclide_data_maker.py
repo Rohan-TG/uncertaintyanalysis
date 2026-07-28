@@ -20,8 +20,8 @@ from scipy.interpolate import PchipInterpolator
 outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
-firstgroupname = 'g1.5-2MeV'
-secondgroupname = 'g1-1.5MeV'
+firstgroupname = 'g4'
+secondgroupname = 'g4'
 
 interpolation_energy_bound = 2500
 relative_tolerance = 0.999
@@ -139,8 +139,8 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 	firstgroupdelta = outputfile.split('_')[2]
 	secondgroupdelta = outputfile.split('_')[-1].split('.m')[0]
 
-	associated_pu239_pendf_name = f'Pu9_dual_{firstgroupname}_{firstgroupdelta}-{secondgroupname}_{secondgroupdelta}_MT18.pendf'
-	pu240_filename = '94240_-1.pendf'
+	associated_pu239_pendf_name = f'Pu239_{firstgroupname}_{firstgroupdelta}_MT18.pendf'
+	pu240_filename = f'Pu240_{secondgroupname}_{secondgroupdelta}_MT18.pendf'
 	pu241_filename = '94241_-1.pendf'
 
 	# Extract Pu-239 data
@@ -246,7 +246,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 					   })
 
 	df.to_parquet(
-		f'{parquet_directory}/Pu239_{firstgroupname}_{firstgroupdelta}_{secondgroupname}_{secondgroupdelta}_mldata.parquet',
+		f'{parquet_directory}/Pu239_{firstgroupname}_{firstgroupdelta}_Pu240_{secondgroupname}_{secondgroupdelta}_mldata.parquet',
 		engine='pyarrow')
 
 
