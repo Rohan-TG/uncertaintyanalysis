@@ -10,10 +10,10 @@ from groupEnergies import Reactions, pchip_energies
 import tqdm
 import ENDF6
 import numpy as np
-from concurrent.futures import ProcessPoolExecutor, as_completed
+# from concurrent.futures import ProcessPoolExecutor, as_completed
 from scipy.interpolate import PchipInterpolator
 
-processes = int(input("Num. processes: "))
+# processes = int(input("Num. processes: "))
 outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
@@ -136,6 +136,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 
 	associated_pu239_pendf_name = f'Pu9_dual_g3_{firstgroupdelta}-g5_{secondgroupdelta}_MT18.pendf'
 	pu240_filename = '94240_-1.pendf'
+	pu241_filename = '94241_-1.pendf'
 
 	# Extract Pu-239 data
 	f239 = open(f'{pu239_pendf_directory}/{associated_pu239_pendf_name}')
@@ -196,115 +197,13 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 	capture_section_241 = ENDF6.find_section(lines_241, MF=3, MT=Reactions.capture)
 	capture_erg_241, capture_xs_241 = ENDF6.read_table(capture_section_241)
 
-
-
-
-
-
-
-def parquet_maker(o_file, full_thinned_erg=pchip_energies):
-	"""Filename should be the name of the PENDF we're reading from"""
-
-	pu239_index = index_combination[0]
-	pu240_index = index_combination[1]
-	pu241_index = index_combination[2]
-
-	reduced_keff_df = keff_dataframe[keff_dataframe.pu239_file_index == pu239_index]
-	reduced_keff_df = reduced_keff_df[reduced_keff_df.pu240_file_index == pu240_index]
-	reduced_keff_df = reduced_keff_df[reduced_keff_df.pu241_file_index == pu241_index]
-
-	pu239_filename = f''
-	# pu240_filename = f'94240_{pu240_index}.pendf'
-	# pu241_filename = f'94241_{pu241_index}.pendf'
-
-
-	# Extract Pu-239 data
-	f239 = open(f'{pu239_pendf_directory}/{pu239_filename}')
-	lines_239 = f239.readlines()
-
-	elastic_section_239 = ENDF6.find_section(lines_239, MF=3, MT=Reactions.elastic)
-	elastic_erg_239, elastic_xs_239 = ENDF6.read_table(elastic_section_239)
-
-	inelastic_section_239 = ENDF6.find_section(lines_239, MF=3, MT=Reactions.inelastic)
-	inelastic_erg_239, inelastic_xs_239 = ENDF6.read_table(inelastic_section_239)
-
-	n2n_section_239 = ENDF6.find_section(lines_239, MF=3, MT=Reactions.n2n)
-	n2n_erg_239, n2n_xs_239 = ENDF6.read_table(n2n_section_239)
-
-	fission_section_239 = ENDF6.find_section(lines_239, MF=3, MT=Reactions.fission)
-	fission_erg_239, fission_xs_239 = ENDF6.read_table(fission_section_239)
-
-	capture_section_239 = ENDF6.find_section(lines_239, MF=3, MT=Reactions.capture)
-	capture_erg_239, capture_xs_239 = ENDF6.read_table(capture_section_239)
-
-
-	# Form energy grid using PCHIP function
-
-	fast_energy_mt18_239 = [erg for erg in fission_erg_239 if erg >= interpolation_energy_bound]
-	fast_xs_mt18_239 = [xs for xs, erg in zip(fission_xs_239, fission_erg_239) if erg >= interpolation_energy_bound]
-
-
-
-	# Extract Pu-240 data
-	f240 = open(f'{pu240_pendf_directory}/{pu240_filename}')
-	lines_240 = f240.readlines()
-
-	elastic_section_240 = ENDF6.find_section(lines_240, MF=3, MT=Reactions.elastic)
-	elastic_erg_240, elastic_xs_240 = ENDF6.read_table(elastic_section_240)
-
-	inelastic_section_240 = ENDF6.find_section(lines_240, MF=3, MT=Reactions.inelastic)
-	inelastic_erg_240, inelastic_xs_240 = ENDF6.read_table(inelastic_section_240)
-
-	n2n_section_240 = ENDF6.find_section(lines_240, MF=3, MT=Reactions.n2n)
-	n2n_erg_240, n2n_xs_240 = ENDF6.read_table(n2n_section_240)
-
-	fission_section_240 = ENDF6.find_section(lines_240, MF=3, MT=Reactions.fission)
-	fission_erg_240, fission_xs_240 = ENDF6.read_table(fission_section_240)
-
-	capture_section_240 = ENDF6.find_section(lines_240, MF=3, MT=Reactions.capture)
-	capture_erg_240, capture_xs_240 = ENDF6.read_table(capture_section_240)
-
-
-
-
-	# Extract Pu-241 data
-	f241 = open(f'{pu241_pendf_directory}/{pu241_filename}')
-	lines_241 = f241.readlines()
-
-	elastic_section_241 = ENDF6.find_section(lines_241, MF=3, MT=Reactions.elastic)
-	elastic_erg_241, elastic_xs_241 = ENDF6.read_table(elastic_section_241)
-
-	inelastic_section_241 = ENDF6.find_section(lines_241, MF=3, MT=Reactions.inelastic)
-	inelastic_erg_241, inelastic_xs_241 = ENDF6.read_table(inelastic_section_241)
-
-	n2n_section_241 = ENDF6.find_section(lines_241, MF=3, MT=Reactions.n2n)
-	n2n_erg_241, n2n_xs_241 = ENDF6.read_table(n2n_section_241)
-
-	fission_section_241 = ENDF6.find_section(lines_241, MF=3, MT=Reactions.fission)
-	fission_erg_241, fission_xs_241 = ENDF6.read_table(fission_section_241)
-
-	capture_section_241 = ENDF6.find_section(lines_241, MF=3, MT=Reactions.capture)
-	capture_erg_241, capture_xs_241 = ENDF6.read_table(capture_section_241)
-
-
-
-
-	# full_thinned_erg = list(interpolation_energies) + list(fast_energy_mt18_239) # full energy grid after applying PCHIP
-
-	full_thinned_xs = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
-
-	# full_thinned_xs = thinned_xs + fast_energy_mt18_239
-
-	# truncated_fission_xs_239 = np.interp(full_thinned_erg, fission_erg_239, fission_xs_239)
-
+	full_thinned_erg = pchip_energies
+	full_thinned_xs = np.interp(pchip_energies, fission_erg_239, fission_xs_239)
 
 	capture_to_fission_239 = np.interp(full_thinned_erg, capture_erg_239, capture_xs_239)
 	n2n_to_fission_239 = np.interp(full_thinned_erg, n2n_erg_239, n2n_xs_239)
 	inelastic_to_fission_239 = np.interp(full_thinned_erg, inelastic_erg_239, inelastic_xs_239)
 	elastic_to_fission_239 = np.interp(full_thinned_erg, elastic_erg_239, elastic_xs_239)
-
-
-
 
 	capture_to_fission_240 = np.interp(full_thinned_erg, capture_erg_240, capture_xs_240)
 	n2n_to_fission_240 = np.interp(full_thinned_erg, n2n_erg_240, n2n_xs_240)
@@ -312,18 +211,14 @@ def parquet_maker(o_file, full_thinned_erg=pchip_energies):
 	elastic_to_fission_240 = np.interp(full_thinned_erg, elastic_erg_240, elastic_xs_240)
 	fission_to_fission_240 = np.interp(full_thinned_erg, fission_erg_240, fission_xs_240)
 
-
 	capture_to_fission_241 = np.interp(full_thinned_erg, capture_erg_241, capture_xs_241)
 	n2n_to_fission_241 = np.interp(full_thinned_erg, n2n_erg_241, n2n_xs_241)
 	inelastic_to_fission_241 = np.interp(full_thinned_erg, inelastic_erg_241, inelastic_xs_241)
 	elastic_to_fission_241 = np.interp(full_thinned_erg, elastic_erg_241, elastic_xs_241)
 	fission_to_fission_241 = np.interp(full_thinned_erg, fission_erg_241, fission_xs_241)
 
-	# extract keff data
-	keff_list = [reduced_keff_df['keff'].values[0] for i in full_thinned_erg]
-	keff_err_list = [reduced_keff_df['keff_err'].values[0] for i in full_thinned_erg]
-
-
+	keff_list_df = [keff_value_float for _ in full_thinned_erg]
+	keff_err_list_df = [keff_error_float for _ in full_thinned_erg]
 
 	df = pd.DataFrame({'ERG': full_thinned_erg,
 					   '94239_MT2_XS': elastic_to_fission_239,
@@ -341,12 +236,18 @@ def parquet_maker(o_file, full_thinned_erg=pchip_energies):
 					   '94241_MT16_XS': n2n_to_fission_241,
 					   '94241_MT18_XS': fission_to_fission_241,
 					   '94241_MT102_XS': capture_to_fission_241,
-					   'keff': keff_list,
-					   'keff_err': keff_err_list,
+					   'keff': keff_list_df,
+					   'keff_err': keff_err_list_df,
 					   })
 
-	df.to_parquet(f'{parquet_directory}/Thinned_energy_random_Pu-239_{pu239_index}_Pu-240_{pu240_index}_Pu-241_{pu241_index}.parquet',
-				  engine='pyarrow')
+	df.to_parquet(
+		f'{parquet_directory}/Pu239_g3_{firstgroupdelta}_g5_{secondgroupdelta}_mldata.parquet',
+		engine='pyarrow')
+
+
+
+
+
 
 
 
