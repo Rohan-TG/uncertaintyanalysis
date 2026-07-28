@@ -20,8 +20,8 @@ from scipy.interpolate import PchipInterpolator
 outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
-firstgroupname = 'g115'
-secondgroupname = 'g152'
+firstgroupname = 'g1.5-2MeV'
+secondgroupname = 'g1-1.5MeV'
 
 interpolation_energy_bound = 2500
 relative_tolerance = 0.999
