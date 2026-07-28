@@ -1,101 +1,78 @@
 import sandy
-import datetime
+import subprocess
 import numpy as np
+import datetime
 import time
-import sys
-from concurrent.futures import ProcessPoolExecutor, as_completed
 import tqdm
+from concurrent.futures import ProcessPoolExecutor, as_completed
+import sys
 
 sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis')
+from groupEnergies import Groups, Pu240, Reactions
 
-from groupEnergies import Groups, Pu239, Reactions
-processes = int(input("Number of NJOY processes: "))
+processes = int(input("Num. processes: "))
 
 start = time.time()
-za = Pu239.ZA
 
-# perturbation_domain = np.arange(-0.25, 0.27, 0.02)
+za = Pu240.ZA
+group = 4
 
-pertlevel = 0.003
-perturbation_pairs = [[-pertlevel, -pertlevel],
-					  [pertlevel, pertlevel],
-					  [0.000, pertlevel],
-					  [0.000, -pertlevel],
-					  [pertlevel, 0.000],
-					  [-pertlevel, 0.000],
-					  [-pertlevel, pertlevel],
-					  [pertlevel, -pertlevel]]
+perturbation_coefficients = [-0.005, 0.005]
 
+# endf6 = sandy.Endf6.from_file('/home/rnt26/PycharmProjects/uncertaintyanalysis/n-094_Pu_239.endf')
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
 pendfheated = endf6.get_pendf(err=0.0001, verbose=True, temperature=300)
-original_pendf = endf6.get_pendf(err=0.0001, verbose=True)
+pendf = endf6.get_pendf(err=0.0001, verbose=True)
 
-xs_unheated = sandy.Xs.from_endf6(original_pendf)
-xs_heated = sandy.Xs.from_endf6(pendfheated)
+xs = sandy.Xs.from_endf6(pendf)
+heated_xs = sandy.Xs.from_endf6(pendfheated)
 
-first_group = '1.5-2MeV'
-second_group = '1-1.5MeV'
+lower_bound = Groups.g4
+upper_bound = Groups.g3
+domain = [lower_bound, upper_bound]
 
-first_group_lower_bound = 1.5e6  # Group 3 eV
-first_group_upper_bound = 2e6   # Group 2 eV
-first_group_domain = [first_group_lower_bound, first_group_upper_bound]
 
-secondary_lower_bound = 1e6  # group 5
-secondary_upper_bound = 1.5e6  # group 4
-secondary_domain = [secondary_lower_bound, secondary_upper_bound]
-
-mat = Pu239.MAT # Pu-239
+mat = Pu240.MAT
 mt = Reactions.fission
 
 
-def run_sandy(pair):
-	pg1 = pair[0]
-	pg2 = pair[1]
 
-	perturbation = sandy.Pert([1, 1 + pg1], index=first_group_domain)
-	xspert = xs_unheated.custom_perturbation(mat, mt, perturbation)
-	xspert_heated = xs_heated.custom_perturbation(mat, mt, perturbation)
+def run_sandy(coeff):
+	perturbation = sandy.Pert([1, 1 + coeff], index=domain)
 
-	pendf_pert = xspert.to_endf6(original_pendf)  # The perturbed file, time to perturb it again
-	heated_pendf_pert = xspert_heated.to_endf6(pendfheated)
+	xspert = xs.custom_perturbation(mat, mt, perturbation)
+	heated_xspert = heated_xs.custom_perturbation(mat, mt, perturbation)
 
-	###########################################################################################################################
-	# begin secondary perturbation
-	xs_2_unheated = sandy.Xs.from_endf6(pendf_pert)
-	xs_2_heated = sandy.Xs.from_endf6(heated_pendf_pert)
+	pendf_pert = xspert.to_endf6(pendf) # Create PENDF of perturbed data
+	heated_pendf_pert = heated_xspert.to_endf6(pendfheated)
 
-	secondary_perturbation = sandy.Pert([1, 1 + pg2], index=secondary_domain)
-	xspert_2_unheated = xs_2_unheated.custom_perturbation(mat, mt, secondary_perturbation)
+	outs = endf6.get_ace(temperature=300,
+						 heatr=False,
+						 thermr=False,
+						 gaspr=False,
+						 purr=True,
+						 verbose=True,
+						 pendf=pendf_pert)
 
-	xspert_2_heated = xs_2_heated.custom_perturbation(mat, mt, secondary_perturbation)
+	savefilename = f"Pu240_g{group}_{coeff:0.3f}_MT{mt}.09c"
+	with open(f"{savefilename}", mode="w") as f:
+		f.write(outs["ace"])
 
-	secondary_pendf_pert = xspert_2_unheated.to_endf6(pendf_pert)
-	secondary_heated_pendf_pert = xspert_2_heated.to_endf6(heated_pendf_pert)
-
-	secondary_heated_pendf_pert.to_file(f'Pu9_dual_g{first_group}_{pg1:0.3f}-g{second_group}_{pg2:0.3f}_MT18.pendf')
-
-	secondary_outs = endf6.get_ace(temperature=300, heatr=False, thermr=False, gaspr=False, purr=True, verbose=True,
-								   pendf=secondary_pendf_pert)
-	savefilename2 = f"Pu9_dual_g{first_group}_{pg1:0.3f}-g{second_group}_{pg2:0.3f}_MT18.09c"
-	with open(f"{savefilename2}", mode="w") as f:
-		f.write(secondary_outs["ace"])
-
-
-
+	savefilependf = f"Pu240_g{group}_{coeff:0.3f}_MT{mt}.pendf"
+	heated_pendf_pert.to_file(savefilependf)
 
 
 
 
 with ProcessPoolExecutor(max_workers = processes) as executor:
-	futures = [executor.submit(run_sandy, c) for c in perturbation_pairs]
+	futures = [executor.submit(run_sandy, c) for c in perturbation_coefficients]
 
 	for i in tqdm.tqdm(as_completed(futures), total=len(futures)):
 		pass
-
-
 
 end = time.time()
 
 elapsed = end - start
 print(f"Time elapsed: {datetime.timedelta(seconds=elapsed)}")
+
 
