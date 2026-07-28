@@ -17,7 +17,7 @@ start = time.time()
 za = Pu240.ZA
 group = 4
 
-perturbation_coefficients = [-0.005, 0.005]
+perturbation_coefficients = [-0.01, 0.01]
 
 # endf6 = sandy.Endf6.from_file('/home/rnt26/PycharmProjects/uncertaintyanalysis/n-094_Pu_239.endf')
 endf6 = sandy.get_endf6_file("ENDFB_80", "xs", za * 10)
