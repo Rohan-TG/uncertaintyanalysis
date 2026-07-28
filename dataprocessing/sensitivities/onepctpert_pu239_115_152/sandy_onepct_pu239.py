@@ -16,7 +16,7 @@ za = Pu239.ZA
 
 # perturbation_domain = np.arange(-0.25, 0.27, 0.02)
 
-pertlevel = 0.003
+pertlevel = 0.01
 perturbation_pairs = [[-pertlevel, -pertlevel],
 					  [pertlevel, pertlevel],
 					  [0.000, pertlevel],
