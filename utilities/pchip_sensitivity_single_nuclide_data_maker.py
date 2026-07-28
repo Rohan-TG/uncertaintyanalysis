@@ -1,5 +1,8 @@
 import os
 import sys
+
+from dataprocessing.sensitivities.onepctpert_pu239_115_152.sandy_onepct_pu239 import second_group
+
 computer = os.uname().nodename
 if computer == 'fermiac':
 	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/')
@@ -17,6 +20,8 @@ from scipy.interpolate import PchipInterpolator
 outputs_directory = input("Enter SCONE outputs directory: ")
 output_files = os.listdir(outputs_directory)
 
+firstgroupname = 'g115'
+secondgroupname = 'g152'
 
 interpolation_energy_bound = 2500
 relative_tolerance = 0.999
@@ -134,7 +139,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 	firstgroupdelta = outputfile.split('_')[2]
 	secondgroupdelta = outputfile.split('_')[-1].split('.m')[0]
 
-	associated_pu239_pendf_name = f'Pu9_dual_g3_{firstgroupdelta}-g5_{secondgroupdelta}_MT18.pendf'
+	associated_pu239_pendf_name = f'Pu9_dual_{firstgroupname}_{firstgroupdelta}-{secondgroupname}_{secondgroupdelta}_MT18.pendf'
 	pu240_filename = '94240_-1.pendf'
 	pu241_filename = '94241_-1.pendf'
 
@@ -241,7 +246,7 @@ for outputfile in tqdm.tqdm(output_files, total=len(output_files)):
 					   })
 
 	df.to_parquet(
-		f'{parquet_directory}/Pu239_g3_{firstgroupdelta}_g5_{secondgroupdelta}_mldata.parquet',
+		f'{parquet_directory}/Pu239_{firstgroupname}_{firstgroupdelta}_{secondgroupname}_{secondgroupdelta}_mldata.parquet',
 		engine='pyarrow')
 
 
