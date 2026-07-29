@@ -99,8 +99,8 @@ def parquet_maker(outputfile):
 	pu0_index = int(outputfile.split('.m')[0].split('_')[3])
 	# pu1_index = int(outputfile.split('.m')[0].split('_')[5])
 
-	pu9_endf6_file = f'{pu9_endf6_directory}/94239_{pu9_index}.endf6'
-	pu0_endf6_file = f'{pu0_endf6_directory}/94240_{pu0_index}.endf6'
+	pu9_endf6_file = f'{pu9_endf6_directory}/n-094_Pu_239.endf'
+	pu0_endf6_file = f'{pu0_endf6_directory}/n-094_Pu_240.endf'
 	# pu1_endf6_file = f'{pu1_endf6_directory}/94241_{pu1_index}.endf6'
 
 	incident_energies_pu9, y_values_pu9, pfns_grid_pu9 = scrape_pfns(pu9_endf6_file)
