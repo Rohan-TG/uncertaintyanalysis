@@ -502,9 +502,9 @@ for num in tqdm.tqdm(range(n_models)):
 
 	save_models.append(temp_model)
 
-	del history
-	del temp_model
-	gc.collect()
+	# del history
+	# del temp_model
+	# gc.collect()
 
 
 overall_run = "saved_best_5"
@@ -627,3 +627,214 @@ s = skew(averaged_errors, bias=False)
 probplot(averaged_errors, dist="norm", plot=plt)
 plt.title("Q-Q plot against normal distribution")
 plt.show()
+
+
+run_shap = 'no'
+
+if run_shap == 'yes':
+	import numpy as np
+	import shap
+	import matplotlib.pyplot as plt
+
+
+	model = selected_best_models[0]
+
+	with open(f'/home/rnt26/uncertaintyanalysis/ml/random/mlp/fixed_paper_save_vars/X_nominal', 'rb') as f:
+		X_nominal = pickle.load(f)
+
+	X_nominal = np.asarray(X_nominal, dtype=np.float32)
+
+	X_perturbed = X_test
+	X_perturbed = np.asarray(X_perturbed, dtype=np.float32)
+
+	# Ensure the nominal input has a batch dimension
+	if X_nominal.ndim == 1:
+		X_nominal = X_nominal[None, :]
+
+	assert X_nominal.shape == (1, 6778)
+	assert X_perturbed.ndim == 2
+	assert X_perturbed.shape[1] == 6778
+
+
+	group_names = [
+		"Pu9 Elastic",
+		"Pu9 Inelastic",
+		"Pu9 (n,2n)",
+		"Pu9 fission",
+		"Pu9 capture",
+
+		"Pu0 Elastic",
+		"Pu0 Inelastic",
+		"Pu0 (n,2n)",
+		"Pu0 fission",
+		"Pu0 capture",
+
+		"Pu1 Elastic",
+		"Pu1 Inelastic",
+		"Pu1 (n,2n)",
+		"Pu1 fission",
+		"Pu1 capture",
+	]
+
+
+	group_slices = [
+		(0, 452),
+		(452, 904),
+		(904, 1356),
+		(1356, 1808),
+		(1808, 2260),
+		(2260, 2712),
+		(2712, 3164),
+		(3164, 3616),
+		(3616, 4068),
+		(4068, 4520),
+		(4520, 4972),
+		(4972, 5424),
+		(5424, 5876),
+		(5876, 6328),
+		(6328, 6778),
+	]
+
+	assert len(group_names) == 15
+	assert len(group_slices) == 15
+	assert group_slices[0][0] == 0
+	assert group_slices[-1][1] == 6778
+
+	# Check that the groups are contiguous
+	for previous, current in zip(group_slices[:-1], group_slices[1:]):
+		assert previous[1] == current[0]
+
+
+
+	explainer = shap.DeepExplainer(
+		(model.inputs, model.outputs[0]),
+		X_nominal,
+	)
+
+
+	# ============================================================
+	# 5. Calculate SHAP values for the perturbed inputs
+	# ============================================================
+
+	raw_shap_values = explainer.shap_values(
+		X_perturbed,
+		check_additivity=True,
+	)
+
+
+	if isinstance(raw_shap_values, list):
+		raw_shap_values = raw_shap_values[0]
+
+	phi = np.asarray(raw_shap_values)
+
+	# Scalar-output models may return:
+	# (n_samples, n_features, 1)
+	if phi.ndim == 3 and phi.shape[-1] == 1:
+		phi = phi[..., 0]
+
+	assert phi.ndim == 2
+	assert phi.shape == X_perturbed.shape
+
+	print("Ungrouped SHAP shape:", phi.shape)
+	# Expected: (n_samples, 6778)
+
+
+	# ============================================================
+	# 6. Signed grouped SHAP values
+	#
+	# These preserve additivity and are retained for validation.
+	#
+	# grouped_signed_phi[n, g] =
+	#     sum of signed SHAP values in group g for sample n
+	# ============================================================
+
+	grouped_signed_phi = np.column_stack([
+		phi[:, start:stop].sum(axis=1)
+		for start, stop in group_slices
+	])
+
+	print("Signed grouped SHAP shape:", grouped_signed_phi.shape)
+	# Expected: (n_samples, 15)
+
+
+	# Verify that signed grouping preserves the total SHAP value
+	np.testing.assert_allclose(
+		grouped_signed_phi.sum(axis=1),
+		phi.sum(axis=1),
+		rtol=1e-5,
+		atol=1e-6,
+	)
+
+
+	# ============================================================
+	# 7. Absolute grouped SHAP values
+	#
+	# Take the absolute value before summing, so contributions
+	# within a group cannot cancel.
+	#
+	# grouped_abs_phi[n, g] =
+	#     sum(abs(SHAP values)) in group g for sample n
+	# ============================================================
+
+	grouped_abs_phi = np.column_stack([
+		np.abs(phi[:, start:stop]).sum(axis=1)
+		for start, stop in group_slices
+	])
+
+	print("Absolute grouped SHAP shape:", grouped_abs_phi.shape)
+	# Expected: (n_samples, 15)
+
+	assert np.all(grouped_abs_phi >= 0)
+
+
+
+	nominal_prediction = float(
+		np.asarray(
+			model(X_nominal, training=False)
+		).reshape(-1)[0]
+	)
+
+	perturbed_predictions = np.asarray(
+		model(X_perturbed, training=False)
+	).reshape(-1)
+
+	predicted_delta = perturbed_predictions - nominal_prediction
+	signed_shap_delta = grouped_signed_phi.sum(axis=1)
+
+	print("Nominal prediction:", nominal_prediction)
+	print(
+		"Maximum signed SHAP additivity error:",
+		np.max(np.abs(predicted_delta - signed_shap_delta)),
+	)
+
+	np.testing.assert_allclose(
+    signed_shap_delta,
+    predicted_delta,
+    rtol=1e-3,
+    atol=1e-4,
+	)
+
+
+	gross_group_importance = grouped_abs_phi.mean(axis=0)
+
+	# Sort from smallest to largest for a horizontal bar chart
+	order = np.argsort(gross_group_importance)
+
+	ordered_names = np.asarray(group_names)[order]
+	ordered_importance = gross_group_importance[order]
+
+	fig, ax = plt.subplots(figsize=(10, 7))
+
+	ax.barh(
+		ordered_names,
+		ordered_importance,
+	)
+
+	ax.set_xlabel("Mean total absolute SHAP contribution")
+	ax.set_ylabel("Feature group")
+	# ax.set_title(
+	#     "Grouped absolute SHAP importance for predicted perturbations"
+	# )
+
+	plt.tight_layout()
+	# plt.show()
