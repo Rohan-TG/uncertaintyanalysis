@@ -35,6 +35,8 @@ data_directory = input('\n\nXS Data directory: ')
 
 test_directory = input('\nTest directory (x set to val): ')
 if test_directory != 'x':
+	# pu239_PFNS_test_directory = input('\nPu-239 PFNS test directory: ')
+	# pu240_PFNS_test_directory = input('\nPu240 PFNS test directory: ')
 	test_files = os.listdir(test_directory)
 
 pu239_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu9'
@@ -222,7 +224,7 @@ X_val = scaled_columns_xval.transpose()
 
 print('\nFetching test data...')
 
-def generate_test_data(test_data_directory, mask=None, masking_value=0, truncate=False):
+def generate_test_data(test_data_directory, mask=None, masking_value=np.max(X_train), truncate=False):
 	files = os.listdir(test_data_directory)
 
 	limiter = 795
@@ -596,7 +598,7 @@ def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 
 	return acceptable_models, truncated_count_threshold, best_averaged_errors
 
-best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_val, keep_n)
+best_models, best_models_count10, averaged_errors = select_best_models(error_matrix_test, keep_n)
 print(best_models_count10 / len(keff_test) * 100)
 
 selected_best_models = []
