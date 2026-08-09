@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import os
+from tqdm import tqdm
 
 feature_names = [
 	"Pu9 Elastic",
@@ -24,3 +27,28 @@ feature_names = [
 
 
 # analysis_df = df[feature_cols + ["keff"]]
+
+directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pchip-data/0-15999'
+files = os.listdir(directory)
+exampledf = pd.read_parquet(os.path.join(directory, files[0]))
+# fission_data = []
+# for f in tqdm(files, total=len(files)):
+# 	df = pd.read_parquet(os.path.join(directory, f))
+# 	df = df[df.ERG >= 2500]
+# 	fission_data.append(df['94239_MT18_XS'].values)
+#
+# X = np.array(fission_data)
+# pca = PCA(n_components=0.999, svd_solver='full')
+# X_pca = pca.fit_transform(X)
+
+
+
+cols = exampledf.columns
+cols = cols[1:-2]
+nonrealmatrix = [[] for i in range(0,15)]
+
+for f in tqdm(files, total=len(files)):
+	df = pd.read_parquet(os.path.join(directory, f))
+	df = df[df.ERG >= 2500]
+	for ci, channel in enumerate(cols):
+		nonrealmatrix[ci].append(df[channel].values)
