@@ -31,15 +31,7 @@ feature_names = [
 directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pchip-data/0-15999'
 files = os.listdir(directory)
 exampledf = pd.read_parquet(os.path.join(directory, files[0]))
-# fission_data = []
-# for f in tqdm(files, total=len(files)):
-# 	df = pd.read_parquet(os.path.join(directory, f))
-# 	df = df[df.ERG >= 2500]
-# 	fission_data.append(df['94239_MT18_XS'].values)
-#
-# X = np.array(fission_data)
-# pca = PCA(n_components=0.999, svd_solver='full')
-# X_pca = pca.fit_transform(X)
+
 
 
 
@@ -52,3 +44,9 @@ for f in tqdm(files, total=len(files)):
 	df = df[df.ERG >= 2500]
 	for ci, channel in enumerate(cols):
 		nonrealmatrix[ci].append(df[channel].values)
+
+pcamatrix = []
+for channel in nonrealmatrix:
+	pca = PCA(n_components=0.999, svd_solver='full')
+	X_pca = pca.fit_transform(channel)
+	pcamatrix.append(X_pca)
