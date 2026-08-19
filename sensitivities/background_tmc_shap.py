@@ -61,33 +61,24 @@ nominal_nonrealmatrix = [[] for i in range(0,15)]
 for nominal_ci, nominal_channel in enumerate(cols):
 	nominal_nonrealmatrix[nominal_ci].append(df_nominal[nominal_channel].values)
 
+
+
 nominal_pcamatrix = []
-for nominal_channel in nominal_nonrealmatrix:
-	pca = PCA(n_components=0.999, svd_solver='full')
-	X_nominal_pca = pca.fit_transform(nominal_channel)
-	nominal_pcamatrix.append(X_nominal_pca)
-
-flattened_nominal_pca_matrix = [[] for i in range(0, len(nominal_nonrealmatrix[0]))]
-for nominal_pca_channel in tqdm(nominal_pcamatrix, total=len(nominal_pcamatrix)):
-	for sidx, pca_nom_sample in enumerate(nominal_pca_channel):
-		flattened_nominal_pca_matrix[sidx] += list(pca_nom_sample)
-
 nominal_mode_number = []
-for i in nominal_pcamatrix:
-	nominal_mode_number.append(len(i[0]))
-
-
-
-
 
 ##############################################################################################################
-# pca decomposition of main dataset
+# pca decomposition of dataset
 pcamatrix = []
-for channel in nonrealmatrix:
+for channel, nominal_channel in zip(nonrealmatrix, nominal_nonrealmatrix):
 	pca = PCA(n_components=0.999, svd_solver='full')
 	X_pca = pca.fit_transform(channel)
-	pcamatrix.append(X_pca)
+	X_nominal_pca = pca.transform(nominal_channel)
 
+	pcamatrix.append(X_pca)
+	nominal_pcamatrix.append(X_nominal_pca)
+
+for i in nominal_pcamatrix:
+	nominal_mode_number.append(len(i[0]))
 # Convert into the right shape (16000, n_total_modes)
 flattened_pca_matrix = [[] for i in range(0, len(nonrealmatrix[0]))]
 for pca_channel in tqdm(pcamatrix, total=len(pcamatrix)):
