@@ -79,11 +79,21 @@ for channel, nominal_channel in zip(nonrealmatrix, nominal_nonrealmatrix):
 
 for i in nominal_pcamatrix:
 	nominal_mode_number.append(len(i[0]))
+
+
 # Convert into the right shape (16000, n_total_modes)
 flattened_pca_matrix = [[] for i in range(0, len(nonrealmatrix[0]))]
+flattened_nominal_pca_matrix = [[] for i in range(0, len(nominal_nonrealmatrix[0]))]
+
+
 for pca_channel in tqdm(pcamatrix, total=len(pcamatrix)):
 	for sample_index, pca_sample in enumerate(pca_channel):
 		flattened_pca_matrix[sample_index] += list(pca_sample)
+
+# flatten nominal pca
+for npc in nominal_pcamatrix:
+	for sidx, pcasnominal in enumerate(npc):
+		flattened_nominal_pca_matrix[sidx] += list(pcasnominal)
 
 mode_number = []
 for i in pcamatrix:
