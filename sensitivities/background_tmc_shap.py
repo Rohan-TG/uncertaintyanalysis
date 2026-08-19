@@ -72,9 +72,16 @@ for nominal_pca_channel in tqdm(nominal_pcamatrix, total=len(nominal_pcamatrix))
 	for sidx, pca_nom_sample in enumerate(nominal_pca_channel):
 		flattened_nominal_pca_matrix[sidx] += list(pca_nom_sample)
 
+nominal_mode_number = []
+for i in nominal_pcamatrix:
+	nominal_mode_number.append(len(i[0]))
+
+
+
+
 
 ##############################################################################################################
-# pca decomposition
+# pca decomposition of main dataset
 pcamatrix = []
 for channel in nonrealmatrix:
 	pca = PCA(n_components=0.999, svd_solver='full')
