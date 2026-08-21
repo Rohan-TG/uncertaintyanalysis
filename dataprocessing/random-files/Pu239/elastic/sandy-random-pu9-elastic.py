@@ -21,7 +21,6 @@ processes = 8
 
 MT = Reactions.elastic
 
-
 samples = endf6.get_perturbations(
 	num_samples,
 	njoy_kws=dict(
