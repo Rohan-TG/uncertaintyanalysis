@@ -314,7 +314,7 @@ model.add(keras.layers.Dense(900, activation='relu'))
 model.add(keras.layers.Dense(750, activation='relu'))
 model.add(keras.layers.Dense(600, activation='relu'))
 model.add(keras.layers.Dense(540, activation='relu'))
-model.add(keras.layers.Dense(380, activation='relu'))
+model.add(keras.layers.Dense(480, activation='relu'))
 model.add(keras.layers.Dense(y_val.shape[1], activation='linear'))
 model.compile(loss='MeanSquaredError', optimizer='adam')
 
