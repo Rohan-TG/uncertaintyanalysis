@@ -639,7 +639,7 @@ if run_shap == 'yes':
 
 	model = selected_best_models[0]
 
-	with open(f'/home/rnt26/uncertaintyanalysis/ml/random/mlp/fixed_paper_save_vars/X_nominal', 'rb') as f:
+	with open(f'/home/rnt26/uncertaintyanalysis/ml/random/mlp/X_nominal.pkl', 'rb') as f:
 		X_nominal = pickle.load(f)
 
 	X_nominal = np.asarray(X_nominal, dtype=np.float32)
@@ -808,10 +808,10 @@ if run_shap == 'yes':
 	)
 
 	np.testing.assert_allclose(
-    signed_shap_delta,
-    predicted_delta,
-    rtol=1e-3,
-    atol=1e-4,
+	signed_shap_delta,
+	predicted_delta,
+	rtol=1e-3,
+	atol=1e-4,
 	)
 
 
