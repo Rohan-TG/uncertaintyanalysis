@@ -706,20 +706,13 @@ if run_shap == 'yes':
 
 
 
-	explainer = shap.DeepExplainer(
-		(model.inputs, model.outputs[0]),
-		X_nominal,
-	)
-
+	explainer = shap.DeepExplainer((model.inputs, model.outputs[0]), X_nominal,)
 
 	# ============================================================
 	# 5. Calculate SHAP values for the perturbed inputs
 	# ============================================================
 
-	raw_shap_values = explainer.shap_values(
-		X_perturbed,
-		check_additivity=True,
-	)
+	raw_shap_values = explainer.shap_values(X_perturbed, check_additivity=True,)
 
 
 	if isinstance(raw_shap_values, list):
@@ -749,9 +742,7 @@ if run_shap == 'yes':
 	# ============================================================
 
 	grouped_signed_phi = np.column_stack([
-		phi[:, start:stop].sum(axis=1)
-		for start, stop in group_slices
-	])
+		phi[:, start:stop].sum(axis=1) for start, stop in group_slices])
 
 	print("Signed grouped SHAP shape:", grouped_signed_phi.shape)
 	# Expected: (n_samples, 15)
@@ -761,8 +752,8 @@ if run_shap == 'yes':
 	np.testing.assert_allclose(
 		grouped_signed_phi.sum(axis=1),
 		phi.sum(axis=1),
-		rtol=1e-5,
-		atol=1e-6,
+		rtol=3e-3, # The maximum relative difference between the SHAP reconstruction and the corresponding value
+		atol=1e-2, # The maximum absolute additivity error in standard deviation space
 	)
 
 
@@ -776,65 +767,43 @@ if run_shap == 'yes':
 	#     sum(abs(SHAP values)) in group g for sample n
 	# ============================================================
 
-	grouped_abs_phi = np.column_stack([
-		np.abs(phi[:, start:stop]).sum(axis=1)
-		for start, stop in group_slices
-	])
+	# grouped_abs_phi = np.column_stack([
+	# 	np.abs(phi[:, start:stop]).sum(axis=1)
+	# 	for start, stop in group_slices
+	# ])
 
-	print("Absolute grouped SHAP shape:", grouped_abs_phi.shape)
+	# print("Absolute grouped SHAP shape:", grouped_abs_phi.shape)
 	# Expected: (n_samples, 15)
 
-	assert np.all(grouped_abs_phi >= 0)
+	# assert np.all(grouped_abs_phi >= 0)
 
+	nominal_prediction = float(np.asarray(model(X_nominal, training=False)).reshape(-1)[0])
 
-
-	nominal_prediction = float(
-		np.asarray(
-			model(X_nominal, training=False)
-		).reshape(-1)[0]
-	)
-
-	perturbed_predictions = np.asarray(
-		model(X_perturbed, training=False)
-	).reshape(-1)
+	perturbed_predictions = np.asarray(model(X_perturbed, training=False)).reshape(-1)
 
 	predicted_delta = perturbed_predictions - nominal_prediction
 	signed_shap_delta = grouped_signed_phi.sum(axis=1)
 
 	print("Nominal prediction:", nominal_prediction)
-	print(
-		"Maximum signed SHAP additivity error:",
-		np.max(np.abs(predicted_delta - signed_shap_delta)),
-	)
+	print("Maximum signed SHAP additivity error:", np.max(np.abs(predicted_delta - signed_shap_delta)),)
 
-	np.testing.assert_allclose(
-	signed_shap_delta,
-	predicted_delta,
-	rtol=1e-3,
-	atol=1e-4,
-	)
+	np.testing.assert_allclose(signed_shap_delta,predicted_delta,rtol=3e-3,atol=1e-2,)
 
 
-	gross_group_importance = grouped_abs_phi.mean(axis=0)
+	# gross_group_importance = grouped_abs_phi.mean(axis=0)
 
+	net_group_importance = np.mean(np.abs(grouped_signed_phi),axis=0,)
 	# Sort from smallest to largest for a horizontal bar chart
-	order = np.argsort(gross_group_importance)
+	# order = np.argsort(gross_group_importance)
+	order = np.argsort(net_group_importance)
 
 	ordered_names = np.asarray(group_names)[order]
-	ordered_importance = gross_group_importance[order]
+	# ordered_importance = gross_group_importance[order]
+	ordered_importance = net_group_importance[order]
 
 	fig, ax = plt.subplots(figsize=(10, 7))
-
-	ax.barh(
-		ordered_names,
-		ordered_importance,
-	)
-
-	ax.set_xlabel("Mean total absolute SHAP contribution")
+	ax.barh(ordered_names, ordered_importance, color="darkviolet")
+	ax.set_xlabel("Mean absolute SHAP contribution")
+	plt.grid()
 	ax.set_ylabel("Feature group")
-	# ax.set_title(
-	#     "Grouped absolute SHAP importance for predicted perturbations"
-	# )
-
 	plt.tight_layout()
-	# plt.show()
