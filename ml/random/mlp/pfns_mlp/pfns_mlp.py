@@ -30,8 +30,11 @@ import time
 
 
 data_directory = input('\n\nXS data directory: ')
-pu239_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu9'
-pu240_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu0'
+# pu239_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu9'
+# pu240_PFNS_directory = '/home/rnt26/uncertaintyanalysis/ml/mldata/pfns_and_xs/pu0'
+
+pu239_PFNS_directory = input('\n\nPu-239 PFNS data dir: ')
+pu240_PFNS_directory = input('\n\nPu-240 PFNS data dir: ')
 
 generate_test_data = input('\nGenerate test data (y/n): ')
 if generate_test_data == 'y':
