@@ -47,10 +47,12 @@ lower_energy_bound = float(input('\nEnter lower energy bound in eV: '))
 
 def fetch_data(datafile, dir = data_directory):
 
-	temp_df = pd.read_parquet('/home/rnt26/uncertaintyanalysis/ml/mldata/baselines/endfbviii.0/endfbviii0_baseline_data_Pu-239_-1_Pu-240_-1_Pu-241_-1.parquet', engine='pyarrow')
-	testing_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	# temp_df = pd.read_parquet('/home/rnt26/uncertaintyanalysis/ml/mldata/baselines/endfbviii.0/endfbviii0_baseline_data_Pu-239_-1_Pu-240_-1_Pu-241_-1.parquet', engine='pyarrow')
+	# testing_df = pd.read_parquet(f'{test_directory}/{datafile}', engine='pyarrow')
+	temp_df = pd.read_parquet(f'{dir}/{datafile}', engine='pyarrow')
+	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
-	testing_df = testing_df[testing_df['ERG'] >= lower_energy_bound]
+	# testing_df = testing_df[testing_df['ERG'] >= lower_energy_bound]
 	temp_df = temp_df[temp_df['ERG'] >= lower_energy_bound]
 
 	keff_value = float(temp_df['keff'].values[0])
@@ -59,7 +61,7 @@ def fetch_data(datafile, dir = data_directory):
 	pu0_mt18xs = temp_df['94240_MT18_XS'].values.tolist()
 	pu1_mt18xs = temp_df['94241_MT18_XS'].values.tolist()
 
-	pu9_mt2xs = testing_df['94239_MT2_XS'].values.tolist()
+	pu9_mt2xs = temp_df['94239_MT2_XS'].values.tolist()
 	pu0_mt2xs = temp_df['94240_MT2_XS'].values.tolist()
 	pu1_mt2xs = temp_df['94241_MT2_XS'].values.tolist()
 
