@@ -28,10 +28,10 @@ with open(f"{model_directory}/training_columns_stds.pkl", "rb") as f:
 
 
 contents = os.listdir(model_directory)
-models = []
+selected_best_models = []
 for object in contents:
 	if object.endswith(".keras"):
-		models.append(keras.models.load_model(f"{model_directory}/{object}"))
+		selected_best_models.append(keras.models.load_model(f"{model_directory}/{object}"))
 
 data_directory = input('\n\nXS data directory: ')
 test_directory = input('\nTest directory (x set to val): ')
@@ -82,7 +82,7 @@ def fetch_data(datafile, dir = data_directory):
 
 	return(XS_obj, keff_value)
 
-average_performance_list_test = []
+
 
 keff_test = []
 XS_test = []
@@ -98,8 +98,8 @@ for test_file in tqdm.tqdm(test_files, total=len(test_files)):
 	# pu9_test_index = int(test_file.split('_')[4])
 	# pu9_test_indices.append(pu9_test_index)
 
-	pu0_test_index = int(test_file.split('_')[6])
-	pu0_test_indices.append(pu0_test_index)
+	# pu0_test_index = int(test_file.split('_')[6])
+	# pu0_test_indices.append(pu0_test_index)
 
 	# pu1_test_index = int(test_file.split('_')[8].split('.')[0])
 	# pu1_test_indices.append(pu1_test_index)
@@ -122,8 +122,12 @@ X_test = np.nan_to_num(X_test, nan=0.0)
 
 prediction_matrix_test = [[] for i in range(len(y_test))]
 error_matrix_test = [[] for i in range(len(y_test))]
+average_performance_list_test = []
 
-for m in models:
+# prediction_matrix_train = [[] for i in range(len(y_train))]
+# error_matrix_train = [[] for i in range(len(y_train))]
+
+for m in selected_best_models:
 	predictions_test = m.predict(X_test)
 	predictions_test = predictions_test.ravel()
 	rescaled_predictions_test = []
@@ -173,8 +177,8 @@ def select_best_models(error_matrix, keep_n_models, threshold=10, mode='test'):
 
 	if mode == 'test':
 		emt = np.array(error_matrix_test)
-	# else:
-		# emt = np.array(error_matrix_val)
+	else:
+		emt = np.array(error_matrix)
 
 	best_averaged_errors = []
 
