@@ -757,15 +757,10 @@ if run_shap == 'yes':
 	)
 
 
-	# ============================================================
-	# 7. Absolute grouped SHAP values
-	#
-	# Take the absolute value before summing, so contributions
-	# within a group cannot cancel.
-	#
-	# grouped_abs_phi[n, g] =
-	#     sum(abs(SHAP values)) in group g for sample n
-	# ============================================================
+	#============================================================
+	#Absolute grouped SHAP values
+	# Take the absolute value before summing, so contributions within a group cannot cancel
+	# grouped_abs_phi[n, g] = sum(abs(SHAP values)) in group g for sample n
 
 	# grouped_abs_phi = np.column_stack([
 	# 	np.abs(phi[:, start:stop]).sum(axis=1)
