@@ -1,3 +1,9 @@
+import sys
+import os
+import numpy as np
+computer = os.uname().nodename
+if computer == 'fermiac':
+	sys.path.append('/home/rnt26/PycharmProjects/uncertaintyanalysis/') # change depending on machine
 import sandy
 from groupEnergies import Pu239
 za = 94239
