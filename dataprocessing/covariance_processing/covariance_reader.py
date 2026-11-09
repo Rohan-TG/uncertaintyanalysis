@@ -43,6 +43,6 @@ E_low = energy_intervals.left.to_numpy()
 E_high = energy_intervals.right.to_numpy()
 
 result = pd.DataFrame({"E_low_eV": E_low, "E_high_eV": E_high,
-					   "uncertainty_percent": u_percent}) # save in pd df
+					   "uncertainty_pct": u_percent}) # save in pd df
 
 
