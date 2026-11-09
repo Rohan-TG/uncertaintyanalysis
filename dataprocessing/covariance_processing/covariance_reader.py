@@ -38,7 +38,11 @@ if np.any(variance < -1e-12): # check if any issues with the variances
 
 u_percent = 100 * np.sqrt(np.maximum(variance, 0)) # calculate pct. variance
 
-result = pd.DataFrame({"E_low_eV": [x.left for x in CMT.index], "E_high_eV": [x.right for x in CMT.index],
+energy_intervals = CMT.index.get_level_values("E")
+E_low = energy_intervals.left.to_numpy()
+E_high = energy_intervals.right.to_numpy()
+
+result = pd.DataFrame({"E_low_eV": E_low, "E_high_eV": E_high,
 					   "uncertainty_percent": u_percent}) # save in pd df
 
 
