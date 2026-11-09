@@ -7,6 +7,7 @@ if computer == 'fermiac':
 import sandy
 from groupEnergies import Pu239
 import pandas as pd
+import matplotlib.pyplot as plt
 
 za = 94239
 filename = "n-094_Pu_239.endf"
