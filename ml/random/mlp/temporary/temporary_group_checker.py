@@ -77,7 +77,7 @@ def fetch_data(datafile, data_dir=data_directory):
 
 	if data_dir == test_directory:
 		df = pd.read_parquet(groupfile, engine='pyarrow')
-		group_reduction = np.interp(energies, df['ERG'].values, df['XS'].values)
+		group_reduction = np.interp(energies, df['ERG'].values, df['94239_MT18_XS'].values)
 
 		pu9_mt18xs = group_reduction.tolist()
 		keff_value = df['keff'].values[0]
@@ -346,47 +346,132 @@ plt.show()
 # if mask != 'x':
 # 	masking_value = 0
 # 	X_test[np.abs(X_test) >= float(mask)] = masking_value
+testps=[]
+testerrs=[]
+for model in selected_best_models:
+	test_predictions = model.predict(X_test)
+	test_predictions = test_predictions.ravel()
 
-test_predictions = model.predict(X_test)
-test_predictions = test_predictions.ravel()
+	rescaled_test_predictions = []
+	test_predictions_list = test_predictions.tolist()
 
-rescaled_test_predictions = []
-test_predictions_list = test_predictions.tolist()
+	for pred in test_predictions_list:
+		descaled_p = pred * train_labels_std + train_labels_mean
+		rescaled_test_predictions.append(float(descaled_p))
 
-for pred in test_predictions_list:
-	descaled_p = pred * train_labels_std + train_labels_mean
-	rescaled_test_predictions.append(float(descaled_p))
+	testps.append(rescaled_test_predictions)
 
-test_errors = []
-for predicted, true in zip(rescaled_test_predictions, keff_test):
-	test_errors.append((predicted - true) * 1e5)
-	print(f'TEST - SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+	test_errors = []
+	for predicted, true in zip(rescaled_test_predictions, keff_test):
+		test_errors.append((predicted - true) * 1e5)
+		print(f'TEST - SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+	testerrs.append(test_errors)
+	sorted_test_errors = sorted(test_errors)
+	absolute_test_errors = [abs(x) for x in sorted_test_errors]
+	print(f'\nAverage absolute test error: {np.mean(absolute_test_errors)} +- {np.std(absolute_test_errors)}')
 
-sorted_test_errors = sorted(test_errors)
-absolute_test_errors = [abs(x) for x in sorted_test_errors]
-print(f'\nAverage absolute test error: {np.mean(absolute_test_errors)} +- {np.std(absolute_test_errors)}')
+	print(f'Max -ve error: {sorted_test_errors[0]} pcm, Max +ve error: {sorted_test_errors[-1]} pcm')
 
-print(f'Max -ve error: {sorted_test_errors[0]} pcm, Max +ve error: {sorted_test_errors[-1]} pcm')
+	print(f"Smallest absolute error: {min(absolute_test_errors)} pcm")
+	acceptable_test_predictions = []
+	borderline_test_predictions = []
+	fifteen_pcm_test_predictions = []
+	twenty_pcm_test_predictions = []
+	for x in absolute_test_errors:
+		if x <= 5.0:
+			acceptable_test_predictions.append(x)
+		if x <= 10.0:
+			borderline_test_predictions.append(x)
+		if x <= 15.0:
+			fifteen_pcm_test_predictions.append(x)
+		if x <= 20.0:
+			twenty_pcm_test_predictions.append(x)
 
-print(f"Smallest absolute error: {min(absolute_test_errors)} pcm")
-acceptable_test_predictions = []
-borderline_test_predictions = []
-fifteen_pcm_test_predictions = []
-twenty_pcm_test_predictions = []
-for x in absolute_test_errors:
-	if x <= 5.0:
-		acceptable_test_predictions.append(x)
-	if x <= 10.0:
-		borderline_test_predictions.append(x)
-	if x <= 15.0:
-		fifteen_pcm_test_predictions.append(x)
-	if x <= 20.0:
-		twenty_pcm_test_predictions.append(x)
+	print(f' {len(acceptable_test_predictions)} ({len(acceptable_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 5 pcm error')
+	print(f' {len(borderline_test_predictions)} ({len(borderline_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 10 pcm error')
+	print(f' {len(fifteen_pcm_test_predictions)} ({len(fifteen_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 15 pcm error)')
+	print(f' {len(twenty_pcm_test_predictions)} ({len(twenty_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 20 pcm error)')
 
-print(f' {len(acceptable_test_predictions)} ({len(acceptable_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 5 pcm error')
-print(f' {len(borderline_test_predictions)} ({len(borderline_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 10 pcm error')
-print(f' {len(fifteen_pcm_test_predictions)} ({len(fifteen_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 15 pcm error)')
-print(f' {len(twenty_pcm_test_predictions)} ({len(twenty_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+	print('#### End test ####')
 
-print('#### End test ####')
+def rerun(filename):
+	groupfile = f'{groupdir}/{filename}'
+	print("\nFetching test data")
+	XS_test = []
+	keff_test = []
 
+	with ProcessPoolExecutor(max_workers=data_processes) as executor:
+		futures = [executor.submit(fetch_data, test_file, test_directory) for test_file in test_files]
+
+		for future in tqdm.tqdm(as_completed(futures), total=len(futures)):
+			xs_values_test, keff_value_test = future.result()
+			XS_test.append(xs_values_test)
+			keff_test.append(keff_value_test)
+
+	XS_test = np.array(XS_test)
+	y_test = (np.array(keff_test) - train_labels_mean) / train_labels_std
+
+	scaling_matrix_xtest = XS_test.transpose()
+
+	scaled_columns_xtest = []
+	print('\nScaling test data...')
+	for column, c_mean, c_std in tqdm.tqdm(
+			zip(scaling_matrix_xtest[le_bound_index:-1], training_column_means, training_column_stds),
+			total=len(scaling_matrix_xtest[le_bound_index:-1])):
+		scaled_column = (np.array(column) - c_mean) / c_std
+		scaled_columns_xtest.append(scaled_column)
+
+	scaled_columns_xtest = np.array(scaled_columns_xtest)
+	X_test = scaled_columns_xtest.transpose()
+
+	X_test = np.nan_to_num(X_test, nan=0.0)
+
+	mask = 200
+	X_test[np.abs(X_test) >= float(mask)] = 0
+
+	test_predictions = model.predict(X_test)
+	test_predictions = test_predictions.ravel()
+
+	rescaled_test_predictions = []
+	test_predictions_list = test_predictions.tolist()
+
+	for pred in test_predictions_list:
+		descaled_p = pred * train_labels_std + train_labels_mean
+		rescaled_test_predictions.append(float(descaled_p))
+
+	test_errors = []
+	for predicted, true in zip(rescaled_test_predictions, keff_test):
+		test_errors.append((predicted - true) * 1e5)
+		print(f'TEST - SCONE: {true:0.5f} - ML: {predicted:0.5f}, Difference = {(predicted - true) * 1e5:0.0f} pcm')
+
+	sorted_test_errors = sorted(test_errors)
+	absolute_test_errors = [abs(x) for x in sorted_test_errors]
+	print(f'\nAverage absolute test error: {np.mean(absolute_test_errors)} +- {np.std(absolute_test_errors)}')
+
+	print(f'Max -ve error: {sorted_test_errors[0]} pcm, Max +ve error: {sorted_test_errors[-1]} pcm')
+
+	print(f"Smallest absolute error: {min(absolute_test_errors)} pcm")
+	acceptable_test_predictions = []
+	borderline_test_predictions = []
+	fifteen_pcm_test_predictions = []
+	twenty_pcm_test_predictions = []
+	for x in absolute_test_errors:
+		if x <= 5.0:
+			acceptable_test_predictions.append(x)
+		if x <= 10.0:
+			borderline_test_predictions.append(x)
+		if x <= 15.0:
+			fifteen_pcm_test_predictions.append(x)
+		if x <= 20.0:
+			twenty_pcm_test_predictions.append(x)
+
+	print(
+		f' {len(acceptable_test_predictions)} ({len(acceptable_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 5 pcm error')
+	print(
+		f' {len(borderline_test_predictions)} ({len(borderline_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 10 pcm error')
+	print(
+		f' {len(fifteen_pcm_test_predictions)} ({len(fifteen_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 15 pcm error)')
+	print(
+		f' {len(twenty_pcm_test_predictions)} ({len(twenty_pcm_test_predictions) / len(absolute_test_errors) * 100:.2f}%) predictions <= 20 pcm error)')
+
+	print('#### End test ####')
