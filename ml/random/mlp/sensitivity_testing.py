@@ -57,7 +57,7 @@ def fetch_data(datafile, dir=data_directory):
 		'/home/rnt26/uncertaintyanalysis/ml/mldata/baselines/endfbviii.0/endfbviii0_baseline_data_Pu-239_-1_Pu-240_-1_Pu-241_-1.parquet',
 		engine='pyarrow')
 
-	isolated_df = pd.read_parquet(f'{data_directory}/{datafile}', engine='pyarrow')
+	isolated_df = pd.read_parquet(f'{dir}/{datafile}', engine='pyarrow')
 
 	baseline_df = baseline_df[baseline_df['ERG'] >= lower_energy_bound] # Set energy domain
 	isolated_df = isolated_df[isolated_df['ERG'] >= lower_energy_bound]
@@ -119,9 +119,9 @@ average_performance_list_test = []
 
 keff_test = []
 XS_test = []
-pu9_test_indices = []
-pu0_test_indices = []
-pu1_test_indices = []
+# pu9_test_indices = []
+# pu0_test_indices = []
+# pu1_test_indices = []
 for test_file in tqdm.tqdm(test_files, total=len(test_files)):
 	xs_values, keff_value = fetch_data(test_file, dir=test_directory)
 
@@ -131,8 +131,8 @@ for test_file in tqdm.tqdm(test_files, total=len(test_files)):
 	# pu9_test_index = int(test_file.split('_')[4])
 	# pu9_test_indices.append(pu9_test_index)
 
-	pu0_test_index = int(test_file.split('_')[6])
-	pu0_test_indices.append(pu0_test_index)
+	# pu0_test_index = int(test_file.split('_')[6])
+	# pu0_test_indices.append(pu0_test_index)
 
 	# pu1_test_index = int(test_file.split('_')[8].split('.')[0])
 	# pu1_test_indices.append(pu1_test_index)
@@ -253,3 +253,50 @@ def s12(kd1d2, kd1_minusd2, kminusd1_d2, kminusd1_minusd2, delta1, delta2):
 	denominator = 4 * knominal * delta1 * delta2
 	return numerator / denominator
 
+
+
+
+
+
+#####################################################
+
+XS_test = np.nan_to_num(XS_test, nan=0.0)
+cross_sections = XS_test[0][1:-1]
+
+cross_sections = np.asarray(cross_sections, dtype=np.float32)
+
+x_mean = np.array(training_column_means)
+x_std = np.array(training_column_stds)
+y_mean = train_labels_mean
+y_std = train_labels_std
+
+
+y_mean_tf = tf.convert_to_tensor(y_mean, dtype=tf.float32)
+y_std_tf = tf.convert_to_tensor(y_std, dtype=tf.float32)
+
+x_mean_tf = tf.convert_to_tensor(x_mean[None, :], dtype=tf.float32)
+x_std_tf = tf.convert_to_tensor(x_std[None, :], dtype=tf.float32)
+
+x_physical = tf.convert_to_tensor(cross_sections[None, :], dtype=tf.float32)
+# x_physical = tf.reshape(
+#     tf.convert_to_tensor(cross_sections, dtype=tf.float32),
+#     shape=(1, -1),
+# )
+
+# x_scaled = tf.convert_to_tensor(X_test[0][None, :])
+
+with tf.GradientTape() as tape:
+	tape.watch(x_physical)
+
+	x_scaled = (x_physical - x_mean_tf) / x_std_tf
+	x_scaled = tf.where(tf.math.is_nan(x_scaled), 0.0, x_scaled)
+	keff_scaled = selected_best_models[0](x_scaled, training=False)
+
+	# Ensure output-scaler constants match the model's dtype
+	y_std_cast = tf.cast(y_std_tf, keff_scaled.dtype)
+	y_mean_cast = tf.cast(y_mean_tf, keff_scaled.dtype)
+
+	keff_physical = keff_scaled * y_std_cast + y_mean_cast
+	keff_scalar = tf.reshape(keff_physical, [-1])[0]
+
+gradient = tape.gradient(keff_scalar, x_physical)
